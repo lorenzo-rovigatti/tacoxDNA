@@ -39,3 +39,7 @@ The '''oxDNA-to-all-atom.py" script takes two mandatory arguments and outputs a 
 * A [PDB](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) file containing the positions of all atoms composing the strand(s) contained in the oxDNA configuration file 
 
 ## Twist and writhe analyzer
+
+## Acknowledgements
+
+* Some of the files in the src/libs folder have been adapted from oxDNA source code
