@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
 
 
-    out = open ("test_oxdna.input", "w")
+    out = open (sys.argv[2] + ".lammps", "w")
 
     out.write('# LAMMPS data file\n')
     out.write('%d atoms\n' % s.N)

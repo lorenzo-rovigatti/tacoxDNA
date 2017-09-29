@@ -914,14 +914,7 @@ class System(object):
     def add_strand(self, s, check_overlap=True):
         """
         Add a Strand to the System
-
-        Returns True if non-overlapping
-        Returns False if there is overlap
         """
-        if check_overlap and self.is_overlapping(s):
-            Nucleotide.index -= s.N
-            Strand.index -= 1
-            return False
         '''
         # we now make cells off-line to save time when loading
         # configurations; interactions are computed with h_bonds.py
