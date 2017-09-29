@@ -10,6 +10,9 @@ warning sui limiti di writhe e twist
 1)conversione catena xyz (1 bead è una coppia di nucleotidi)-> modello oxdna (nick, non-nick)   (e viceversa?)
 (nel caso annodato aggiungere correzione giusta)
 per il momento facciamo una sola catena alla volta?
+controllo input (persistence length?)
+aggiungere sequenza
+
 2)conversione lammps xyz quaternions<->oxdna (e viceversa)
 file top da leggere
 e file restart lamps da leggere che genera anche il top

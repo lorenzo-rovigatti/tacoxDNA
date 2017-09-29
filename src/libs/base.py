@@ -147,7 +147,7 @@ class Nucleotide(Printable):
     """
     index = 0
 
-    def __init__(self, cm_pos, a1, a3, base, btype=None, L=np.array([0., 0., 0.]), v=np.array([0., 0., 0.]), n3=-1):
+    def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1):
         Printable.__init__(self)
         self.index = Nucleotide.index
         Nucleotide.index += 1
@@ -536,6 +536,16 @@ class Strand(Printable):
             top += "%d %s %d %d\n" % (self.index + 1, n.get_base(), n3, n5)
 
         return conf, top
+
+    def get_lammps_bonds(self):
+        top = []
+        for n in self._nucleotides:
+            if n.index != self._last:
+                top.append("%d  %d" % (n.index + 1, n.index + 2))
+            elif self._circular:
+                top.append("%d  %d" % (n.index + 1, self._first + 1))
+
+        return top
 
     def _get_crepy_output(self):
         if not self.visible:
