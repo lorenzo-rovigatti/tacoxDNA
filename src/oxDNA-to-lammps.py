@@ -56,10 +56,14 @@ if __name__ == '__main__':
         print >> sys.stderr, "Usage is %s topology configuration" % sys.argv[0]
         sys.exit(1)
 
-    lr = LorenzoReader(sys.argv[1], sys.argv[2])
-    s = lr.get_system()
+    try:
+        lr = LorenzoReader(sys.argv[1], sys.argv[2])
+        s = lr.get_system()
+    except Exception as e:
+        print >> sys.stderr, "Parser error: %s" % e
+        exit(1)
+    
     s.map_nucleotides_to_strands()
-
     box = s._box
     
     out_name = sys.argv[2] + ".lammps"

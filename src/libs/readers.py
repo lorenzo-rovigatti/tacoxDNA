@@ -3,7 +3,7 @@ import numpy as np
 import os.path
 
 class LorenzoReader:
-    def __init__(self, topology, configuration, check_overlap=False):
+    def __init__(self, topology, configuration):
         self._conf = False
 
         if not os.path.isfile(configuration):
@@ -12,26 +12,26 @@ class LorenzoReader:
         if not os.path.isfile(topology):
             base.Logger.die("Topology file '%s' is not readable" % topology)
 
-        self._check_overlap = check_overlap
         self._conf = open(configuration, "r")
 
         f = open(topology, "r")
-        f.readline()
+        self.N, self.N_strands = [int(x) for x in f.readline().split()]
         self._top_lines = f.readlines()
+        if len(self._top_lines) != self.N:
+            raise Exception("The number of nucleotides specified in the topology file header (%d) is different from the number of nucleotide lines found in the same file (%d)" % (self.N, len(self._top_lines)))
 
     def __del__(self):
         if self._conf: self._conf.close()
 
     def _read(self, only_strand_ends=False, skip=False):
-        timeline = self._conf.readline()
-        time = 0.
-        if  len(timeline) == 0:
-            return False
-        else:
+        try:
+            timeline = self._conf.readline()
             time = float(timeline.split()[2])
-
-        box = np.array([float(x) for x in self._conf.readline().split()[2:]])
-        self._conf.readline()
+    
+            box = np.array([float(x) for x in self._conf.readline().split()[2:]])
+            self._conf.readline()
+        except Exception as e:
+            raise Exception("The header lines of the configuration file are invalid (caught a '%s' exception)" % e)
 
         if skip:
             for tl in self._top_lines:
@@ -45,7 +45,7 @@ class LorenzoReader:
 
         s = False
         strandid_current = 0
-        for tl in self._top_lines:
+        for i_line, tl in enumerate(self._top_lines):
             tls = tl.split()
             n3 = int(tls[2])
             n5 = int(tls[3])
@@ -57,7 +57,7 @@ class LorenzoReader:
                 try:
                     tmp = int (tls[1])
                 except:
-                    raise ValueError ("problems in topology file with specific base pairing")
+                    raise Exception("The line n. %d in the topology file contains an incorrect specific base pairing" % i_line)
 
                 if tmp > 0:
                     b = tmp % 4
@@ -73,13 +73,17 @@ class LorenzoReader:
                     iscircular = False
 
                 if s:
-                    system.add_strand(s, self._check_overlap)
+                    system.add_strand(s)
                 s = base.Strand()
                 if iscircular:
                     s.make_circular()
                 strandid_current = strandid
 
             ls = self._conf.readline().split()
+            if len(ls) == 0:
+                raise Exception("The %d-th nucleotide line in the configuration file is empty" % i_line)
+            elif len(ls) != 15:
+                raise Exception("The %d-th nucleotide line in the configuration file is invalid" % i_line)
             cm = [float(x) for x in ls[0:3]]
             a1 = [float(x) for x in ls[3:6]]
             a3 = [float(x) for x in ls[6:9]]
@@ -88,8 +92,8 @@ class LorenzoReader:
             if not only_strand_ends or n3 == -1 or n5 == -1:
                 s.add_nucleotide(base.Nucleotide(cm, a1, a3, b, bb, v, L, n3))
 
-        system.add_strand(s, self._check_overlap)
-
+        system.add_strand(s)
+        
         return system
 
 

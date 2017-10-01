@@ -164,6 +164,37 @@ class Atom(object):
             if c in self.name: color = colors[c]
         r = 0.5
         return "%s %s %s @ %f C[%s]" % (self.pos[0], self.pos[1], self.pos[2], r, color)
+    
+    
+def align(full_base, ox_base):
+        #print full_base.base, np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
+    
+        theta = utils.get_angle(full_base.a3, ox_base._a3)
+        axis = np.cross(full_base.a3, ox_base._a3)
+        axis /= sqrt(np.dot(axis, axis))
+        R = utils.get_rotation_matrix(axis, theta)
+        full_base.rotate(R)
+    
+        theta = utils.get_angle(full_base.a1, ox_base._a1)
+        axis = np.cross(full_base.a1, ox_base._a1)
+        axis /= sqrt(np.dot(axis, axis))
+        R = utils.get_rotation_matrix(axis, theta)
+        full_base.rotate(R)
+        old_a1 = np.array(full_base.a1)
+    
+        #print " ", np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
+        
+def print_P_distance_dd(nucls, divide_by=1):
+        if len(nucls) != 24:
+            print >> sys.stderr, "%s can be used for dodecamers only" % print_P_distance_dd.__name__
+            sys.exit(1)
+        # check the distances between P's
+        for i, n1 in enumerate(nucls):
+            for n2 in nucls[i+1: ]:
+                # only for base pairs who have phospate groups
+                if n1.idx + n2.idx == 13 and n1.chain_id != n2.chain_id and "P" in n1.named_atoms and "P" in n2.named_atoms:
+                    diff = n1.named_atoms["P"].pos - n2.named_atoms["P"].pos
+                    print n1.name, n2.name, sqrt(np.dot(diff, diff)) / divide_by
 
 
 if __name__ == '__main__':
@@ -193,26 +224,12 @@ if __name__ == '__main__':
     for n in nucleotides:
         n.a1, n.a2, n.a3 = utils.get_orthonormalized_base(n.a1, n.a2, n.a3)
     
-    lr = LorenzoReader(sys.argv[1], sys.argv[2])
-    s = lr.get_system()
-    
-    def align(full_base, ox_base):
-        #print full_base.base, np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
-    
-        theta = utils.get_angle(full_base.a3, ox_base._a3)
-        axis = np.cross(full_base.a3, ox_base._a3)
-        axis /= sqrt(np.dot(axis, axis))
-        R = utils.get_rotation_matrix(axis, theta)
-        full_base.rotate(R)
-    
-        theta = utils.get_angle(full_base.a1, ox_base._a1)
-        axis = np.cross(full_base.a1, ox_base._a1)
-        axis /= sqrt(np.dot(axis, axis))
-        R = utils.get_rotation_matrix(axis, theta)
-        full_base.rotate(R)
-        old_a1 = np.array(full_base.a1)
-    
-        #print " ", np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
+    try:
+        lr = LorenzoReader(sys.argv[1], sys.argv[2])
+        s = lr.get_system()
+    except Exception as e:
+        print >> sys.stderr, "Parser error: %s" % e
+        exit(1)
     
     #print ".Box:100,100,100"
     ox_nucleotides = []
@@ -257,18 +274,6 @@ if __name__ == '__main__':
     
     # remove the next line to print the distance between P atoms
     sys.exit(1)
-    def print_P_distance_dd(nucls, divide_by=1):
-        if len(nucls) != 24:
-            print >> sys.stderr, "%s can be used for dodecamers only" % print_P_distance_dd.__name__
-            sys.exit(1)
-        # check the distances between P's
-        for i, n1 in enumerate(nucls):
-            for n2 in nucls[i+1: ]:
-                # only for base pairs who have phospate groups
-                if n1.idx + n2.idx == 13 and n1.chain_id != n2.chain_id and "P" in n1.named_atoms and "P" in n2.named_atoms:
-                    diff = n1.named_atoms["P"].pos - n2.named_atoms["P"].pos
-                    print n1.name, n2.name, sqrt(np.dot(diff, diff)) / divide_by
-    
     
     print_P_distance_dd(nucleotides)
     print ""
