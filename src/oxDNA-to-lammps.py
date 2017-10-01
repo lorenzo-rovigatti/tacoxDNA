@@ -61,11 +61,9 @@ if __name__ == '__main__':
     s.map_nucleotides_to_strands()
 
     box = s._box
-
-
-
-
-    out = open (sys.argv[2] + ".lammps", "w")
+    
+    out_name = sys.argv[2] + ".lammps"
+    out = open (out_name, "w")
 
     out.write('# LAMMPS data file\n')
     out.write('%d atoms\n' % s.N)
@@ -135,12 +133,6 @@ if __name__ == '__main__':
 
     out.close()
 
-    print >> sys.stdout, "## Wrote data to 'data.oxdna'"
-    print >> sys.stdout, "## DONE"
-
-
-
-
-
-
-
+    print >> sys.stderr, "## Wrote data to '%s'" % out_name
+    print >> sys.stderr, "## DONE"
+    

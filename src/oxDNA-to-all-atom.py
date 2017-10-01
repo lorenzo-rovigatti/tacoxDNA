@@ -222,9 +222,12 @@ if __name__ == '__main__':
         com += my_strand.cm_pos
     com /= s.N_strands
     
-    print "HEADER    t=1.12"
-    print "MODEL     1"
-    print "REMARK ## 0,0"
+    out_name = sys.argv[2] + ".pdb"
+    out = open (out_name, "w")
+    
+    print >> out, "HEADER    t=1.12"
+    print >> out, "MODEL     1"
+    print >> out, "REMARK ## 0,0"
     first_id = True
     old_chain_id = -1
     for nucleotide in s._nucleotides:
@@ -235,17 +238,22 @@ if __name__ == '__main__':
         if my_base.chain_id != old_chain_id:
             if old_chain_id != -1:
                 print >> sys.stderr, "TERRING: ", old_chain_id, my_base.chain_id
-                print "TER"
+                print >> out, "TER"
             old_chain_id = my_base.chain_id
             is_3_prime = True
         my_base.idx = (nucleotide.index % 12) + 1
         align(my_base, nucleotide)
         my_base.set_base((nucleotide.pos_base - com)*8.518)
         ox_nucleotides.append(my_base)
-        print my_base.to_pdb("A", False, is_3_prime)
-    print "REMARK ## 0,0"
-    print "TER"
-    print "ENDMDL"
+        print >> out, my_base.to_pdb("A", False, is_3_prime)
+    print >> out, "REMARK ## 0,0"
+    print >> out, "TER"
+    print >> out, "ENDMDL"
+    
+    out.close()
+    
+    print >> sys.stderr, "## Wrote data to '%s'" % out_name
+    print >> sys.stderr, "## DONE"
     
     # remove the next line to print the distance between P atoms
     sys.exit(1)
