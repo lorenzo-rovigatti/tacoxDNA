@@ -6,7 +6,7 @@ base.py includes the classes: System, Strand, Nucleotide
     - Get detailed energy information (process_data/)
     - If you want to use it with oxRNA, you have to set environment variable OXRNA to 1  (export OXRNA=1) 
 """
-import sys, os
+import sys
 import numpy as np
 
 def partition(s, d):
@@ -775,6 +775,9 @@ class System(object):
         self.E_kin = E_kin
         self.E_tot = E_pot + E_kin
         self.cells_done = False
+        
+        Nucleotide.index = 0
+        Strand.index = 0
 
     def get_sequences (self):
         return [x._sequence for x in self._strands]

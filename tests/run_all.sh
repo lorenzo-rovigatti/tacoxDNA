@@ -2,14 +2,14 @@
 
 passed=0
 tot=0
-for f in $(ls -1 */run.sh)
+for f in $(ls -1 */*.sh)
 do
 	d=$(dirname $f)
 	cd $d
 
 	tot=$[tot + 1]
 	
-	bash run.sh &> /dev/null
+	bash $(basename $f) &> /dev/null
 	
 	if [ $? -eq 0 ]
 	then

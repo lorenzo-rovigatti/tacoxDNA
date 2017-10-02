@@ -117,8 +117,6 @@ if __name__ == '__main__':
 
         box = box_max - box_min
         system = base.System(box)
-        base.Nucleotide.index = 0
-        base.Strand.index = 0
 
         current_strand = base.Strand()
 
