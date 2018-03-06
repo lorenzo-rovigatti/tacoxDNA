@@ -537,6 +537,16 @@ class Strand(Printable):
 
         return conf, top
 
+    def get_lammps_N_of_bonds_strand(self):
+        N_bonds=0
+        for n in self._nucleotides:
+            if n.index != self._last:
+                N_bonds+=1
+            elif self._circular:
+                N_bonds+=1
+
+        return N_bonds
+
     def get_lammps_bonds(self):
         top = []
         for n in self._nucleotides:

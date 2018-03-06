@@ -1,5 +1,5 @@
 #convertiamo oxdna to lammps starter
-#per ora facciamo solo il caso con 2 strand uguali
+#lo script funziona per qualsiasi configurazione di partenza
 #testa mettendo il bo cubico invece che rettangolare
 
 import numpy as np
@@ -65,14 +65,20 @@ if __name__ == '__main__':
     
     s.map_nucleotides_to_strands()
     box = s._box
-    
+   
+    #get total number of bonds
+    N_bonds=0
+    for strand in s._strands:
+        N_bonds += strand.get_lammps_N_of_bonds_strand()
+
+
     out_name = sys.argv[2] + ".lammps"
     out = open (out_name, "w")
 
     out.write('# LAMMPS data file\n')
     out.write('%d atoms\n' % s.N)
     out.write('%d ellipsoids\n' % s.N)
-    out.write('%d bonds\n' % s.N)
+    out.write('%d bonds\n' % N_bonds)
     out.write('\n')
     out.write('4 atom types\n')
     out.write('1 bond types\n')

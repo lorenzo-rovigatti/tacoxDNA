@@ -1,7 +1,7 @@
 # LAMMPS data file
 16 atoms
 16 ellipsoids
-16 bonds
+14 bonds
 
 4 atom types
 1 bond types
