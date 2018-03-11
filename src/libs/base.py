@@ -1,5 +1,5 @@
 """
-Utility functions for oxDNA.
+Utility functions.
 base.py includes the classes: System, Strand, Nucleotide
     - Make initial configurations (generate.py)
     - Generate PDB, Chimera, VMD files from trajectory/config (traj2pdb.py, traj2chimera.py, traj2tcl.py)
@@ -9,6 +9,7 @@ base.py includes the classes: System, Strand, Nucleotide
 import sys
 import numpy as np
 
+
 def partition(s, d):
     if d in s:
         sp = s.split(d, 1)
@@ -16,14 +17,12 @@ def partition(s, d):
     else:
         return s, "", ""
 
-number_to_base = {0 : 'A', 1 : 'G', 2 : 'C', 3 : 'T'}
 
+number_to_base = {0 : 'A', 1 : 'G', 2 : 'C', 3 : 'T'}
 
 base_to_number = {'A' : 0, 'a' : 0, 'G' : 1, 'g' : 1,
                   'C' : 2, 'c' : 2, 'T' : 3, 't' : 3,
                   'U' : 3, 'u' : 3, 'D' : 4}
-                  
-                  
 
 try:
     FLT_EPSILON = np.finfo(np.float).eps
@@ -59,6 +58,7 @@ INT_EXC_NONBONDED = 3
 
 H_CUTOFF = -0.1
 
+
 # static class
 class Logger(object):
     debug_level = None
@@ -85,6 +85,7 @@ class Logger(object):
 
 
 class Printable(object):
+
     def __init__(self):
         self._output_callables = {OUT_TOM : self._get_tom_output,
                                   OUT_LORENZO : self._get_lorenzo_output,
@@ -303,16 +304,17 @@ class Nucleotide(Printable):
         res += "O %lf %lf %lf\n" % (s2[0], s2[1], s2[2])
 
         return res
-	# This prints a sphere with a line around it, hopefully.
+
+    # This prints a sphere with a line around it, hopefully.
     def _get_TEP_vmd_xyz_output(self):
-				s1 = self.cm_pos_box
-				s2 = self.cm_pos_box + 0.3 * self._a2
-				s3 = self.cm_pos_box + 0.15 * self._a1
-				res = "C %lf %lf %lf\n" % tuple(s1)
-				res += "H %lf %lf %lf\n" % tuple(s2)
-				res += "He %lf %lf %lf\n" % tuple(s3)
-				
-				return res
+        s1 = self.cm_pos_box
+        s2 = self.cm_pos_box + 0.3 * self._a2
+        s3 = self.cm_pos_box + 0.15 * self._a1
+        res = "C %lf %lf %lf\n" % tuple(s1)
+        res += "H %lf %lf %lf\n" % tuple(s2)
+        res += "He %lf %lf %lf\n" % tuple(s3)
+        
+        return res
 
     def get_pdb_output(self, strtype, strsubid):
         s1 = self.cm_pos_box + self.get_pos_back_rel()
@@ -538,12 +540,12 @@ class Strand(Printable):
         return conf, top
 
     def get_lammps_N_of_bonds_strand(self):
-        N_bonds=0
+        N_bonds = 0
         for n in self._nucleotides:
             if n.index != self._last:
-                N_bonds+=1
+                N_bonds += 1
             elif self._circular:
-                N_bonds+=1
+                N_bonds += 1
 
         return N_bonds
 
@@ -746,7 +748,6 @@ def parse_visibility(path):
         if len(linea) > 0: output.append(linea)
 
     return output
-
 
 
 class System(object):
@@ -1221,7 +1222,6 @@ class System(object):
 
         """
 
-
         self._prepare(visibility)
 
         if self._N > 9999:
@@ -1297,7 +1297,6 @@ class System(object):
                 commands.append ("col deep sky blue #0:%s@K" % (strtypes[i]))
             commands.append ("bondcolor %s #0:%s" % (mycolors[i], strtypes[i]))
 
-
         # facciamo gli ellissoidi, no? visto che ci siamo
         commands.append ("aniso scale 0.75 smoothing 4")
 
@@ -1325,7 +1324,7 @@ class System(object):
     def map_nucleotides_to_strands(self):
         # this function creates nucl_id -> strand_id array
         for i in range(len(self._strands)):
-            for j in range(self._strands[i].get_length()):
+            for _ in range(self._strands[i].get_length()):
                 self._nucleotide_to_strand.append(i)
 
     def read_H_bonds(self, inputpipe):
@@ -1373,7 +1372,6 @@ class System(object):
                 self._strands[strandB].add_H_interaction(strandA)
             self._nucleotides[nuclA].add_H_interaction(nuclB)
             self._nucleotides[nuclB].add_H_interaction(nuclA)
-
 
     def show_H_interactions(self):
         print "# Strand1_id  Strand2_id   Number_of_H_bonds"

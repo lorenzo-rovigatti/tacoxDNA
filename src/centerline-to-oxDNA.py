@@ -6,11 +6,11 @@ import os
 from libs import topology as top
 from libs import base
 
+
 # angolo definito dando una normale fissata del piano
 def py_ang(v1, v2, vplane):
 	v1n = v1 / la.norm(v1) 
 	v2n = v2 / la.norm(v2) 
-
 	
 	# arctan con questi argomenti da angolo tra 0 e pi, e la normale definisce la direzione. Se vuoi fissare la direzione, il segno lo decide quale delle due normali scegli
 	return np.arctan2 (la.norm(np.cross(v1n, v2n)) , np.dot (v1n, v2n)) * np.sign(np.dot(np.cross(v1n, v2n), vplane))
@@ -52,6 +52,7 @@ def get_rotation_matrix(axis, anglest):
 	
 	
 class Options(object):
+
 	def __init__(self):
 		object.__init__(self)
 		
@@ -103,6 +104,7 @@ def parse_options(argv):
 		
 	return opts
 
+
 # parametri
 BASE_BASE = 0.3897628551303122  # in direzione normale all'elica, va contata anche la rotazione
 CM_CENTER_DS = 0.6
@@ -123,7 +125,6 @@ if __name__ == '__main__':
 	scaling = BASE_BASE / np.sqrt(np.dot(coordxyz[1, :] - coordxyz[0, :], coordxyz[1, :] - coordxyz[0, :]))
 	coordxyz *= scaling  # coord che lo strand deve seguire
 	
-	
 	# inizializzazione vettori legati agli strand
 	# geometria asse
 	dist = np.copy(coordxyz)
@@ -135,7 +136,6 @@ if __name__ == '__main__':
 	
 	ssdna2 = np.copy(coordxyz)
 	v_perp_ssdna2 = np.copy(coordxyz)
-	
 	
 	######
 	# #Size box sistema## si prende lato massimo
@@ -162,7 +162,6 @@ if __name__ == '__main__':
 	for c in range(0, numrows): 
 		ind_1 = int(c - 1 - mt.floor((c - 1) / float(numrows)) * numrows)
 		ind = int(c - mt.floor(c / float(numrows)) * numrows)
-		
 			
 		p[ind, :] = np.cross(dist[ind_1, :] , dist[ind, :])
 		p[ind, :] /= np.sqrt(np.dot(p[ind, :] , p[ind, :]))
@@ -237,7 +236,6 @@ if __name__ == '__main__':
 		ssdna1_base = map(lambda x: base.base_to_number[x], sequence)		
 			
 		seq_file.close()
-			
 
 	strand1 = base.Strand()	
 	for c in range(numrows):

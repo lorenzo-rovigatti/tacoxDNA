@@ -20,8 +20,10 @@ BASE_SHIFT = 1.13
 COM_SHIFT = 0.5
 DD12_PDB_PATH = "dd12.pdb"
 
+
 class Nucleotide(object):
     serial_residue = 1
+
     def __init__(self, name, idx):
         object.__init__(self)
         self.name = name
@@ -51,7 +53,7 @@ class Nucleotide(object):
         for a in atoms:
             com += a.pos
 
-        return com/len(atoms)
+        return com / len(atoms)
 
     def compute_a3(self):
         base_com = self.get_com(self.base_atoms)
@@ -124,14 +126,14 @@ class Nucleotide(object):
     def set_com(self, new_com):
         com = self.get_com()
         for a in self.atoms:
-            a.pos += new_com - com - COM_SHIFT*self.a1
+            a.pos += new_com - com - COM_SHIFT * self.a1
 
     def set_base(self, new_base_com):
         com = self.get_com()
         atoms = [v for k, v in self.named_atoms.iteritems() if k in self.ring_names]
         ring_com = self.get_com(atoms)
         for a in self.atoms:
-            a.pos += new_base_com - ring_com - BASE_SHIFT*self.a1
+            a.pos += new_base_com - ring_com - BASE_SHIFT * self.a1
 
         self.compute_as()
 
@@ -140,6 +142,7 @@ class Nucleotide(object):
 
 class Atom(object):
     serial_atom = 1
+
     def __init__(self, pdb_line):
         object.__init__(self)
         # http://cupnet.net/pdb-format/
@@ -148,7 +151,7 @@ class Atom(object):
         self.residue = pdb_line[17:20].strip()
         self.residue_idx = int(pdb_line[22:26])
         # convert to oxDNA's length unit
-        self.pos = np.array([float(pdb_line[31:38]), float(pdb_line[38:46]), float(pdb_line[46:54])])# / 8.518
+        self.pos = np.array([float(pdb_line[31:38]), float(pdb_line[38:46]), float(pdb_line[46:54])])  # / 8.518
 
     def is_hydrogen(self):
         return "H" in self.name
@@ -167,7 +170,7 @@ class Atom(object):
     
     
 def align(full_base, ox_base):
-        #print full_base.base, np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
+        # print full_base.base, np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
     
         theta = utils.get_angle(full_base.a3, ox_base._a3)
         axis = np.cross(full_base.a3, ox_base._a3)
@@ -182,7 +185,8 @@ def align(full_base, ox_base):
         full_base.rotate(R)
         old_a1 = np.array(full_base.a1)
     
-        #print " ", np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
+        # print " ", np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
+
         
 def print_P_distance_dd(nucls, divide_by=1):
         if len(nucls) != 24:
@@ -190,7 +194,7 @@ def print_P_distance_dd(nucls, divide_by=1):
             sys.exit(1)
         # check the distances between P's
         for i, n1 in enumerate(nucls):
-            for n2 in nucls[i+1: ]:
+            for n2 in nucls[i + 1: ]:
                 # only for base pairs who have phospate groups
                 if n1.idx + n2.idx == 13 and n1.chain_id != n2.chain_id and "P" in n1.named_atoms and "P" in n2.named_atoms:
                     diff = n1.named_atoms["P"].pos - n2.named_atoms["P"].pos
@@ -231,7 +235,7 @@ if __name__ == '__main__':
         print >> sys.stderr, "Parser error: %s" % e
         exit(1)
     
-    #print ".Box:100,100,100"
+    # print ".Box:100,100,100"
     ox_nucleotides = []
     s.map_nucleotides_to_strands()
     com = np.array([0., 0., 0.])
@@ -260,7 +264,7 @@ if __name__ == '__main__':
             is_3_prime = True
         my_base.idx = (nucleotide.index % 12) + 1
         align(my_base, nucleotide)
-        my_base.set_base((nucleotide.pos_base - com)*8.518)
+        my_base.set_base((nucleotide.pos_base - com) * 8.518)
         ox_nucleotides.append(my_base)
         print >> out, my_base.to_pdb("A", False, is_3_prime)
     print >> out, "REMARK ## 0,0"

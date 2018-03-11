@@ -9,7 +9,7 @@ do
 
 	tot=$[tot + 1]
 	
-	bash $(basename $f) &> log.dat #/dev/null
+	bash $(basename $f) &> log.dat
 	
 	if [ $? -eq 0 ]
 	then

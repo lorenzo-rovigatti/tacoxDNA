@@ -1,15 +1,16 @@
-#convertiamo oxdna to lammps starter
-#lo script funziona per qualsiasi configurazione di partenza
-#testa mettendo il bo cubico invece che rettangolare
+# convertiamo oxdna to lammps starter
+# lo script funziona per qualsiasi configurazione di partenza
+# testa mettendo il bo cubico invece che rettangolare
 
 import numpy as np
 import sys, os
 from libs.readers import LorenzoReader
 
+
 def exyz_to_quat (mya1, mya3):
 
     mya2 = np.cross(mya3, mya1)
-    myquat = [1,0,0,0]
+    myquat = [1, 0, 0, 0]
 
     q0sq = 0.25 * (mya1[0] + mya2[1] + mya3[2] + 1.0)
     q1sq = q0sq - 0.5 * (mya2[1] + mya3[2])
@@ -21,34 +22,33 @@ def exyz_to_quat (mya1, mya3):
 
     if q0sq >= 0.25:
 	myquat[0] = np.sqrt(q0sq)
-	myquat[1] = (mya2[2] - mya3[1]) / (4.0*myquat[0])
-	myquat[2] = (mya3[0] - mya1[2]) / (4.0*myquat[0])
-	myquat[3] = (mya1[1] - mya2[0]) / (4.0*myquat[0])
+	myquat[1] = (mya2[2] - mya3[1]) / (4.0 * myquat[0])
+	myquat[2] = (mya3[0] - mya1[2]) / (4.0 * myquat[0])
+	myquat[3] = (mya1[1] - mya2[0]) / (4.0 * myquat[0])
     elif q1sq >= 0.25:
 	myquat[1] = np.sqrt(q1sq)
-	myquat[0] = (mya2[2] - mya3[1]) / (4.0*myquat[1])
-	myquat[2] = (mya2[0] + mya1[1]) / (4.0*myquat[1])
-	myquat[3] = (mya1[2] + mya3[0]) / (4.0*myquat[1])
+	myquat[0] = (mya2[2] - mya3[1]) / (4.0 * myquat[1])
+	myquat[2] = (mya2[0] + mya1[1]) / (4.0 * myquat[1])
+	myquat[3] = (mya1[2] + mya3[0]) / (4.0 * myquat[1])
     elif q2sq >= 0.25:
 	myquat[2] = np.sqrt(q2sq)
-	myquat[0] = (mya3[0] - mya1[2]) / (4.0*myquat[2])
-	myquat[1] = (mya2[0] + mya1[1]) / (4.0*myquat[2])
-	myquat[3] = (mya3[1] + mya2[2]) / (4.0*myquat[2])
+	myquat[0] = (mya3[0] - mya1[2]) / (4.0 * myquat[2])
+	myquat[1] = (mya2[0] + mya1[1]) / (4.0 * myquat[2])
+	myquat[3] = (mya3[1] + mya2[2]) / (4.0 * myquat[2])
     elif q3sq >= 0.25:
 	myquat[3] = np.sqrt(q3sq)
-	myquat[0] = (mya1[1] - mya2[0]) / (4.0*myquat[3])
-	myquat[1] = (mya3[0] + mya1[2]) / (4.0*myquat[3])
-	myquat[2] = (mya3[1] + mya2[2]) / (4.0*myquat[3])
+	myquat[0] = (mya1[1] - mya2[0]) / (4.0 * myquat[3])
+	myquat[1] = (mya3[0] + mya1[2]) / (4.0 * myquat[3])
+	myquat[2] = (mya3[1] + mya2[2]) / (4.0 * myquat[3])
 
-    norm = 1.0/np.sqrt(myquat[0]*myquat[0] + myquat[1]*myquat[1] + \
-			  myquat[2]*myquat[2] + myquat[3]*myquat[3])
+    norm = 1.0 / np.sqrt(myquat[0] * myquat[0] + myquat[1] * myquat[1] + \
+			  myquat[2] * myquat[2] + myquat[3] * myquat[3])
     myquat[0] *= norm
     myquat[1] *= norm
     myquat[2] *= norm
     myquat[3] *= norm
 
-    return np.array([myquat[0],myquat[1],myquat[2],myquat[3]])
-
+    return np.array([myquat[0], myquat[1], myquat[2], myquat[3]])
 
 
 if __name__ == '__main__':
@@ -66,11 +66,10 @@ if __name__ == '__main__':
     s.map_nucleotides_to_strands()
     box = s._box
    
-    #get total number of bonds
-    N_bonds=0
+    # get total number of bonds
+    N_bonds = 0
     for strand in s._strands:
         N_bonds += strand.get_lammps_N_of_bonds_strand()
-
 
     out_name = sys.argv[2] + ".lammps"
     out = open (out_name, "w")
@@ -84,9 +83,9 @@ if __name__ == '__main__':
     out.write('1 bond types\n')
     out.write('\n')
     out.write('# System size\n')
-    out.write('%f %f xlo xhi\n' % (0,box[0]))
-    out.write('%f %f ylo yhi\n' % (0,box[1]))
-    out.write('%f %f zlo zhi\n' % (0,box[2]))
+    out.write('%f %f xlo xhi\n' % (0, box[0]))
+    out.write('%f %f ylo yhi\n' % (0, box[1]))
+    out.write('%f %f zlo zhi\n' % (0, box[2]))
 
     out.write('\n')
     out.write('Masses\n')
@@ -103,9 +102,9 @@ if __name__ == '__main__':
 
     for nucleotide in s._nucleotides:
         out.write('%d %d %22.15le %22.15le %22.15le %d 1 1\n' \
-              % (nucleotide.index+1, nucleotide._base+1, \
+              % (nucleotide.index + 1, nucleotide._base + 1, \
                  nucleotide.cm_pos[0], nucleotide.cm_pos[1], nucleotide.cm_pos[2], \
-                 s._nucleotide_to_strand[nucleotide.index]+1))
+                 s._nucleotide_to_strand[nucleotide.index] + 1))
 
     out.write('\n')
     out.write('# Atom-ID, translational, rotational velocity\n')
@@ -113,10 +112,10 @@ if __name__ == '__main__':
     out.write('\n')
 
     for nucleotide in s._nucleotides:
-        #out.write("%d %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le\n" \
+        # out.write("%d %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le\n" \
         #      % (i+1,0.0,0.0,0.0,0.0,0.0,0.0))
         out.write("%d %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le\n" \
-              % (nucleotide.index+1,nucleotide._v[0],nucleotide._v[1],nucleotide._v[2],nucleotide._L[0],nucleotide._L[1],nucleotide._L[2]))
+              % (nucleotide.index + 1, nucleotide._v[0], nucleotide._v[1], nucleotide._v[2], nucleotide._L[0], nucleotide._L[1], nucleotide._L[2]))
 
     out.write('\n')
     out.write('# Atom-ID, shape, quaternion\n')
@@ -124,22 +123,22 @@ if __name__ == '__main__':
     out.write('\n')
 
     for nucleotide in s._nucleotides:
-        quaternions=exyz_to_quat(nucleotide._a1,nucleotide._a3)
+        quaternions = exyz_to_quat(nucleotide._a1, nucleotide._a3)
         out.write(\
         "%d %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le\n"  \
-          % (nucleotide.index+1,1.1739845031423408,1.1739845031423408,1.1739845031423408, \
-        quaternions[0],quaternions[1], quaternions[2],quaternions[3]))
+          % (nucleotide.index + 1, 1.1739845031423408, 1.1739845031423408, 1.1739845031423408, \
+        quaternions[0], quaternions[1], quaternions[2], quaternions[3]))
 
     out.write('\n')
     out.write('# Bond topology\n')
     out.write('Bonds\n')
     out.write('\n')
-    idx=1
+    idx = 1
     for strand in s._strands:
         bonds = strand.get_lammps_bonds()
         for b in bonds:
-            out.write("%d  %d  %s\n" % (idx,1,b))
-            idx+=1
+            out.write("%d  %d  %s\n" % (idx, 1, b))
+            idx += 1
 
     out.close()
 

@@ -100,7 +100,7 @@ class LorenzoReader:
     # if only_strand_ends == True then a strand will contain only the first and the last nucleotide
     # useful for some analysis like csd for coaxial interactions
     def get_system(self, only_strand_ends=False, N_skip=0):
-        for i in range(N_skip):
+        for _ in range(N_skip):
             self._read(skip=True)
 
         return self._read(only_strand_ends=only_strand_ends, skip=False)

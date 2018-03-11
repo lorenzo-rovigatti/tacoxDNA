@@ -2,6 +2,7 @@ import numpy as np
 
 from base import FLT_EPSILON
 
+
 def get_angle(a, b):
     """
     Get angle between a,b
@@ -13,21 +14,22 @@ def get_angle(a, b):
 
     """
     ab = np.dot(a, b)
-    if ab > (1.-FLT_EPSILON): return 0
-    elif ab < (-1.+FLT_EPSILON): return np.pi
+    if ab > (1. - FLT_EPSILON): return 0
+    elif ab < (-1. + FLT_EPSILON): return np.pi
     else: return np.arccos(ab)
+
 
 def get_orthonormalized_base(v1, v2, v3):
     v1_norm2 = np.dot(v1, v1)
     v2_v1 = np.dot(v2, v1)
 
-    v2 -= (v2_v1/v1_norm2) * v1
+    v2 -= (v2_v1 / v1_norm2) * v1
 
     v3_v1 = np.dot(v3, v1)
     v3_v2 = np.dot(v3, v2)
     v2_norm2 = np.dot(v2, v2)
 
-    v3 -= (v3_v1/v1_norm2) * v1 + (v3_v2/v2_norm2) * v2
+    v3 -= (v3_v1 / v1_norm2) * v1 + (v3_v2 / v2_norm2) * v2
 
     v1 /= np.sqrt(v1_norm2)
     v2 /= np.sqrt(v2_norm2)
@@ -35,8 +37,9 @@ def get_orthonormalized_base(v1, v2, v3):
 
     return v1, v2, v3
 
+
 def get_random_vector_in_sphere(r=1):
-    r2 = r*r
+    r2 = r * r
     v = np.random.uniform(-r, r, 3)
 
     while np.dot(v, v) > r2:
@@ -44,16 +47,18 @@ def get_random_vector_in_sphere(r=1):
 
     return v
 
+
 def get_random_vector():
     ransq = 1.
 
     while ransq >= 1.:
         ran1 = 1. - 2. * np.random.random()
         ran2 = 1. - 2. * np.random.random()
-        ransq = ran1*ran1 + ran2*ran2
+        ransq = ran1 * ran1 + ran2 * ran2
 
     ranh = 2. * np.sqrt(1. - ransq)
-    return np.array([ran1*ranh, ran2*ranh, 1. - 2. * ransq])
+    return np.array([ran1 * ranh, ran2 * ranh, 1. - 2. * ransq])
+
 
 def get_random_rotation_matrix():
     v1, v2, v3 = get_orthonormalized_base(get_random_vector(), get_random_vector(), get_random_vector())
@@ -63,6 +68,7 @@ def get_random_rotation_matrix():
     if np.linalg.det(R) < 0: R = np.array([v2, v1, v3])
 
     return R
+
 
 def get_rotation_matrix(axis, anglest):
     """
@@ -87,19 +93,19 @@ def get_rotation_matrix(axis, anglest):
         if len(anglest) > 1:
             if anglest[1] in ["degrees", "deg", "o"]:
                 angle = (np.pi / 180.) * anglest[0]
-                #angle = np.deg2rad (anglest[0])
+                # angle = np.deg2rad (anglest[0])
             elif anglest[1] in ["bp"]:
                 # Allow partial bp turns
                 angle = float(anglest[0]) * (np.pi / 180.) * 35.9
-                #angle = int(anglest[0]) * (np.pi / 180.) * 35.9
+                # angle = int(anglest[0]) * (np.pi / 180.) * 35.9
                 # Older versions of numpy don't implement deg2rad()
-                #angle = int(anglest[0]) * np.deg2rad(35.9)
+                # angle = int(anglest[0]) * np.deg2rad(35.9)
             else:
                 angle = float(anglest[0])
         else:
             angle = float(anglest[0])
     else:
-        angle = float(anglest) # in degrees, I think
+        angle = float(anglest)  # in degrees, I think
 
     axis = np.array(axis)
     axis /= np.sqrt(np.dot(axis, axis))
@@ -109,6 +115,6 @@ def get_rotation_matrix(axis, anglest):
     olc = 1. - ct
     x, y, z = axis
 
-    return np.array([[olc*x*x+ct, olc*x*y-st*z, olc*x*z+st*y],
-                    [olc*x*y+st*z, olc*y*y+ct, olc*y*z-st*x],
-                    [olc*x*z-st*y, olc*y*z+st*x, olc*z*z+ct]])
+    return np.array([[olc * x * x + ct, olc * x * y - st * z, olc * x * z + st * y],
+                    [olc * x * y + st * z, olc * y * y + ct, olc * y * z - st * x],
+                    [olc * x * z - st * y, olc * y * z + st * x, olc * z * z + ct]])
