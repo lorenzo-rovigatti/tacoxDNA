@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-'''
-Created on 28 Sep 2017
-
-@author: lorenzo
-'''
 
 import sys
 import os

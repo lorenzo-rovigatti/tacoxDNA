@@ -1,14 +1,10 @@
-# convertiamo oxdna to lammps starter
-# lo script funziona per qualsiasi configurazione di partenza
-# testa mettendo il bo cubico invece che rettangolare
+#!/usr/bin/env python
 
 import numpy as np
 import sys, os
 from libs.readers import LorenzoReader
 
-
 def exyz_to_quat (mya1, mya3):
-
     mya2 = np.cross(mya3, mya1)
     myquat = [1, 0, 0, 0]
 

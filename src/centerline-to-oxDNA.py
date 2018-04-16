@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# TODO: translate the comments
+
 import numpy as np
 import math as mt
 import numpy.linalg as la
@@ -5,7 +8,7 @@ import sys
 import os
 from libs import topology as top
 from libs import base
-
+from libs import utils
 
 # angolo definito dando una normale fissata del piano
 def py_ang(v1, v2, vplane):
@@ -14,42 +17,6 @@ def py_ang(v1, v2, vplane):
 	
 	# arctan con questi argomenti da angolo tra 0 e pi, e la normale definisce la direzione. Se vuoi fissare la direzione, il segno lo decide quale delle due normali scegli
 	return np.arctan2 (la.norm(np.cross(v1n, v2n)) , np.dot (v1n, v2n)) * np.sign(np.dot(np.cross(v1n, v2n), vplane))
-	
-	
-# matrice rotazione asse-angolo (asse non serve normalizzato, angolo in rad)
-def get_rotation_matrix(axis, anglest):
-	# the argument anglest can be either an angle in radiants
-	# (accepted types are float, int or np.float64 or np.float64)
-	# or a tuple [angle, units] where angle a number and
-	# units is a string. It tells the routine whether to use degrees,
-	# radiants (the default) or base pairs turns
-	if not isinstance (anglest, (np.float64, np.float32, float, int)):
-		if len(anglest) > 1:
-			if anglest[1] in ["degrees", "deg", "o"]:
-				# angle = np.deg2rad (anglest[0])
-				angle = (np.pi / 180.) * (anglest[0])
-			elif anglest[1] in ["bp"]:
-				angle = int(anglest[0]) * (np.pi / 180.) * (34.81)
-			else:
-				angle = float(anglest[0])
-		else:
-			angle = float(anglest[0])
-	else:
-		angle = float(anglest)  # in degrees, I think
-	# print "angolo",angle/np.pi*180
-	axis = np.array(axis)
-	axis /= np.sqrt(np.dot(axis, axis))
-
-	ct = np.cos(angle)
-	st = np.sin(angle)
-	olc = 1. - ct
-	x, y, z = axis
-
-	# questa e' la matrice che torna
-	return np.array([[olc * x * x + ct, olc * x * y - st * z, olc * x * z + st * y],
-					[olc * x * y + st * z, olc * y * y + ct, olc * y * z - st * x],
-					[olc * x * z - st * y, olc * y * z + st * x, olc * z * z + ct]])
-	
 	
 class Options(object):
 
@@ -105,8 +72,9 @@ def parse_options(argv):
 	return opts
 
 
-# parametri
-BASE_BASE = 0.3897628551303122  # in direzione normale all'elica, va contata anche la rotazione
+# base-base distance along the helical pitch
+BASE_BASE = 0.3897628551303122
+# distance between the helix centre and the nucleotides' centre of mass
 CM_CENTER_DS = 0.6
 
 if __name__ == '__main__':
@@ -116,14 +84,15 @@ if __name__ == '__main__':
 	if opts.seed != None:
 		np.random.seed(opts.seed)
 	
-	# importa file con coordinate
+	# import the coordinates from the user-provided file
 	coordxyz = np.loadtxt(opts.centerline_file, float)
 	
-	numrows = len(coordxyz)  # num base pairs
+	# number of base pairs
+	numrows = len(coordxyz)
 	
-	# scaliamo i vettori prendendo 0.3897628551303122 come rif 
+	# use the model parameters to scale the distances 
 	scaling = BASE_BASE / np.sqrt(np.dot(coordxyz[1, :] - coordxyz[0, :], coordxyz[1, :] - coordxyz[0, :]))
-	coordxyz *= scaling  # coord che lo strand deve seguire
+	coordxyz *= scaling
 	
 	# inizializzazione vettori legati agli strand
 	# geometria asse
@@ -137,14 +106,12 @@ if __name__ == '__main__':
 	ssdna2 = np.copy(coordxyz)
 	v_perp_ssdna2 = np.copy(coordxyz)
 	
-	######
-	# #Size box sistema## si prende lato massimo
-	####
+	# TODO: how do we choose the simulation box?
 	
+	# take the bounding box as the simulation box for the output configuration
 	boxx = max(coordxyz[:numrows, 0]) - min(coordxyz[:numrows, 0])
 	boxy = max(coordxyz[:numrows, 1]) - min(coordxyz[:numrows, 1])
 	boxz = max(coordxyz[:numrows, 2]) - min(coordxyz[:numrows, 2])
-	
 	boxmax = max(boxx, boxy, boxz)
 	
 	# scegliamo come boxmax il diametro del cerchio di N particelle a distanza BASE_BASE tra loro
@@ -204,7 +171,7 @@ if __name__ == '__main__':
 	
 		# usiamo gamma per ruotare p_i sull asse s_(i+1) in modo da avere l angolo corretto con v_perp_ssdna1 vecchio
 		
-		R = get_rotation_matrix(dist[ind, :], gamma)
+		R = utils.get_rotation_matrix(dist[ind, :], gamma)
 		v_perp_ssdna1[ind, :] = np.dot(R , p[ind, :])  # normalizzato
 		v_perp_ssdna2[ind, :] = -v_perp_ssdna1[ind, :]
 		
