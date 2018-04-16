@@ -1,9 +1,9 @@
+#!/usr/bin/env python
 '''
 Created on 28 Sep 2017
 
 @author: lorenzo
 '''
-#!/usr/bin/env python
 
 import sys
 import os
@@ -18,8 +18,8 @@ from libs.readers import LorenzoReader
 
 BASE_SHIFT = 1.13
 COM_SHIFT = 0.5
+FROM_OXDNA_TO_ANGSTROM = 8.518
 DD12_PDB_PATH = "dd12.pdb"
-
 
 class Nucleotide(object):
     serial_residue = 1
@@ -96,6 +96,9 @@ class Nucleotide(object):
         self.compute_a3()
         self.a2 = np.cross(self.a3, self.a1)
         self.check = abs(np.dot(self.a1, self.a3))
+        
+    def correct_for_large_boxes(self, box):
+        map(lambda x: x.shift(-np.rint(x.pos / box ) * box), self.atoms)
 
     def to_pdb(self, chain_identifier, print_H, is_3_prime):
         res = []
@@ -107,6 +110,8 @@ class Nucleotide(object):
             res.append(a.to_pdb(chain_identifier, Nucleotide.serial_residue))
 
         Nucleotide.serial_residue += 1
+        if Nucleotide.serial_residue > 9999:
+            Nucleotide.serial_residue = 1
         return "\n".join(res)
 
     def to_mgl(self):
@@ -151,14 +156,19 @@ class Atom(object):
         self.residue = pdb_line[17:20].strip()
         self.residue_idx = int(pdb_line[22:26])
         # convert to oxDNA's length unit
-        self.pos = np.array([float(pdb_line[31:38]), float(pdb_line[38:46]), float(pdb_line[46:54])])  # / 8.518
+        self.pos = np.array([float(pdb_line[31:38]), float(pdb_line[38:46]), float(pdb_line[46:54])])
 
     def is_hydrogen(self):
         return "H" in self.name
 
+    def shift(self, diff):
+        self.pos += diff
+
     def to_pdb(self, chain_identifier, serial_residue):
         res = "%-6s%5d %-4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f%-4s%-2s%-2s" % ("ATOM", Atom.serial_atom, self.name, " ", self.residue, chain_identifier, serial_residue, " ", self.pos[0], self.pos[1], self.pos[2], 1.00, 0.00, " ", " ", " ")
         Atom.serial_atom += 1
+        if Atom.serial_atom > 99999:
+            Atom.serial_atom = 1
         return res
 
     def to_mgl(self):
@@ -170,8 +180,6 @@ class Atom(object):
     
     
 def align(full_base, ox_base):
-        # print full_base.base, np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
-    
         theta = utils.get_angle(full_base.a3, ox_base._a3)
         axis = np.cross(full_base.a3, ox_base._a3)
         axis /= sqrt(np.dot(axis, axis))
@@ -184,22 +192,6 @@ def align(full_base, ox_base):
         R = utils.get_rotation_matrix(axis, theta)
         full_base.rotate(R)
         old_a1 = np.array(full_base.a1)
-    
-        # print " ", np.dot(full_base.a1, ox_base._a1), np.dot(full_base.a3, ox_base._a3)
-
-        
-def print_P_distance_dd(nucls, divide_by=1):
-        if len(nucls) != 24:
-            print >> sys.stderr, "%s can be used for dodecamers only" % print_P_distance_dd.__name__
-            sys.exit(1)
-        # check the distances between P's
-        for i, n1 in enumerate(nucls):
-            for n2 in nucls[i + 1: ]:
-                # only for base pairs who have phospate groups
-                if n1.idx + n2.idx == 13 and n1.chain_id != n2.chain_id and "P" in n1.named_atoms and "P" in n2.named_atoms:
-                    diff = n1.named_atoms["P"].pos - n2.named_atoms["P"].pos
-                    print n1.name, n2.name, sqrt(np.dot(diff, diff)) / divide_by
-
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -243,6 +235,12 @@ if __name__ == '__main__':
         com += my_strand.cm_pos
     com /= s.N_strands
     
+    box_angstrom = s._box * FROM_OXDNA_TO_ANGSTROM
+    correct_for_large_boxes = False
+    if np.any(box_angstrom[box_angstrom > 999]):
+        print >> sys.stderr, "At least one of the box sizes is larger than 999: all the atoms which are outside of the box will be brought back"
+        correct_for_large_boxes = True
+    
     out_name = sys.argv[2] + ".pdb"
     out = open (out_name, "w")
     
@@ -264,8 +262,10 @@ if __name__ == '__main__':
             is_3_prime = True
         my_base.idx = (nucleotide.index % 12) + 1
         align(my_base, nucleotide)
-        my_base.set_base((nucleotide.pos_base - com) * 8.518)
+        my_base.set_base((nucleotide.pos_base - com) * FROM_OXDNA_TO_ANGSTROM)
         ox_nucleotides.append(my_base)
+        if correct_for_large_boxes:
+            my_base.correct_for_large_boxes(box_angstrom)
         print >> out, my_base.to_pdb("A", False, is_3_prime)
     print >> out, "REMARK ## 0,0"
     print >> out, "TER"
@@ -275,10 +275,3 @@ if __name__ == '__main__':
     
     print >> sys.stderr, "## Wrote data to '%s'" % out_name
     print >> sys.stderr, "## DONE"
-    
-    # remove the next line to print the distance between P atoms
-    sys.exit(1)
-    
-    print_P_distance_dd(nucleotides)
-    print ""
-    print_P_distance_dd(ox_nucleotides)
