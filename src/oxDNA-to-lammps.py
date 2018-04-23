@@ -110,8 +110,6 @@ if __name__ == '__main__':
     out.write('\n')
 
     for nucleotide in s._nucleotides:
-        # out.write("%d %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le\n" \
-        #      % (i+1,0.0,0.0,0.0,0.0,0.0,0.0))
         out.write("%d %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le\n" \
               % (nucleotide.index + 1, nucleotide._v[0], nucleotide._v[1], nucleotide._v[2], nucleotide._L[0], nucleotide._L[1], nucleotide._L[2]))
 

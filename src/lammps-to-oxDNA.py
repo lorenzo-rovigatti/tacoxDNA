@@ -1,24 +1,14 @@
-# prende in input un file x y z q0 q1 q2 q3
-
-# in lammps il nucleotide come corpo rigido puo essere rappresentato da un quaternione. Il quaternione rappresenta una rotazione di un angolo theta attorno ad un asse 
-# la rotazione identifica una matrice 3x3 applicabile a un punto per fare questa rotazione. Qui in basso ci sono le formule perconvertirle usate qui sotto
-# trasformazione matrice -> quaternioni e inversa
-
-# http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
-# http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/transforms/index.htm
-
-# La terna di vettori si ricava leggendo una per una le righe (o le colonne, mi confonde), e quelle rappresentato la terna (sarebbe come moltiplicare la matrice per (1 0 0), (0 1 0) etc)
-# Probabilmente per ricavare il quaternione e' stata usata la matrice di rotazione inversa riferita alla terna (quindi la matrice trasposta), e ugualmente va considerata la stessa cosa per ritornare indietro
-# ho verificato che la trasformazione all indietro coindide con quella in avanti
-
-# nella terna del nucleotide
-# a1 corrisponde al vettore congiungente backbone to base (per interazioni base-base)
-# a3 corisponde al terzo vettore della terna e alla congiungente del backbone
-
 import numpy as np
 import sys, os
 from libs import base
+from libs import reader_lammps_init 
 
+number_oxdna_to_lammps = {0 : 0, 1 : 2, 2 : 1, 3 : 3}
+
+
+#rules to convert from a1 a3 vectors to quaternions based on
+# http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
+# http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/transforms/index.htm
 
 def exyz_to_quat (mya1, mya3):
 
@@ -96,41 +86,35 @@ def quat_to_exyz (myquat):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print >> sys.stderr, "Usage is %s lammps_input configuration" % sys.argv[0]
+    if len(sys.argv) < 2:
+        print >> sys.stderr, "Usage is %s lammps_init_file" % sys.argv[0]
         sys.exit(1)
 
-    with open(sys.argv[2]) as conf:
-        conf.readline()
-        conf.readline()
-        conf.readline()
-        N = int(conf.readline())
-        conf.readline()
-        box_min = np.array([0., 0., 0.])
-        box_max = np.array([0., 0., 0.])
-        for i in range(3):
-            box_min[i], box_max[i] = [float(x) for x in conf.readline().split()]
-        conf.readline()
+    conf=reader_lammps_init.Lammps_parser(sys.argv[1])
+    N = conf.natoms 
+    box = np.array([0, 0., 0.])
+    box[0]=conf.Lx
+    box[1]=conf.Ly
+    box[2]=conf.Lz
 
-        coordxyz = np.loadtxt(conf, float)
-        if len(coordxyz) != N:
-            print >> sys.stderr, "The number of particles specified in the headers of the configuration (%d) is different from the particle lines found therein (%d)" % (N, len(coordxyz))
-            sys.exit(1)
+    system = base.System(box)
 
-        box = box_max - box_min
-        system = base.System(box)
 
-        current_strand = base.Strand()
+    strands=[]
+    for i in range(conf.nstrands):
+            strands.append(base.Strand())
 
-        for nucleotide in coordxyz:
-            cm = nucleotide[2:5]
-            quaternions = nucleotide[5:9]
+    for i in range(N):
+            cm = conf.xyz[i,:]
+            quaternions = conf.ellipsoids[i,:]
             a1, a3 = quat_to_exyz(quaternions)
-            b = int(nucleotide[1]) - 1
+            b = number_oxdna_to_lammps[conf.bases[i]-1] 
 
-            current_strand.add_nucleotide(base.Nucleotide(cm, a1, a3, b, b))
+            strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b))
 
-        system.add_strand(current_strand)
-        basename = os.path.basename(sys.argv[2])
-        system.print_lorenzo_output(basename + ".oxdna", basename + ".top")
+    for i in range(conf.nstrands):
+        system.add_strand(strands[i])
+    
+    basename = os.path.basename(sys.argv[1])
+    system.print_lorenzo_output(basename + ".oxdna", basename + ".top")
 
