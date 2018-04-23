@@ -4,6 +4,8 @@ import numpy as np
 import sys, os
 from libs.readers import LorenzoReader
 
+number_oxdna_to_lammps = {0 : 0, 1 : 2, 2 : 1, 3 : 3}
+
 def exyz_to_quat (mya1, mya3):
     mya2 = np.cross(mya3, mya1)
     myquat = [1, 0, 0, 0]
@@ -98,7 +100,7 @@ if __name__ == '__main__':
 
     for nucleotide in s._nucleotides:
         out.write('%d %d %22.15le %22.15le %22.15le %d 1 1\n' \
-              % (nucleotide.index + 1, nucleotide._base + 1, \
+              % (nucleotide.index + 1, number_oxdna_to_lammps[nucleotide._base] + 1, \
                  nucleotide.cm_pos[0], nucleotide.cm_pos[1], nucleotide.cm_pos[2], \
                  s._nucleotide_to_strand[nucleotide.index] + 1))
 
