@@ -49,6 +49,29 @@ class Lammps_parser(object):
 
         self.nstrands=len(np.unique(self.strand))
 
+    #checking the nucleotides have indexes ordered the same way as bonds and are compatible with strands
+        for i in range(self.natoms):
+            next_bond=self.bonds[i][1]
+            
+            if next_bond!=-1:
+                #check the consecutive bond is on the same strand
+                if self.strand[i]!=self.strand[next_bond]:
+                    print >> sys.stderr, "Wrong bond arising between two different strands"
+                #check the right bond is an higher index (except from the circular closure)
+                if next_bond==i-1:
+                    print >> sys.stderr, "The bonds should be in incremental order (i i+1) except for strand circularization N 0"
+                if next_bond>i+1:
+                    print >> sys.stderr, "The bonds should be in incremental order (i i+1) except for strand circularization N 0"
+                if next_bond<i+1:
+                    if self.bonds[next_bond][1]!=next_bond+1:
+                        print >> sys.stderr, "The bonds should be in incremental order (i i+1) except for strand circularization N 0"
+
+                #more check to insert about completely random ordering
+   
+
+
+
+
     def parse_Atoms_header(self,datalines):
 
 	if self.natoms != len(datalines):
@@ -77,12 +100,17 @@ class Lammps_parser(object):
 	if self.nbonds !=len(datalines):
 		raise ValueError("Number of atoms in header %d and in Bonds %d do not coincide" % self.nbonds,len(datalines))	
 	else:
-		nbonds=self.nbonds
-		self.bonds=np.zeros((nbonds,2),dtype=int)
+        #creating a vector indicating for each particle who it is bonded too on its left and right in order of increasing index
+		natoms=self.natoms
+		self.bonds=np.ones((natoms,2),dtype=int)*(-1.)
 		for i, line in enumerate(datalines):
-			line = line.split()
-			index=int(line[0])-1
-			self.bonds[index]= line[2:4]
+                    line = line.split()
+                    p1=int(line[2])-1
+                    p2=int(line[3])-1
+
+                    self.bonds[p1][1]=p2
+                    self.bonds[p2][0]=p1
+
 
 
     def parse_ellipsoids(self,datalines):

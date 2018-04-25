@@ -104,6 +104,7 @@ if __name__ == '__main__':
     for i in range(conf.nstrands):
             strands.append(base.Strand())
 
+
     for i in range(N):
             cm = conf.xyz[i,:]
             quaternions = conf.ellipsoids[i,:]
@@ -112,9 +113,18 @@ if __name__ == '__main__':
 
             strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b))
 
+            #close strand 
+            next_bond=conf.bonds[i][1]
+            if next_bond!=-1 and next_bond!=i+1:
+                if conf.strand[i]!=conf.strand[next_bond]:
+                    print >> sys.stderr, "Wrong bond arising between two different strands"
+                else:
+                    strands[conf.strand[i]-1].make_circular()
+
+
     for i in range(conf.nstrands):
         system.add_strand(strands[i])
-    
+
     basename = os.path.basename(sys.argv[1])
     system.print_lorenzo_output(basename + ".oxdna", basename + ".top")
 

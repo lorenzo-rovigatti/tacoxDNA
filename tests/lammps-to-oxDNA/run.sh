@@ -1,7 +1,9 @@
 #!/bin/bash
 
 CORRECT_OUTPUT="correct_output.dat"
-OUTPUT="init_lammps.dat.out"
+CORRECT_TOP="correct_output.top"
+OUTPUT="init_lammps.dat.oxdna"
+OUTPUT_TOP="init_lammps.dat.top"
 
 if [ ! -s init_lammps.dat ] 
 then
@@ -10,7 +12,7 @@ then
 fi
 
 python ../../src/lammps-to-oxDNA.py init_lammps.dat
-diff_lines=$(diff $CORRECT_OUTPUT $OUTPUT)
+diff_lines=$(cat <(diff $CORRECT_OUTPUT $OUTPUT) <(diff $CORRECT_TOP $OUTPUT_TOP))
 
 if [ $? -ne 0 ]
 then
