@@ -47,6 +47,8 @@ class Lammps_parser(object):
 
 	self.parse_ellipsoids(sects['Ellipsoids'])
 
+        self.parse_velocities(sects['Velocities'])
+
         self.nstrands=len(np.unique(self.strand))
 
     #checking the nucleotides have indexes ordered the same way as bonds and are compatible with strands
@@ -91,6 +93,28 @@ class Lammps_parser(object):
 		    self.bases[index] = line[1]
 		    self.strand[index] = line[5]
 		    self.xyz[index,:] = line[2:5]
+
+    def parse_velocities(self,datalines):
+        if self.natoms != len(datalines):
+            raise ValueError("Velocities section do not contain the same amount of particles as number of atoms %d != %d " % self.natoms,len(datalines))
+        if len(datalines[1].split())!=7:
+            raise ValueError("Velocities section should be the default one # Atom-ID, translational, rotational velocity with 7 columns and not %d" % len(datalines[1].split()))
+        else:
+            N=self.natoms
+            self.v = np.zeros((N,3), dtype=float)
+            self.Lv = np.zeros((N,3), dtype=float)
+            for i, line in enumerate(datalines):
+                line = line.split()
+                index=int(line[0])-1
+                self.v[index] = line[1:4]
+                self.Lv[index] = line[4:7]
+
+
+
+
+
+
+
 
     def parse_bonds(self,datalines):
 

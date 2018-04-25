@@ -111,7 +111,10 @@ if __name__ == '__main__':
             a1, a3 = quat_to_exyz(quaternions)
             b = number_oxdna_to_lammps[conf.bases[i]-1] 
 
-            strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b))
+            v = conf.v[i,:]
+            Lv = conf.Lv[i,:]
+
+            strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b,v,Lv))
 
             #close strand 
             next_bond=conf.bonds[i][1]

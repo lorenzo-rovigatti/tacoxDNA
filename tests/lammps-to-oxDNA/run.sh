@@ -20,6 +20,6 @@ then
 	exit 1
 else
 	echo "TEST PASSED";
-	rm $OUTPUT
+	#rm $OUTPUT
 	exit 0
 fi 
