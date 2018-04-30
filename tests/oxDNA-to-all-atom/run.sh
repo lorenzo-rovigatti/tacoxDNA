@@ -9,6 +9,7 @@ then
 	exit 1
 fi
 
+rm $OUTPUT 2> /dev/null
 python ../../src/oxDNA-to-all-atom.py ds.top ds.dat
 diff_lines=$(diff $CORRECT_OUTPUT $OUTPUT)
 
