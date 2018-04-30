@@ -21,5 +21,6 @@ then
 	exit 1
 else
 	echo "TEST PASSED";
+	rm $OUTPUT_CONF $OUTPUT_TOP
 	exit 0
 fi 
