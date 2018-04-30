@@ -153,10 +153,9 @@ class Nucleotide(Printable):
         self.index = Nucleotide.index
         Nucleotide.index += 1
         self.cm_pos = np.array(cm_pos)
-        self._a1 = np.array (a1)
-        self._a3 = np.array (a3)
-        # self._a2 = np.cross (a3, a1) # implemented as property
-        # _base should be a number
+        self._a1 = np.array(a1)
+        self._a3 = np.array(a3)
+        # base should be an integer
         if isinstance(base, int):
             pass
         else:
@@ -173,7 +172,7 @@ class Nucleotide(Printable):
         self._v = v
         self.n3 = n3
         self.next = -1
-        self.interactions = []  # what other nucleotide this nucleotide actually interacts with
+        self.interactions = []  # what other nucleotides this nucleotide actually interacts with
         self.init_interactions()
 
     def get_pos_base (self):
@@ -230,11 +229,6 @@ class Nucleotide(Printable):
         self.cm_pos = np.dot(R, self.cm_pos - origin) + origin
         self._a1 = np.dot(R, self._a1)
         self._a3 = np.dot(R, self._a3)
-        # the following have been removed
-        # self._a2 = np.dot(R, self._a2)
-        # self.pos_base = self.cm_pos + self._a1 * POS_BASE
-        # self.pos_stack = self.cm_pos + self._a1 * POS_STACK
-        # self.pos_back = self.cm_pos + self._a1 * POS_BACK
 
     def distance (self, other, PBC=True, box=None):
         if PBC and box is None:
