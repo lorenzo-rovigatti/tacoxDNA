@@ -4,7 +4,7 @@ import sys
 import os
 import numpy as np
 import copy
-from math import sqrt
+from math import sqrt, sin
 
 from libs.pdb import Atom, Nucleotide, FROM_OXDNA_TO_ANGSTROM
 import libs.base as base
@@ -15,16 +15,19 @@ DD12_PDB_PATH = "dd12.pdb"
 
 def align(full_base, ox_base):
         theta = utils.get_angle(full_base.a3, ox_base._a3)
-        axis = np.cross(full_base.a3, ox_base._a3)
-        axis /= sqrt(np.dot(axis, axis))
-        R = utils.get_rotation_matrix(axis, theta)
-        full_base.rotate(R)
+        # if the two bases are already essentially aligned then we do nothing
+        if sin(theta) > 1e-3:
+            axis = np.cross(full_base.a3, ox_base._a3)
+            axis /= sqrt(np.dot(axis, axis))
+            R = utils.get_rotation_matrix(axis, theta)
+            full_base.rotate(R)
     
         theta = utils.get_angle(full_base.a1, ox_base._a1)
-        axis = np.cross(full_base.a1, ox_base._a1)
-        axis /= sqrt(np.dot(axis, axis))
-        R = utils.get_rotation_matrix(axis, theta)
-        full_base.rotate(R)
+        if sin(theta) > 1e-3:
+            axis = np.cross(full_base.a1, ox_base._a1)
+            axis /= sqrt(np.dot(axis, axis))
+            R = utils.get_rotation_matrix(axis, theta)
+            full_base.rotate(R)
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -97,7 +100,7 @@ if __name__ == '__main__':
         ox_nucleotides.append(my_base)
         if correct_for_large_boxes:
             my_base.correct_for_large_boxes(box_angstrom)
-        print >> out, my_base.to_pdb("A", False, is_3_prime)
+        print >> out, my_base.to_pdb("A", True, is_3_prime)
     print >> out, "REMARK ## 0,0"
     print >> out, "TER"
     print >> out, "ENDMDL"

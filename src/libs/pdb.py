@@ -47,12 +47,8 @@ class Nucleotide(object):
 
     def compute_a3(self):
         base_com = self.get_com(self.base_atoms)
-        # in case of a 3' end we either use H05' (if provided by the PDB file) or O5'
-        if len(self.phosphate_atoms) > 0:
-            phosphate_com = self.get_com(self.phosphate_atoms)
-        else:
-            phosphate_com = self.O5_prime.pos
-        parallel_to = phosphate_com - base_com
+        # the O4' oxygen is always (at least for non pathological configurations, as far as I know) oriented towards the 3' direction
+        parallel_to = base_com - self.named_atoms["O4'"].pos
         self.a3 = np.array([0., 0., 0.])
         
         for perm in itertools.permutations(self.ring_names, 3):
@@ -149,7 +145,6 @@ class Atom(object):
         self.chain_id = pdb_line[21:22].strip()
         self.residue = pdb_line[17:20].strip()
         self.residue_idx = int(pdb_line[22:26])
-        # convert to oxDNA's length unit
         self.pos = np.array([float(pdb_line[31:38]), float(pdb_line[38:46]), float(pdb_line[46:54])])
 
     def is_hydrogen(self):

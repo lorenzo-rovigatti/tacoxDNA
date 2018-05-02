@@ -15,9 +15,9 @@ if __name__ == '__main__':
         sys.exit(1)
         
     pdb_file = sys.argv[1]
-    if sys.argv[2] != "35":
+    if sys.argv[2] == "35":
         oxDNA_direction = True
-    elif sys.argv[2] != "53":
+    elif sys.argv[2] == "53":
         oxDNA_direction = False
     else:
         print >> sys.stderr, "The second argument should be either 35 or 53"
@@ -63,6 +63,8 @@ if __name__ == '__main__':
         com = nucl.get_com() * FROM_ANGSTROM_TO_OXDNA
         new_oxDNA_nucl = base.Nucleotide(com, nucl.a1, nucl.a3, nucl.base[0])
         strand.add_nucleotide(new_oxDNA_nucl)
+        
+        print >> sys.stderr, nucl.base
         
         if len(nucl.base) > 2:
             print >> sys.stderr, "ERROR: invalid PDB base type '%s'" % nucl.base
