@@ -30,10 +30,6 @@ class Nucleotide(object):
         elif "'" in a.name: self.sugar_atoms.append(a)
         else: self.base_atoms.append(a)
         
-        # we might need to use this as a substitute for the phosphate group to choose the helix direction in the compute_a3 method
-        if a.name == "O5'":
-            self.O5_prime = a
-        
         self.named_atoms[a.name] = a
         if self.chain_id == None: self.chain_id = a.chain_id
 

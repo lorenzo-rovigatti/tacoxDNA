@@ -705,7 +705,7 @@ class Strand(Printable):
     cm_pos = property(get_cm_pos, set_cm_pos)
     N = property(get_length)
     sequence = property(get_sequence)
-
+    
     def add_H_interaction(self, other_strand):
         if other_strand in self.H_interactions.keys():
             self.H_interactions[other_strand] += 1
@@ -725,6 +725,9 @@ class Strand(Printable):
 
     def make_noncircular(self):
         self._circular = False
+        
+    def is_circular(self):
+        return self._circular
 
 
 def parse_visibility(path):

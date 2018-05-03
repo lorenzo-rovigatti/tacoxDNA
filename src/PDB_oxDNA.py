@@ -4,6 +4,7 @@
 
 import sys
 import os
+import itertools
 import numpy as np
 
 from libs.pdb import Atom, Nucleotide, FROM_ANGSTROM_TO_OXDNA
@@ -23,25 +24,28 @@ if __name__ == '__main__':
         print >> sys.stderr, "The second argument should be either 35 or 53"
         exit(1)
         
+    pdb_strands = []
     with open(pdb_file) as f:
-        nucleotides = []
+        strand = []
         old_residue = ""
         for line in f.readlines():
             if line.startswith("ATOM"):
                 na = Atom(line)
                 if na.residue_idx != old_residue:
                     nn = Nucleotide(na.residue, na.residue_idx)
-                    nucleotides.append(nn)
+                    if oxDNA_direction:
+                        strand.append(nn)
+                    else:
+                        strand.insert(0, nn)
                     old_residue = na.residue_idx
                 nn.add_atom(na)
+            elif "TER" in line:
+                pdb_strands.append(strand)
+                strand = []
                 
-    # PDB files might list nucleotide in the 5' -> 3' order. oxDNA always uses the 3' -> 5' convention, hence the need to revert the array
-    if not oxDNA_direction:
-        nucleotides.reverse()
-        
     box_low = np.array([1e6, 1e6, 1e6], dtype=np.float64)
     box_high = np.array([-1e6, -1e6, -1e6], dtype=np.float64)
-    for nucl in nucleotides:
+    for nucl in itertools.chain(*pdb_strands):
         com = nucl.get_com()
         for i in range(3):
             if com[i] < box_low[i]:
@@ -57,26 +61,23 @@ if __name__ == '__main__':
     system = base.System(box)
     strand = base.Strand()
     
-    for nucl in nucleotides:
-        nucl.compute_as()
+    for pdb_strand in pdb_strands:
+        strand = base.Strand()
         
-        com = nucl.get_com() * FROM_ANGSTROM_TO_OXDNA
-        new_oxDNA_nucl = base.Nucleotide(com, nucl.a1, nucl.a3, nucl.base[0])
-        strand.add_nucleotide(new_oxDNA_nucl)
-        
-        print >> sys.stderr, nucl.base
-        
-        if len(nucl.base) > 2:
-            print >> sys.stderr, "ERROR: invalid PDB base type '%s'" % nucl.base
-            exit(1)
-        elif nucl.base[-1] == "3":
-            if strand.N != 1:
-                print >> sys.stderr, "ERROR: malformed PDB file. Trying to add a 3' nucleotide (name: %s, index: %s) to a non-empty strand" % (nucl.name, nucl.idx)
-                exit(1)
-        elif nucl.base[-1] == "5" or nucl == nucleotides[-1]: # TODO the rhs of the or will be removed in the future
-            system.add_strand(strand, check_overlap=False)
-            strand = base.Strand()
+        for nucl in pdb_strand:
+            nucl.compute_as()
+            
+            com = nucl.get_com() * FROM_ANGSTROM_TO_OXDNA
+            new_oxDNA_nucl = base.Nucleotide(com, nucl.a1, nucl.a3, nucl.base[0])
+            strand.add_nucleotide(new_oxDNA_nucl)
+            
+        system.add_strand(strand, check_overlap=False)
                 
     basename = os.path.basename(pdb_file)
-    system.print_lorenzo_output(basename + ".oxdna", basename + ".top")
-            
+    topology_file = basename + ".top"
+    configuration_file = basename + ".oxdna"
+    system.print_lorenzo_output(configuration_file, topology_file)
+    
+    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
+    print >> sys.stderr, "## DONE"
+    
