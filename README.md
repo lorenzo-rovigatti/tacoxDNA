@@ -10,9 +10,9 @@ The `centerline-to-oxDNA.py` script generates an oxDNA topology/configuration pa
 * A centerline file containing a list of coordinates
 
 ### Optional arguments
-* `-c|--closed`
-* `-o|--open`
-* `-h|--help`
+* `-c\--closed`
+* `-o\--open`
+* `-h\--help`
 * `-d\--dsDNA`
 * `-s\--ssDNA`
 * `-n\--nicked`
