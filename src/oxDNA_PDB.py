@@ -132,7 +132,7 @@ if __name__ == '__main__':
     
     for strand in s._strands:
         strand_pdb = []
-        is_3_prime = True
+        is_3_prime = not strand.is_circular()
         for nucleotide in strand._nucleotides:
             nb = base.number_to_base[nucleotide._base]
             my_base = copy.deepcopy(bases[nb])
