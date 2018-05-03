@@ -40,13 +40,13 @@ class Options(object):
 def print_usage():
         print >> sys.stderr, "USAGE:"
         print >> sys.stderr, "\t%s centerline_file" % sys.argv[0]
-        print >> sys.stderr, "\t[-c|--closed] [-o|--open] [-h|--help] [-d\--dsDNA] [-s\--ssDNA] [-n\--nicked] [-p\--supercoiling] [-w\--writhe] [-e\--seed] [-q\--sequence]"
+        print >> sys.stderr, "\t[-c\--closed] [-o\--open] [-h\--help] [-d\--dsDNA] [-s\--ssDNA] [-n\--nicked] [-p\--supercoiling] [-w\--writhe] [-e\--seed] [-q\--sequence]"
         exit(1)
 		
 		
 def parse_options(argv):
 	shortArgs = 'cohdsnp:w:e:q:'
-	longArgs = ['closed', 'open', 'help', 'dsDNA', 'ssDNA', 'nicked', 'supercoiling', 'writhe', 'seed', 'sequence']
+	longArgs = ['closed', 'open', 'help', 'dsDNA', 'ssDNA', 'nicked', 'supercoiling=', 'writhe=', 'seed=', 'sequence=']
 	
 	opts = Options()
 	
