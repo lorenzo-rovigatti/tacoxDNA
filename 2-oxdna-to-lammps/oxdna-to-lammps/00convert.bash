@@ -1,1 +1,0 @@
-bash convert_oxdna_file_to_lammps_file.bash tmp1
