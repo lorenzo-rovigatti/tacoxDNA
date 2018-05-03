@@ -34,15 +34,14 @@ The `oxDNA-to-LAMMPS.py` script takes two mandatory arguments and outputs a sing
 * An oxDNA configuration file
 
 ### Output
-* A file containing the list of nucleotide positions, quaternions, velocities, angular velocities and bonds which can be used as a restart file in LAMMPS. The name of the file is just the oxDNA configuration filename, prefixed with "LAMMPS_"
+* A file containing the list of nucleotide positions, quaternions, velocities, angular velocities and bonds which can be used as a start file in LAMMPS. The name of the file is just the oxDNA configuration filename, prefixed with "LAMMPS_"
 
 ## LAMMPS-to-oxDNA converter
 
-The `LAMMPS-to-oxDNA.py` script takes two mandatory arguments and outputs two files.
+The `LAMMPS-to-oxDNA.py` script takes one mandatory argument and outputs two files.
 
 ### Arguments
-* A LAMMPS input file, containing the topology of the configuration in the form of a list of bonds
-* A LAMMPS output file having [...]
+* A LAMMPS input start file, containing the nucleotide positions, quaternions, velocities, angular velocities and bond list 
 
 ### Output
 * An oxDNA topology file (named by suffixing the LAMMPS output file with ".top")
