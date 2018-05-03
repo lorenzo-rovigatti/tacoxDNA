@@ -2,17 +2,17 @@
 
 CORRECT_OUTPUT="correct_output.dat"
 CORRECT_TOP="correct_output.top"
-OUTPUT_CONF="init_lammps.dat.oxdna"
-OUTPUT_TOP="init_lammps.dat.top"
+OUTPUT_CONF="input.pdb.oxdna"
+OUTPUT_TOP="input.pdb.top"
 
-if [ ! -s init_lammps.dat ] 
+if [ ! -s input.pdb ] 
 then
-	echo "Can't find input file. Are you sure you are in the right folder?"
+	echo "Can't find the input file. Are you sure you are in the right folder?"
 	exit 1
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python ../../src/lammps-to-oxDNA.py init_lammps.dat
+python ../../src/PDB_oxDNA.py input.pdb 53
 (diff $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

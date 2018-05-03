@@ -13,7 +13,7 @@ fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
 python ../../src/centerline-to-oxDNA.py centerline.dat -p 0.1 -q sequence.dat --ssDNA --open
-(diff $CORRECT_OUTPUT_CONF $OUTPUT_CONF) && (diff $CORRECT_OUTPUT_TOP $OUTPUT_TOP)
+(diff $CORRECT_OUTPUT_CONF $OUTPUT_CONF > /dev/null) && (diff $CORRECT_OUTPUT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]
 then

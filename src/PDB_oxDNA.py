@@ -29,6 +29,7 @@ if __name__ == '__main__':
         strand = []
         old_residue = ""
         for line in f.readlines():
+            line = line.strip()
             if line.startswith("ATOM"):
                 na = Atom(line)
                 if na.residue_idx != old_residue:
@@ -39,9 +40,12 @@ if __name__ == '__main__':
                         strand.insert(0, nn)
                     old_residue = na.residue_idx
                 nn.add_atom(na)
-            elif "TER" in line:
+            elif line == "TER":
                 pdb_strands.append(strand)
                 strand = []
+            # if the file does not contain any TER line we need to manually add the current strand to the list of strands
+            elif line == "END" and len(pdb_strands) == 0:
+                pdb_strands.append(strand)
                 
     box_low = np.array([1e6, 1e6, 1e6], dtype=np.float64)
     box_high = np.array([-1e6, -1e6, -1e6], dtype=np.float64)

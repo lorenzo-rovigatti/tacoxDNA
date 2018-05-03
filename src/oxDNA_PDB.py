@@ -56,8 +56,7 @@ def parse_options():
         else:
             print >> sys.stderr, "The 'direction' argument should be either 35 or 53"
             exit(1)
-    except Exception as e:
-        print >> sys.stderr, e
+    except Exception:
         print_usage()
         
     return opts

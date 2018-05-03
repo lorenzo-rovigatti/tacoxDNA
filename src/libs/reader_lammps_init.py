@@ -111,7 +111,7 @@ class Lammps_parser(object):
 
         #creating a vector indicating for each particle who it is bonded too on its left and right in order of increasing index
         natoms=self.natoms
-        self.bonds=np.ones((natoms,2),dtype=int)*(-1.)
+        self.bonds=np.ones((natoms,2),dtype=int)*(-1)
         for i, line in enumerate(datalines):
             line = line.split()
             p1=int(line[2])-1

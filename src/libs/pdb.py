@@ -7,13 +7,23 @@ COM_SHIFT = 0.5
 FROM_OXDNA_TO_ANGSTROM = 8.518
 FROM_ANGSTROM_TO_OXDNA = 1. / FROM_OXDNA_TO_ANGSTROM
 
+NAME_TO_BASE = {
+        "ADE" : "A",
+        "CYT" : "C",
+        "GUA" : "G",
+        "THY" : "T",
+    }
+
 class Nucleotide(object):
     serial_residue = 1
-
+    
     def __init__(self, name, idx):
         object.__init__(self)
         self.name = name
-        self.base = name[1:]
+        if self.name in NAME_TO_BASE.keys():
+            self.base = NAME_TO_BASE[self.name]
+        else:
+            self.base = name[1:]
         self.idx = idx
         self.base_atoms = []
         self.phosphate_atoms = []
