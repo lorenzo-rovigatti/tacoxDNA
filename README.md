@@ -7,19 +7,29 @@ tacoxDNA (Tools and Converters for oxDNA) is a collection of tools developed to 
 The `centerline-to-oxDNA.py` script generates an oxDNA topology/configuration pair from a file containing a list of coordinates that defines a centerline.
 
 ### Mandatory arguments
-* A centerline file containing a list of coordinates
+* A centerline file containing a list of coordinates in the format x y z
 
 ### Optional arguments
 * `-c\--closed`
+the last bead (base) is connected to the first bead (base). Default is True
 * `-o\--open`
+the last bead (base) is not connected to the first bead (base). Default is False
 * `-h\--help`
+print usage
 * `-d\--dsDNA`
+the chain is clad with a double strand DNA. Default is True
 * `-s\--ssDNA`
+the chain is clad with a single strand DNA. Default is False
 * `-n\--nicked`
+optional argument when -d option is used. One of the two strands of double strand DNA is nicked (not circularized). Default is False
 * `-p\--supercoiling=SUPERCOILING_DENSITY`
+supercoiling density percentage. Default is 0, with an equilibrium pitch of 10.5 imposed
 * `-w\--writhe=WRITHE_AMOUNT`
+additional writhe to superimpose (useful for knots which have an average writhe different from 0). Default value is 0.
 * `-e\--seed=RNG_SEED`
+random seed.
 * `-q\--sequence=SEQUENCE`
+text file containing sequence, ex ATCTGA. Default is a random sequence. The length of the sequence should correspond to the number of points in the coordinate file
 
 ### Output
 * An oxDNA topology file (named by suffixing the centerline file with ".top")
