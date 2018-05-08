@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # TODO: translate the comments
+# TODO: how do we choose the simulation box?
 
 import numpy as np
 import math as mt
@@ -10,13 +11,6 @@ from libs import topology as top
 from libs import base
 from libs import utils
 
-# angolo definito dando una normale fissata del piano
-def py_ang(v1, v2, vplane):
-	v1n = v1 / la.norm(v1) 
-	v2n = v2 / la.norm(v2) 
-	
-	# arctan con questi argomenti da angolo tra 0 e pi, e la normale definisce la direzione. Se vuoi fissare la direzione, il segno lo decide quale delle due normali scegli
-	return np.arctan2 (la.norm(np.cross(v1n, v2n)) , np.dot (v1n, v2n)) * np.sign(np.dot(np.cross(v1n, v2n), vplane))
 	
 class Options(object):
 
@@ -88,14 +82,13 @@ if __name__ == '__main__':
 	coordxyz = np.loadtxt(opts.centerline_file, float)
 	
 	# number of base pairs
-	numrows = len(coordxyz)
+	nbases = len(coordxyz)
 	
 	# use the model parameters to scale the distances 
-	scaling = BASE_BASE / np.sqrt(np.dot(coordxyz[1, :] - coordxyz[0, :], coordxyz[1, :] - coordxyz[0, :]))
+	scaling = BASE_BASE / la.norm(coordxyz[1, :] - coordxyz[0, :]) 
 	coordxyz *= scaling
-	
-	# inizializzazione vettori legati agli strand
-	# geometria asse
+
+        #initialize vectors
 	dist = np.copy(coordxyz)
 	dist_norm = np.copy(coordxyz)
 	p = np.copy(coordxyz)
@@ -106,85 +99,80 @@ if __name__ == '__main__':
 	ssdna2 = np.copy(coordxyz)
 	v_perp_ssdna2 = np.copy(coordxyz)
 	
-	# TODO: how do we choose the simulation box?
 	
 	# take the bounding box as the simulation box for the output configuration
-	boxx = max(coordxyz[:numrows, 0]) - min(coordxyz[:numrows, 0])
-	boxy = max(coordxyz[:numrows, 1]) - min(coordxyz[:numrows, 1])
-	boxz = max(coordxyz[:numrows, 2]) - min(coordxyz[:numrows, 2])
-	boxmax = max(boxx, boxy, boxz)
+	boxx = max(coordxyz[:nbases, 0]) - min(coordxyz[:nbases, 0])
+	boxy = max(coordxyz[:nbases, 1]) - min(coordxyz[:nbases, 1])
+	boxz = max(coordxyz[:nbases, 2]) - min(coordxyz[:nbases, 2])
+	boxmax = max(boxx, boxy, boxz) + 2.*BASE_BASE
 	
-	# scegliamo come boxmax il diametro del cerchio di N particelle a distanza BASE_BASE tra loro
-	boxmax = BASE_BASE * numrows / np.pi
 	
-	# calcoliamo vettori distanza tra elementi successivi asse (non normalizzati)
-	for c in range(0, numrows): 
-		ind = int(c - mt.floor(c / float(numrows)) * numrows)
-		ind1 = int(c + 1 - mt.floor((c + 1) / float(numrows)) * numrows)
+	# centerline base_to_base vectors
+	for c in range(0, nbases): 
+		ind = c 
+		ind1 = (c + 1) % nbases
 	
 		dist[ind, :] = coordxyz[ind1, :] - coordxyz[ind, :]
-		dist_norm[ind, :] = dist[ind, :] / np.sqrt(np.dot(dist[ind, :], dist[ind, :]))
+		dist_norm[ind, :] = dist[ind, :] / la.norm(dist[ind, :])
 	
-	# calcoliamo vettori perpendicolare a due segmenti successivi (normalizzati)
-	for c in range(0, numrows): 
-		ind_1 = int(c - 1 - mt.floor((c - 1) / float(numrows)) * numrows)
-		ind = int(c - mt.floor(c / float(numrows)) * numrows)
+	# vectors perpendicular between two consecutive centerline vectors (normalized)
+	for c in range(0, nbases): 
+		ind_1 = (c - 1 + nbases) % nbases 
+		ind = c
 			
 		p[ind, :] = np.cross(dist[ind_1, :] , dist[ind, :])
-		p[ind, :] /= np.sqrt(np.dot(p[ind, :] , p[ind, :]))
+		p[ind, :] /= la.norm(p[ind, :])
 	
-	# calcoliamo il writhe della configurazione, per capire se stiamo dando una rotazione eccessiva
+	# chain writhe
 	WR = 0.
 	if opts.closed:
 		WR = top.get_writhe(coordxyz)
-	
-	# il pitch di equilibrio dipende da larghezza sistema, tra 10.50 e 10.55 (N/pitch da il numero di giri di 360 totali, ossia il linking number)
-	# per sistemi di 10080 basi ho visto che e' perfettamente 10.50 a 1M
+        
+        #oxdna equiibrium pitch
 	pitch = 10.5
-	LK = round((numrows / pitch) * (opts.supercoiling + 1) + opts.writhe)  # LK deve essere un numero intero? Si perche devi chiudere il giro alla fine
+
+        #global linking number
+	LK = round((nbases / pitch) * (opts.supercoiling + 1) + opts.writhe) 
 	
-	TW = LK - WR  # TW = LK - WR
-	rot_base = TW * 2.0 * np.pi / numrows  # angolo in radianti per base 
+	TW = LK - WR 
+
+        #twisting angle between two consecutive bases
+	rot_base = TW * 2.0 * np.pi / nbases  
 	
 	####################################
-	# ##Inizializziamo lo strand di dna
+	# Initialize DNA strand 
 	####################################
 	
-	# posizione iniziale v_perp_ssdna1 (direzione tra asse e ssdna1), sfruttando il fatto che p(0) e perp sia a dist(-1) che dist(0). Dopo anche se ruoto non cambia nulla. Essendo normalizzati anche v_perp_ssdna1 lo e, ma lo normalizziamo per sicurezza
-	v_perp_ssdna1[0, :] = np.cross(dist_norm[0, :], p[0, :]) 
-	v_perp_ssdna1[0, :] /= np.sqrt(np.dot(v_perp_ssdna1[0, :], v_perp_ssdna1[0, :])) 
+	#First hydrogen-hydrogen bond vector
+        v_perp_ssdna1[0, :] = np.cross(dist_norm[0, :], p[0, :]) 
+	v_perp_ssdna1[0, :] /= la.norm(v_perp_ssdna1[0, :])
 	
-	for c in range(numrows): 
-		# pos ssdna1
+	for c in range(nbases): 
+		#dna center of mass positions
 		ssdna1[c, :] = coordxyz[c, :] - CM_CENTER_DS * v_perp_ssdna1[c, :] 
 		ssdna2[c, :] = coordxyz[c, :] + CM_CENTER_DS * v_perp_ssdna1[c, :] 
 	
-		# Aggiorniamo v_perp_ssdna1 in modo che l angolo di twist sia rot_base (vedi Langowski per il calcolo dell angolo)
+		#Update v_perp_ssdna1
 		
-		# riscrivo gli indici per non confondermi
-		ind_1 = int(c - mt.floor(c / float(numrows)) * numrows)  # indice del basepair attuale
-		ind = int(c + 1 - mt.floor((c + 1) / float(numrows)) * numrows)  # indice del nuovo basepair
+		ind_1 = c 
+		ind = (c + 1) % nbases 
 		
-		alpha = py_ang(v_perp_ssdna1[ind_1, :] , p[ind, :] , dist[ind_1, :])
+		alpha = top.py_ang(v_perp_ssdna1[ind_1, :] , p[ind, :] , dist[ind_1, :])
 		gamma = rot_base - alpha
-		# gamma = gamma -  int(round(  (gamma)  /(2* np.pi)))  * 2*np.pi # non so se e necessario
-	
-		# usiamo gamma per ruotare p_i sull asse s_(i+1) in modo da avere l angolo corretto con v_perp_ssdna1 vecchio
 		
 		R = utils.get_rotation_matrix(dist[ind, :], gamma)
-		v_perp_ssdna1[ind, :] = np.dot(R , p[ind, :])  # normalizzato
+		v_perp_ssdna1[ind, :] = np.dot(R , p[ind, :])  
 		v_perp_ssdna2[ind, :] = -v_perp_ssdna1[ind, :]
 		
 	# check LK imposed and measured
 	TW_measured = top.get_twist(coordxyz, ssdna1)
 	
-	box = np.array([2 * boxmax, 2 * boxmax, 2 * boxmax])
+	box = np.array([boxmax, boxmax, boxmax])
 	system = base.System(box)
 	
 	if opts.sequence_file == None:
-		ssdna1_base = np.zeros(numrows, int)
-		# assegniamo basi in modo casuale
-		for c in range(numrows):
+		ssdna1_base = np.zeros(nbases, int)
+		for c in range(nbases):
 			ssdna1_base[c] = np.random.randint(0, 4)
 	else:
 		try:
@@ -196,8 +184,8 @@ if __name__ == '__main__':
 		contents = seq_file.read()
 		# remove all whitespace from the file's contents
 		sequence = ''.join(contents.split())
-		if len(sequence) != numrows:
-			print >> sys.stderr, "The length of the given sequence (%d) should be equal to the number of coordinates in the centerline file (%d)" % (len(sequence), numrows)
+		if len(sequence) != nbases:
+			print >> sys.stderr, "The length of the given sequence (%d) should be equal to the number of coordinates in the centerline file (%d)" % (len(sequence), nbases)
 			exit(1)
 			
 		ssdna1_base = map(lambda x: base.base_to_number[x], sequence)		
@@ -205,7 +193,7 @@ if __name__ == '__main__':
 		seq_file.close()
 
 	strand1 = base.Strand()	
-	for c in range(numrows):
+	for c in range(nbases):
 		b = ssdna1_base[c]
 		strand1.add_nucleotide(base.Nucleotide(ssdna1[c], v_perp_ssdna1[c], dist_norm[c], b, b))
 	if opts.closed:
@@ -214,8 +202,8 @@ if __name__ == '__main__':
 
 	if opts.double:
 		strand2 = base.Strand()
-		for c in range(numrows):
-			reverse_idx = numrows - 1 - c
+		for c in range(nbases):
+			reverse_idx = nbases - 1 - c
 			b = 3 - ssdna1_base[reverse_idx]
 			strand2.add_nucleotide(base.Nucleotide(ssdna2[reverse_idx], v_perp_ssdna2[reverse_idx], -dist_norm[reverse_idx], b, b))
 		if opts.closed and not opts.nicked:

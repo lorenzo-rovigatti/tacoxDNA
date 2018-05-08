@@ -2,7 +2,7 @@ import numpy as np
 import math as mt
 import numpy.linalg as la
 
-# angolo definito dando una normale fissata del piano
+#angle between vectors (-pi,pi) with a reference plane
 def py_ang(v1, v2, vplane):
 	v1n = v1 / la.norm(v1)
 	v2n = v2 / la.norm(v2)
