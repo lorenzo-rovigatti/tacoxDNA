@@ -2,16 +2,14 @@ import numpy as np
 import math as mt
 import numpy.linalg as la
 
-#angle between vectors (-pi,pi) with a reference plane
+#angle between vectors (-pi,pi) with a reference direction vplane 
 def py_ang(v1, v2, vplane):
 	v1n = v1 / la.norm(v1)
 	v2n = v2 / la.norm(v2)
 
-	# arctan con questi argomenti da angolo tra 0 e pi, e la normale definisce la direzione. Se vuoi fissare la direzione, il segno lo decide quale delle due normali scegli
 	return np.arctan2 (la.norm(np.cross(v1n, v2n)) , np.dot (v1n, v2n)) * np.sign(np.dot(np.cross(v1n, v2n), vplane))
 
 
-# in questo caso diamo l asse e uno strand del dna, e abbiamo tutti i dati, seguiamo metodo 3 del paper di langowski
 def get_twist(axis, ssdna1):
 	numrows = len(axis)
 	distn = np.copy(axis)
@@ -21,7 +19,7 @@ def get_twist(axis, ssdna1):
 
 	TW = 0
 
-	# calcoliamo vettori distanza tra elementi successivi asse
+        #axis vectors
 	for c in range(0, numrows):
 		ind = c
 		ind1 = (c + 1) % numrows
@@ -30,7 +28,7 @@ def get_twist(axis, ssdna1):
 		distn[ind, :] = dist[ind, :] / np.sqrt(np.dot(dist[ind, :], dist[ind, :]))
 		# print ind,ind1, dist[ind,:],axis[ind,:],axis[ind1,:]
 
-	# calcoliamo vettori perpendicolare a due segmenti successivi
+	# vector perpendicular to two consecutive axis vectors
 	for c in range(0, numrows):
 		ind_1 = (c - 1 + numrows) % numrows
 		ind = c
@@ -39,7 +37,7 @@ def get_twist(axis, ssdna1):
 		p[ind, :] /= np.sqrt(np.dot(p[ind, :] , p[ind, :]))
 		# print p[ind,0], p[ind,1], p[ind,2]
 
-	# calcoliamo vettori asse-nucleotide e ortogonalizziamo
+	# axis to base vectors (perpendicular to axis)
 	weight = 0.5  # 1 #0.5
 	for c in range(0, numrows):
 		a[c, :] = weight * ssdna1[c, :] + (1 - weight) * ssdna1[(c - 1 + numrows) % numrows, :] - axis[c, :]
@@ -48,7 +46,7 @@ def get_twist(axis, ssdna1):
 		proj = np.dot(a[c, :], distn[c, :])
 		a[c, :] = a[c, :] - proj * distn[c, :]
 
-	# calcoliamo gli angoli di twist separatamente
+	# twist angles
 	for c in range(0, numrows):
 		ind_1 = (c - 1 + numrows) % numrows
 		ind = c
@@ -57,8 +55,6 @@ def get_twist(axis, ssdna1):
 
 		alpha = py_ang(a[ind_1, :] , p[ind, :] , dist[ind_1, :])
 		gamma = py_ang(p[ind, :]  , a[ind, :]  , dist[ind, :])
-
-		# vogliamo che resti tra -pi e pi
 
 		angle = (alpha + gamma + 4 * np.pi) % (2 * np.pi)
 		# Now we have the angle in 0 - 2pi . if it exceeds pi, let's take angle-2*pi instead
@@ -72,7 +68,7 @@ def get_twist(axis, ssdna1):
 	return TW
 
 
-# si da in input un ndarray con le coordinate della curva, che puo essere asse del dna o uno dei due strand
+#curve xyz coordinate as input
 def get_writhe(coordxyz):
 	numrows = len(coordxyz)
 	dist = np.copy(coordxyz)
@@ -80,7 +76,6 @@ def get_writhe(coordxyz):
 
 	WR = 0
 
-	# costruiamo la matrice delle distanze
 	for c in range(0, numrows): 
 		ind = int(c - mt.floor(c / float(numrows)) * numrows)
 		ind1 = int(c + 1 - mt.floor((c + 1) / float(numrows)) * numrows)
@@ -89,13 +84,8 @@ def get_writhe(coordxyz):
 		# distn[ind,:]=dist[ind,:]/np.sqrt(np.dot(dist[ind,:],dist[ind,:]))	
 		# print ind,ind1, coordxyz[ind,:],coordxyz[ind1,:],dist[ind,:]
 
-		# 1 metodo paperKlenin Langowski 2000, uso la stessa notazione
 	for i in range(1, numrows):
-		# if(i%100==0):
-		# 	print i
 		for j in range(0, i):
-			# i indica il segmento i,i+1 # il segmento j,j+1
-			# calcoliamo i 4 segmenti necessari
 			ind_i = int(i - mt.floor(i / float(numrows)) * numrows)
 			ind_i1 = int(i + 1 - mt.floor((i + 1) / float(numrows)) * numrows)
 			ind_j = int(j - mt.floor(j / float(numrows)) * numrows)
