@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# TODO: translate the comments
 # TODO: how do we choose the simulation box?
 
 import numpy as np
-import math as mt
 import numpy.linalg as la
 import sys
 import os
@@ -32,10 +30,10 @@ class Options(object):
 		
 		
 def print_usage():
-        print >> sys.stderr, "USAGE:"
-        print >> sys.stderr, "\t%s centerline_file" % sys.argv[0]
-        print >> sys.stderr, "\t[-c\--closed] [-o\--open] [-h\--help] [-d\--dsDNA] [-s\--ssDNA] [-n\--nicked] [-p\--supercoiling] [-w\--writhe] [-e\--seed] [-q\--sequence]"
-        exit(1)
+	print >> sys.stderr, "USAGE:"
+	print >> sys.stderr, "\t%s centerline_file" % sys.argv[0]
+	print >> sys.stderr, "\t[-c\--closed] [-o\--open] [-h\--help] [-d\--dsDNA] [-s\--ssDNA] [-n\--nicked] [-p\--supercoiling] [-w\--writhe] [-e\--seed] [-q\--sequence]"
+	exit(1)
 		
 		
 def parse_options(argv):
@@ -60,7 +58,7 @@ def parse_options(argv):
 			if k[0] == '-q' or k[0] == "--sequence=": opts.sequence_file = k[1]
 			
 		opts.centerline_file = files[0]
-	except Exception as e:
+	except Exception:
 		print_usage()
 		
 	return opts
@@ -88,7 +86,7 @@ if __name__ == '__main__':
 	scaling = BASE_BASE / la.norm(coordxyz[1, :] - coordxyz[0, :]) 
 	coordxyz *= scaling
 
-        #initialize vectors
+	#initialize vectors
 	dist = np.copy(coordxyz)
 	dist_norm = np.copy(coordxyz)
 	p = np.copy(coordxyz)
@@ -127,16 +125,16 @@ if __name__ == '__main__':
 	WR = 0.
 	if opts.closed:
 		WR = top.get_writhe(coordxyz)
-        
-        #oxdna equiibrium pitch
+
+	#oxdna equiibrium pitch
 	pitch = 10.5
 
-        #global linking number
+	#global linking number
 	LK = round((nbases / pitch) * (opts.supercoiling + 1) + opts.writhe) 
 	
 	TW = LK - WR 
 
-        #twisting angle between two consecutive bases
+	#twisting angle between two consecutive bases
 	rot_base = TW * 2.0 * np.pi / nbases  
 	
 	####################################
@@ -144,7 +142,7 @@ if __name__ == '__main__':
 	####################################
 	
 	#First hydrogen-hydrogen bond vector
-        v_perp_ssdna1[0, :] = np.cross(dist_norm[0, :], p[0, :]) 
+	v_perp_ssdna1[0, :] = np.cross(dist_norm[0, :], p[0, :]) 
 	v_perp_ssdna1[0, :] /= la.norm(v_perp_ssdna1[0, :])
 	
 	for c in range(nbases): 

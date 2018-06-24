@@ -10,7 +10,7 @@ then
 fi
 
 rm $OUTPUT 2> /dev/null
-python ../../src/oxDNA-to-lammps.py ds.top ds.dat
+python ../../src/oxDNA_LAMMPS.py ds.top ds.dat
 diff_lines=$(diff $CORRECT_OUTPUT $OUTPUT)
 
 if [ $? -ne 0 ]

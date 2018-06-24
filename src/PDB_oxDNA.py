@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-# TODO: need to improve parsing to support the TER statement
-
 import sys
 import os
 import itertools
