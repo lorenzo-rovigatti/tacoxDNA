@@ -4,7 +4,7 @@ tacoxDNA (Tools and Converters for oxDNA) is a collection of tools developed to 
 
 ## Generator for twisted and knotted configurations
 
-The `centerline-to-oxDNA.py` script generates an oxDNA topology/configuration pair from a file containing a list of coordinates that defines a centerline.
+The `XYZ_oxDNA.py` script generates an oxDNA topology/configuration pair from a file containing a list of coordinates that defines a centerline.
 
 ### Mandatory arguments
 * A centerline file containing a list of coordinates in the format x y z
@@ -37,7 +37,7 @@ text file containing sequence, ex ATCTGA. Default is a random sequence. The leng
 
 ## oxDNA-to-LAMMPS converter
 
-The `oxDNA-to-LAMMPS.py` script takes two mandatory arguments and outputs a single file.
+The `oxDNA_LAMMPS.py` script takes two mandatory arguments and outputs a single file.
 
 ### Arguments
 * An oxDNA topology file
@@ -48,7 +48,7 @@ The `oxDNA-to-LAMMPS.py` script takes two mandatory arguments and outputs a sing
 
 ## LAMMPS-to-oxDNA converter
 
-The `LAMMPS-to-oxDNA.py` script takes one mandatory argument and outputs two files.
+The `LAMMPS_oxDNA.py` script takes one mandatory argument and outputs two files.
 
 ### Arguments
 * A LAMMPS input start file, containing the nucleotide positions, quaternions, velocities, angular velocities and bond list 

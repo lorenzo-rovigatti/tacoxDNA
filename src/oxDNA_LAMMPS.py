@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-import sys, os
+import sys
 from libs.readers import LorenzoReader
 
 number_oxdna_to_lammps = {0 : 0, 1 : 2, 2 : 1, 3 : 3}
@@ -19,25 +19,25 @@ def exyz_to_quat (mya1, mya3):
     # compute other components from it
 
     if q0sq >= 0.25:
-	myquat[0] = np.sqrt(q0sq)
-	myquat[1] = (mya2[2] - mya3[1]) / (4.0 * myquat[0])
-	myquat[2] = (mya3[0] - mya1[2]) / (4.0 * myquat[0])
-	myquat[3] = (mya1[1] - mya2[0]) / (4.0 * myquat[0])
+        myquat[0] = np.sqrt(q0sq)
+        myquat[1] = (mya2[2] - mya3[1]) / (4.0 * myquat[0])
+        myquat[2] = (mya3[0] - mya1[2]) / (4.0 * myquat[0])
+        myquat[3] = (mya1[1] - mya2[0]) / (4.0 * myquat[0])
     elif q1sq >= 0.25:
-	myquat[1] = np.sqrt(q1sq)
-	myquat[0] = (mya2[2] - mya3[1]) / (4.0 * myquat[1])
-	myquat[2] = (mya2[0] + mya1[1]) / (4.0 * myquat[1])
-	myquat[3] = (mya1[2] + mya3[0]) / (4.0 * myquat[1])
+        myquat[1] = np.sqrt(q1sq)
+        myquat[0] = (mya2[2] - mya3[1]) / (4.0 * myquat[1])
+        myquat[2] = (mya2[0] + mya1[1]) / (4.0 * myquat[1])
+        myquat[3] = (mya1[2] + mya3[0]) / (4.0 * myquat[1])
     elif q2sq >= 0.25:
-	myquat[2] = np.sqrt(q2sq)
-	myquat[0] = (mya3[0] - mya1[2]) / (4.0 * myquat[2])
-	myquat[1] = (mya2[0] + mya1[1]) / (4.0 * myquat[2])
-	myquat[3] = (mya3[1] + mya2[2]) / (4.0 * myquat[2])
+        myquat[2] = np.sqrt(q2sq)
+        myquat[0] = (mya3[0] - mya1[2]) / (4.0 * myquat[2])
+        myquat[1] = (mya2[0] + mya1[1]) / (4.0 * myquat[2])
+        myquat[3] = (mya3[1] + mya2[2]) / (4.0 * myquat[2])
     elif q3sq >= 0.25:
-	myquat[3] = np.sqrt(q3sq)
-	myquat[0] = (mya1[1] - mya2[0]) / (4.0 * myquat[3])
-	myquat[1] = (mya3[0] + mya1[2]) / (4.0 * myquat[3])
-	myquat[2] = (mya3[1] + mya2[2]) / (4.0 * myquat[3])
+        myquat[3] = np.sqrt(q3sq)
+        myquat[0] = (mya1[1] - mya2[0]) / (4.0 * myquat[3])
+        myquat[1] = (mya3[0] + mya1[2]) / (4.0 * myquat[3])
+        myquat[2] = (mya3[1] + mya2[2]) / (4.0 * myquat[3])
 
     norm = 1.0 / np.sqrt(myquat[0] * myquat[0] + myquat[1] * myquat[1] + \
 			  myquat[2] * myquat[2] + myquat[3] * myquat[3])
