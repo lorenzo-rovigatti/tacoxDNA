@@ -1,6 +1,7 @@
 import numpy as np
 import itertools
 from math import sqrt
+import sys
 
 BASE_SHIFT = 1.13
 COM_SHIFT = 0.5
@@ -14,14 +15,24 @@ NAME_TO_BASE = {
         "THY" : "T",
     }
 
+BASES = ["A", "T", "G", "C", "U"]
+
 class Nucleotide(object):
     serial_residue = 1
+    RNA_warning_printed = False
     
     def __init__(self, name, idx):
         object.__init__(self)
-        self.name = name
+        self.name = name.strip()
         if self.name in NAME_TO_BASE.keys():
             self.base = NAME_TO_BASE[self.name]
+        elif self.name in BASES:
+            if self.name == "U" and not Nucleotide.RNA_warning_printed:
+                print >> sys.stderr, "WARNING: uracil detected: since RNA is not supported, U will be treated as a T"
+                self.name = "T"
+                Nucleotide.RNA_warning_printed = True
+                
+            self.base = self.name
         else:
             self.base = name[1:]
         self.idx = idx
