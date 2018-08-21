@@ -11,25 +11,25 @@ The `XYZ_oxDNA.py` script generates an oxDNA topology/configuration pair from a 
 
 ### Optional arguments
 * `-c\--closed`
-the last bead (base) is connected to the first bead (base). Default is True
+the last bead is connected to the first bead (default)
 * `-o\--open`
-the last bead (base) is not connected to the first bead (base). Default is False
+the last bead is not connected to the first bead
 * `-h\--help`
 print usage
 * `-d\--dsDNA`
-the chain is clad with a double strand DNA. Default is True
+the chain is clad with a double-stranded DNA (default)
 * `-s\--ssDNA`
-the chain is clad with a single strand DNA. Default is False
+the chain is clad with a single-stranded DNA
 * `-n\--nicked`
-optional argument when -d option is used. One of the two strands of double strand DNA is nicked (not circularized). Default is False
+optional argument when -d option is used. One of the two strands of double strand DNA is nicked (not circularized) (not set by default)
 * `-p\--supercoiling=SUPERCOILING_DENSITY`
-supercoiling density percentage. Default is 0, with an equilibrium pitch of 10.5 imposed
+supercoiling density percentage (defaults to 0, with an equilibrium pitch of 10.5 imposed)
 * `-w\--writhe=WRITHE_AMOUNT`
-additional writhe to superimpose (useful for knots which have an average writhe different from 0). Default value is 0.
+additional writhe to superimpose (useful for knots which have an average writhe different from 0, it defaults to 0)
 * `-e\--seed=RNG_SEED`
-random seed.
+random seed (defaults to a random value)
 * `-q\--sequence=SEQUENCE`
-text file containing sequence, ex ATCTGA. Default is a random sequence. The length of the sequence should correspond to the number of points in the coordinate file
+text file containing a valid DNA sequence (*e.g.* ATCTGA). The length of the sequence should correspond to the number of points in the coordinate file. If not specified, the sequence will be chosen randomly
 
 ### Output
 * An oxDNA topology file (named by suffixing the centerline file with ".top")
@@ -51,7 +51,7 @@ The `oxDNA_LAMMPS.py` script takes two mandatory arguments and outputs a single 
 The `LAMMPS_oxDNA.py` script takes one mandatory argument and outputs two files.
 
 ### Arguments
-* A LAMMPS input start file, containing the nucleotide positions, quaternions, velocities, angular velocities and bond list 
+* A LAMMPS input start file, containing the nucleotide positions, quaternions, velocities, angular velocities and the bond list 
 
 ### Output
 * An oxDNA topology file (named by suffixing the LAMMPS output file with ".top")

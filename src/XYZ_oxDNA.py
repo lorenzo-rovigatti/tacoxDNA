@@ -52,10 +52,10 @@ def parse_options(argv):
 			if k[0] == '-d' or k[0] == '--dsDNA': opts.double = True
 			if k[0] == '-s' or k[0] == "--ssDNA": opts.double = False
 			if k[0] == '-n' or k[0] == "--nicked": opts.nicked = True
-			if k[0] == '-p' or k[0] == "--supercoiling=": opts.supercoiling = float(k[1])
-			if k[0] == '-w' or k[0] == "--writhe=": opts.writhe = float(k[1])
-			if k[0] == '-e' or k[0] == "--seed=": opts.seed = int(k[1])
-			if k[0] == '-q' or k[0] == "--sequence=": opts.sequence_file = k[1]
+			if k[0] == '-p' or k[0] == "--supercoiling": opts.supercoiling = float(k[1])
+			if k[0] == '-w' or k[0] == "--writhe": opts.writhe = float(k[1])
+			if k[0] == '-e' or k[0] == "--seed": opts.seed = int(k[1])
+			if k[0] == '-q' or k[0] == "--sequence": opts.sequence_file = k[1]
 			
 		opts.centerline_file = files[0]
 	except Exception:
