@@ -36,7 +36,7 @@ def print_usage():
 	exit(1)
 		
 		
-def parse_options(argv):
+def parse_options():
 	shortArgs = 'cohdsnp:w:e:q:'
 	longArgs = ['closed', 'open', 'help', 'dsDNA', 'ssDNA', 'nicked', 'supercoiling=', 'writhe=', 'seed=', 'sequence=']
 	
@@ -70,7 +70,7 @@ BASE_BASE = 0.3897628551303122
 CM_CENTER_DS = 0.6
 
 if __name__ == '__main__':
-	opts = parse_options(sys.argv)
+	opts = parse_options()
 	opts.check()
 	
 	if opts.seed != None:

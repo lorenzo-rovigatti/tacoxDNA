@@ -3,15 +3,9 @@
 import sys
 from json import load
 import numpy as np
-from numpy.linalg import norm 
-
-# for some reason, files originally made in T1 have a different .json form than T2
-# it would be possible to rewrite all the parameters to fix it, but tossing a factor
-# of 1.1 for DNA and 1.6 for RNA on base_vector seems to be good enough
-tiamat_version_fudge = 1  
 
 
-class Base:
+class Base(object):
     scale = 1 / 0.85
     
     def __init__(self, local_id, base_info):
@@ -54,7 +48,7 @@ class Base:
         return self.across
     
     
-class Strand:
+class Strand(object):
 
     def __init__(self, strand_id, base_info_lst, local_id_strart=0):
         self.strand_id = strand_id
@@ -71,7 +65,7 @@ class Strand:
         
 
 def normalize(v):
-    return v / norm(v)
+    return v / np.sqrt(np.dot(v, v))
 
 
 def get_5primes(bases):
@@ -151,40 +145,30 @@ def define_connections(strands):
 
 # used to calculate the center of mass 
 def neighbor3_cal_vector(AB, AA3, AB5):
-    centrmas = -0.13079674 * AB - 0.22543211 * AA3 + 0.62949112 * AB5
-    centrmas = normalize(centrmas)
-    a3 = 2.69498211 * AB - 1.04531113 * AA3 - 2.30531223 * AB5
-    a3 = normalize(a3)
+    centrmas = normalize(-0.13079674 * AB - 0.22543211 * AA3 + 0.62949112 * AB5)
+    a3 = normalize(2.69498211 * AB - 1.04531113 * AA3 - 2.30531223 * AB5)
     a1 = AB
     return [a1, a3, centrmas]
 
 
 # used to calculate the center of mass 
 def neighbor5_cal_vector(AB, AA5, AB3):
-    centrmas = 0.81079674 * AB + 0.22543211 * AA5 - 0.50262804 * AB3
-    # centrmas = 0.85540635*AB + 0.30569283*AA5 -0.44567833*AB3
-    centrmas = centrmas / norm(centrmas)
-    a3 = -2.12846367 * AB + 0.82557385 * AA5 + 2.33064701 * AB3
-    # a3 = -1.60523423*AB  + 0.58820649*AA5 + 2.00150202*AB3
-    a3 = a3 / norm(a3)
+    centrmas = normalize(0.81079674 * AB + 0.22543211 * AA5 - 0.50262804 * AB3)
+    a3 = normalize(-2.12846367 * AB + 0.82557385 * AA5 + 2.33064701 * AB3)
     a1 = AB
     return [a1, a3, centrmas]
 
 
 def neighbor3_cal_vector_RNA(AB, AA3, AB5):
-    centrmas = -0.28102082 * AB - 0.25891019 * AA3 + 0.84990909 * AB5
-    centrmas = normalize(centrmas)
-    a3 = 2.34763359 * AB - 1.1627428 * AA3 - 1.63537381 * AB5
-    a3 = normalize(a3)
+    centrmas = normalize(-0.28102082 * AB - 0.25891019 * AA3 + 0.84990909 * AB5)
+    a3 = normalize(2.34763359 * AB - 1.1627428 * AA3 - 1.63537381 * AB5)
     a1 = AB
     return [a1, a3, centrmas]
 
 
 def neighbor5_cal_vector_RNA(AB, AA5, AB3):
-    centrmas = 0.85540635 * AB + 0.30569283 * AA5 - 0.44567833 * AB3
-    centrmas = centrmas / norm(centrmas)
-    a3 = -1.60523423 * AB + 0.58820649 * AA5 + 2.00150202 * AB3
-    a3 = a3 / norm(a3)
+    centrmas = normalize(0.85540635 * AB + 0.30569283 * AA5 - 0.44567833 * AB3)
+    a3 = normalize(-1.60523423 * AB + 0.58820649 * AA5 + 2.00150202 * AB3)
     a1 = AB
     return [a1, a3, centrmas]
 
@@ -208,8 +192,7 @@ class NoBase(Base):
 def write_topology_file(strands, top_file_name):
     # setup the topology header 
     top_lines = [
-        '%d %d' % (len(bases), len(strands))  # set number of bases
-                                                # number of strands in the system 
+        '%d %d' % (len(bases), len(strands))  # number of bases, number of strands
     ]
 
     # go through all the strands to generate topology 
@@ -238,7 +221,7 @@ def write_force_file(strands, force_file_name):
         f_out.write("\n".join(lines))
 
 
-def write_configuration_file(strands, conf_file_name):
+def write_configuration_file(strands, conf_file_name, opts):
     # Decide on a box size based on strand length and number of strands - there's not a good way to do this blind
     # Need to know strand lengths, organization, shape
     # strand_lengths = map(len, strands)
@@ -272,8 +255,6 @@ def write_configuration_file(strands, conf_file_name):
             paring_base5 = down_base.get_across()
             paring_base5_vector = paring_base5.get_pos()
             
-            # print(base_vector, up_base_vector, down_base_vector)
-            
             # three backbong vectors, A-base_vector, B-paring_base_vector,
             # A5up_base_vector, A3down_base_vector
             backbone_A_to_backbone_B = normalize(-base_vector + paring_base_vector)
@@ -282,20 +263,20 @@ def write_configuration_file(strands, conf_file_name):
             backboneA_to_backbone_B3 = normalize(-base_vector + paring_base3_vector)
             backboneA_to_backbone_B5 = normalize(-base_vector + paring_base5_vector)
             
-            # do we have a dooplex across the  3' end 
+            # do we have a dooplex across the 3' end
             if not(type(paring_base5) is NoBase):
-                if isDNA:
+                if opts['isDNA']:
                     a1_vector, a3_vector, cm_pos = neighbor3_cal_vector(backbone_A_to_backbone_B, backbone_A_to_posA3_neibor, backboneA_to_backbone_B5)
                 else:
                     a1_vector, a3_vector, cm_pos = neighbor3_cal_vector_RNA(backbone_A_to_backbone_B, backbone_A_to_posA3_neibor, backboneA_to_backbone_B5)
-                cm_pos = cm_pos + (base_vector * tiamat_version_fudge)   
+                cm_pos = cm_pos + (base_vector * opts['tiamat_version_fudge'])   
             # do we have a dooplex across the 5' end
-            elif not(type(paring_base3) is  NoBase):
-                if isDNA:
+            elif not(type(paring_base3) is NoBase):
+                if opts['isDNA']:
                     a1_vector, a3_vector, cm_pos = neighbor5_cal_vector(backbone_A_to_backbone_B, backbone_A_to_posA5_neibor, backboneA_to_backbone_B3)
                 else:
                     a1_vector, a3_vector, cm_pos = neighbor5_cal_vector_RNA(backbone_A_to_backbone_B, backbone_A_to_posA5_neibor, backboneA_to_backbone_B3)
-                cm_pos = cm_pos + (base_vector * tiamat_version_fudge)
+                cm_pos = cm_pos + (base_vector * opts['tiamat_version_fudge'])
             else:
                 # single stranded case, not really treated (could randomize orientations?) 
                 cm_pos = base_vector
@@ -316,53 +297,92 @@ def write_configuration_file(strands, conf_file_name):
         f_out.write('\n'.join(configuration_lines) + "\n")
     
 
-# by default we do DNA
-isDNA = True
+def print_usage():
+        print >> sys.stderr, "USAGE:"
+        print >> sys.stderr, "\t%s Tiamat_json_file" % sys.argv[0]
+        print >> sys.stderr, "\t[-m\--molecule=DNA|RNA]"
+        print >> sys.stderr, "\t[-t\--tiamat-version=2]\n\n"
+        print >> sys.stderr, "\tThe defaults options are --molecule=DNA and --tiamat-version=1\n"
+        exit(1)
+
+
+def parse_options():
+    shortArgs = 'm:t:'
+    longArgs = ['molecule=', 'tiamat-version=']
+    
+    # for some reason, files originally made in T1 have a different .json form than T2
+    # it would be possible to rewrite all the parameters to fix it, but tossing a factor
+    # of 1.2 for DNA and 1.6 for RNA on base_vector seems to be good enough
+    opts = {
+        "isDNA" : True,
+        "tiamat_version_fudge" : 1
+    }
+    
+    tiamat_version = 1
+    try:
+        import getopt
+        args, positional_args = getopt.gnu_getopt(sys.argv[1:], shortArgs, longArgs)
+        for k in args:
+            if k[0] == '-m' or k[0] == '--molecule':
+                k_arg = k[1].upper()
+                if k_arg == "DNA":
+                    print >> sys.stderr, "## Assuming DNA"
+                    opts["isDNA"] = True
+                elif k_arg == "RNA":
+                    print >> sys.stderr, "## Assuming RNA"
+                    opts["isDNA"] = False
+                else:
+                    print >> sys.stderr, "The argument of '%s' should be either 'DNA' or 'RNA' (got '%s' instead)" % (k[0], k[1])
+                    exit(1)
+            elif k[0] == '-t' or k[0] == '--tiamat-version':
+                tiamat_version = int(k[1])
+            
+        if tiamat_version == 1:
+            if opts['isDNA']:
+                opts['tiamat_version_fudge'] = 1.2
+            else: 
+                opts['tiamat_version_fudge'] = 1.6
+        elif tiamat_version == 2:
+            opts['tiamat_version_fudge'] = 1
+        else:
+            print >> sys.stderr, "The argument of '%s' should be either '1' or '2' (got '%s' instead)" % (k[0], k[1])
+            exit(1)
+            
+        print >> sys.stderr, "## Assuming Tiamat version %d" % tiamat_version
+            
+        opts['tiamat_file'] = positional_args[0]
+        
+    except Exception:
+        print_usage()
+        
+    return opts
+
 
 if __name__ == '__main__':
-    if len(sys.argv) == 4:
-        if sys.argv[1] == 'RNA':
-            isDNA = False
-        elif sys.argv[1] == 'DNA':
-            isDNA = True
-        else:
-            raise Exception("Use either DNA or RNA.")
+    opts = parse_options()
 
-        tiamat_version = sys.argv[2]
-        if tiamat_version == "1":
-            if isDNA:
-                tiamat_version_fudge = 1.2
-            else: tiamat_version_fudge = 1.6
-        elif tiamat_version == "2":
-            tiamat_version_fudge = 1
-        else: 
-            raise Exception("Please enter either 1 or 2 as your Tiamat version, if you're not sure, it's probably 1")
+    top_file_name = opts['tiamat_file'] + ".top"
+    conf_file_name = opts['tiamat_file'] + ".oxdna"
+    force_file_name = opts['tiamat_file'] + ".forces.txt"
+    
+    # read and parse json
+    with open(opts['tiamat_file'], 'r') as f_out:
+        data = load(f_out)
+    # our main interest are the bases
+    bases = data['bases']
+    
+    # get a list of the strands in the system
+    strands = split_bases_to_strands(bases)
+    # setup connections with new local indices within the strands  
+    define_connections(strands)
+    
+    # # build topology file first 
+    write_topology_file(strands, top_file_name)
 
-        FileName = sys.argv[3]
-
-        top_file_name = FileName + ".top"
-        conf_file_name = FileName + ".oxdna"
-        force_file_name = FileName + ".forces.txt"
-        
-        # read and parse json
-        with open(FileName, 'r') as f_out:
-            data = load(f_out)
-        # our main interest are the bases
-        bases = data['bases']
-        
-        # get a list of the strands in the system
-        strands = split_bases_to_strands(bases)
-        # setup connections with new local indices within the strands  
-        define_connections(strands)
-        
-        # # build topology file first 
-        write_topology_file(strands, top_file_name)
-
-        # write forces file
-        write_force_file(strands, force_file_name)
-        
-        # work on the configuration file 
-        write_configuration_file(strands, conf_file_name)
-        print("wrote files", top_file_name, conf_file_name, force_file_name)
-    else:
-        print("usage: \n main.py [DNA|RNA] [1|2](Tiamat version) input_file")
+    # write forces file
+    write_force_file(strands, force_file_name)
+    
+    # work on the configuration file 
+    write_configuration_file(strands, conf_file_name, opts)
+    
+#     print("wrote files", top_file_name, conf_file_name, force_file_name)
