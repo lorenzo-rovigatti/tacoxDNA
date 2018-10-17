@@ -5,6 +5,7 @@ from json import load
 import numpy as np
 
 
+# TODO: use the stuff in base.py
 class Base(object):
     scale = 1 / 0.85
     
@@ -128,8 +129,6 @@ def split_bases_to_strands(bases):
         local_id = strand.bases[-1].local_id + 1
     
     extra_strands = get_circular_strands(bases, included, len(strands) + 1, local_id)
-    # sys.exit(-1)
-    # extra_strands = []
     return strands + extra_strands
 
 
@@ -226,6 +225,7 @@ def write_configuration_file(strands, conf_file_name, opts):
     # Need to know strand lengths, organization, shape
     # strand_lengths = map(len, strands)
     
+    # TODO: choose the size of the box according to the configuration we are converting
     box_size = 250  
     # box_size = max(strand_lengths) * 2
     
@@ -255,7 +255,7 @@ def write_configuration_file(strands, conf_file_name, opts):
             paring_base5 = down_base.get_across()
             paring_base5_vector = paring_base5.get_pos()
             
-            # three backbong vectors, A-base_vector, B-paring_base_vector,
+            # three backbone vectors, A-base_vector, B-paring_base_vector,
             # A5up_base_vector, A3down_base_vector
             backbone_A_to_backbone_B = normalize(-base_vector + paring_base_vector)
             backbone_A_to_posA5_neibor = normalize(-base_vector + up_base_vector)
@@ -307,15 +307,16 @@ def print_usage():
 
 
 def parse_options():
-    shortArgs = 'm:t:'
-    longArgs = ['molecule=', 'tiamat-version=']
+    shortArgs = 'm:t:f'
+    longArgs = ['molecule=', 'tiamat-version=', '--print-force-file']
     
     # for some reason, files originally made in T1 have a different .json form than T2
     # it would be possible to rewrite all the parameters to fix it, but tossing a factor
     # of 1.2 for DNA and 1.6 for RNA on base_vector seems to be good enough
     opts = {
         "isDNA" : True,
-        "tiamat_version_fudge" : 1
+        "tiamat_version_fudge" : 1,
+        "print_force_file" : False
     }
     
     tiamat_version = 1
@@ -336,6 +337,8 @@ def parse_options():
                     exit(1)
             elif k[0] == '-t' or k[0] == '--tiamat-version':
                 tiamat_version = int(k[1])
+            elif k[0] == '-f' or k[0] == '--print-force-file':
+                opts['print_force_file'] = True
             
         if tiamat_version == 1:
             if opts['isDNA']:
@@ -380,7 +383,8 @@ if __name__ == '__main__':
     write_topology_file(strands, top_file_name)
 
     # write forces file
-    write_force_file(strands, force_file_name)
+    if opts['print_force_file']:
+        write_force_file(strands, force_file_name)
     
     # work on the configuration file 
     write_configuration_file(strands, conf_file_name, opts)
