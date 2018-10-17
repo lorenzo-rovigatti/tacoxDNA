@@ -301,14 +301,15 @@ def print_usage():
         print >> sys.stderr, "USAGE:"
         print >> sys.stderr, "\t%s Tiamat_json_file" % sys.argv[0]
         print >> sys.stderr, "\t[-m\--molecule=DNA|RNA]"
-        print >> sys.stderr, "\t[-t\--tiamat-version=2]\n\n"
+        print >> sys.stderr, "\t[-t\--tiamat-version=2]"
+        print >> sys.stderr, "\t[-f\--print-force-file]\n\n"
         print >> sys.stderr, "\tThe defaults options are --molecule=DNA and --tiamat-version=1\n"
         exit(1)
 
 
 def parse_options():
     shortArgs = 'm:t:f'
-    longArgs = ['molecule=', 'tiamat-version=', '--print-force-file']
+    longArgs = ['molecule=', 'tiamat-version=', 'print-force-file']
     
     # for some reason, files originally made in T1 have a different .json form than T2
     # it would be possible to rewrite all the parameters to fix it, but tossing a factor
