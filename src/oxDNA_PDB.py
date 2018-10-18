@@ -131,11 +131,20 @@ if __name__ == '__main__':
     
     for strand in s._strands:
         strand_pdb = []
-        is_3_prime = not strand.is_circular()
-        for nucleotide in strand._nucleotides:
+        nucleotides_in_strand = strand._nucleotides
+        if not options['oxDNA_direction']:
+                nucleotides_in_strand = reversed(nucleotides_in_strand)
+        for n_idx, nucleotide in enumerate(nucleotides_in_strand, 1):
             nb = base.number_to_base[nucleotide._base]
             my_base = copy.deepcopy(bases[nb])
             my_base.chain_id = s._nucleotide_to_strand[nucleotide.index]
+            residue_suffix = ""
+            # 3' end
+            if nucleotide == strand._nucleotides[0] and not strand.is_circular(): 
+                    residue_suffix = "3"
+            # 5' end
+            elif nucleotide == strand._nucleotides[-1]: 
+                    residue_suffix = "5"
 
             my_base.idx = (nucleotide.index % 12) + 1
             align(my_base, nucleotide)
@@ -144,12 +153,9 @@ if __name__ == '__main__':
             if correct_for_large_boxes:
                 my_base.correct_for_large_boxes(box_angstrom)
             
-            is_3_prime = False
-            nucleotide_pdb = my_base.to_pdb("A", options['print_hydrogens'], is_3_prime)
-            if options['oxDNA_direction']:
-                strand_pdb.append(nucleotide_pdb)
-            else:
-                strand_pdb.insert(0, nucleotide_pdb)
+            serial_residue = n_idx % 9999
+            nucleotide_pdb = my_base.to_pdb("A", options['print_hydrogens'], serial_residue, residue_suffix)
+            strand_pdb.append(nucleotide_pdb)
                 
         print >> out, "\n".join(x for x in strand_pdb)
             

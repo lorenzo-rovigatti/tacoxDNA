@@ -18,7 +18,6 @@ NAME_TO_BASE = {
 BASES = ["A", "T", "G", "C", "U"]
 
 class Nucleotide(object):
-    serial_residue = 1
     RNA_warning_printed = False
     
     def __init__(self, name, idx):
@@ -108,18 +107,15 @@ class Nucleotide(object):
     def correct_for_large_boxes(self, box):
         map(lambda x: x.shift(-np.rint(x.pos / box ) * box), self.atoms)
 
-    def to_pdb(self, chain_identifier, print_H, is_3_prime):
+    def to_pdb(self, chain_identifier, print_H, serial_residue, residue_suffix):
         res = []
         for a in self.atoms:
             if not print_H and 'H' in a.name:
                 continue
-            if is_3_prime and 'P' in a.name:
+            if residue_suffix == "5" and 'P' in a.name:
                 continue
-            res.append(a.to_pdb(chain_identifier, Nucleotide.serial_residue))
+            res.append(a.to_pdb(chain_identifier, serial_residue, residue_suffix))
 
-        Nucleotide.serial_residue += 1
-        if Nucleotide.serial_residue > 9999:
-            Nucleotide.serial_residue = 1
         return "\n".join(res)
 
     def to_mgl(self):
@@ -170,8 +166,9 @@ class Atom(object):
     def shift(self, diff):
         self.pos += diff
 
-    def to_pdb(self, chain_identifier, serial_residue):
-        res = "%-6s%5d %-4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f%-4s%-2s%-2s" % ("ATOM", Atom.serial_atom, self.name, " ", self.residue, chain_identifier, serial_residue, " ", self.pos[0], self.pos[1], self.pos[2], 1.00, 0.00, " ", " ", " ")
+    def to_pdb(self, chain_identifier, serial_residue, residue_suffix):
+        residue = self.residue + residue_suffix
+        res = "%-6s%5d %-4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f%-4s%-2s%-2s" % ("ATOM", Atom.serial_atom, self.name, " ", residue, chain_identifier, serial_residue, " ", self.pos[0], self.pos[1], self.pos[2], 1.00, 0.00, " ", " ", " ")
         Atom.serial_atom += 1
         if Atom.serial_atom > 99999:
             Atom.serial_atom = 1
