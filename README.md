@@ -25,9 +25,9 @@ optional argument when -d option is used. One of the two strands of double stran
 * `-p\--supercoiling=SUPERCOILING_DENSITY`
 supercoiling density percentage (defaults to 0, with an equilibrium pitch of 10.5 imposed)
 * `-w\--writhe=WRITHE_AMOUNT`
-additional writhe to superimpose (useful for knots which have an average writhe different from 0, it defaults to 0)
+topological target writhe to superimpose (With 0 superoiling density, corresponds to the average writhe. Useful for knots which have an average writhe different from 0, it defaults to 0)
 * `-e\--seed=RNG_SEED`
-random seed (defaults to a random value)
+random seed for DNA sequence (defaults to a random value)
 * `-q\--sequence=SEQUENCE`
 text file containing a valid DNA sequence (*e.g.* ATCTGA). The length of the sequence should correspond to the number of points in the coordinate file. If not specified, the sequence will be chosen randomly
 
