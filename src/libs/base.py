@@ -8,6 +8,7 @@ base.py includes the classes: System, Strand, Nucleotide
 """
 import sys
 import numpy as np
+import os
 
 
 def partition(s, d):
@@ -33,6 +34,9 @@ except:
 POS_BACK = -0.4
 POS_STACK = 0.34
 POS_BASE = 0.4
+CM_CENTER_DS = POS_BASE + 0.2
+FENE_R0_OXDNA = 0.7525
+FENE_EPS = 2.0
 
 OUT_TOM = 0
 OUT_LORENZO = 1
@@ -57,6 +61,12 @@ INT_EXC_BONDED = 1
 INT_EXC_NONBONDED = 3
 
 H_CUTOFF = -0.1
+
+GROOVE_ENV_VAR = "OXDNA_GROOVE"
+if os.environ.get(GROOVE_ENV_VAR) == '1':
+    MM_GROOVING = True
+else:
+    MM_GROOVING = False
 
 
 # static class

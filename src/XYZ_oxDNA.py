@@ -137,13 +137,13 @@ if __name__ == '__main__':
 	#twisting angle between two consecutive bases
 	rot_base = TW * 2.0 * np.pi / nbases  
 
-        #recap
-        if opts.closed:
-            print >> sys.stderr, "Total Linking Number (LK) %f, composed of:" % ((nbases / pitch) * (opts.supercoiling + 1) + opts.writhe)
-            print  >> sys.stderr, "1) Equilibrium number of DNA turns %f" % (nbases / pitch)
-            print  >> sys.stderr, "2) Target writhe %f = Topological writhe %f + Turns imposed by supercoiling  %f " % (opts.writhe+(nbases / pitch) *opts.supercoiling,opts.writhe,(nbases / pitch) *opts.supercoiling)
-            print >> sys.stderr, "LK has been rounded to %f" % LK
-            print >> sys.stderr, "Intial chain writhe %f" % WR
+	#recap
+	if opts.closed:
+		print >> sys.stderr, "Total Linking Number (LK) %f, composed of:" % ((nbases / pitch) * (opts.supercoiling + 1) + opts.writhe)
+		print  >> sys.stderr, "1) Equilibrium number of DNA turns %f" % (nbases / pitch)
+		print  >> sys.stderr, "2) Target writhe %f = Topological writhe %f + Turns imposed by supercoiling  %f " % (opts.writhe+(nbases / pitch) *opts.supercoiling,opts.writhe,(nbases / pitch) *opts.supercoiling)
+		print >> sys.stderr, "LK has been rounded to %f" % LK
+		print >> sys.stderr, "Intial chain writhe %f" % WR
 
 
 	####################################
