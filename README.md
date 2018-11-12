@@ -33,7 +33,7 @@ text file containing a valid DNA sequence (*e.g.* ATCTGA). The length of the seq
 
 ### Output
 * An oxDNA topology file (named by suffixing the centerline file with ".top")
-* An oxDNA configuration file (named by suffixing the centerline file with ".conf")
+* An oxDNA configuration file (named by suffixing the centerline file with ".oxdna")
 
 ## oxDNA-to-LAMMPS converter
 
@@ -55,7 +55,7 @@ The `LAMMPS_oxDNA.py` script takes one mandatory argument and outputs two files.
 
 ### Output
 * An oxDNA topology file (named by suffixing the LAMMPS output file with ".top")
-* An oxDNA configuration file (named by suffixing the LAMMPS output file with ".conf")
+* An oxDNA configuration file (named by suffixing the LAMMPS output file with ".oxdna")
 
 ## oxDNA-to-PDB converter
 
@@ -82,7 +82,27 @@ The `PDB_oxDNA.py` script takes two mandatory arguments.
 
 ### Output
 * An oxDNA topology file (named by suffixing the PDB file with ".top")
-* An oxDNA configuration file (named by suffixing the PDB file with ".conf")
+* An oxDNA configuration file (named by suffixing the PDB file with ".oxdna")
+
+## cadnano-to-oxDNA converter
+
+The `cadnano_oxDNA.py` script takes two mandatory arguments.
+
+### Mandatory arguments
+* The input cadnano file (in json format)
+* The lattice type the file was designed with. It should be either *sq* (square) or *he* (hexagonal)
+
+### Optional arguments
+* `-e\--seed=RNG_SEED`
+random seed for DNA sequence (defaults to a random value)
+* `-b\--box=VALUE`
+the length of the box side (in oxDNA simulation units) where the system will be placed
+* `-q\--sequence=SEQUENCE`
+text file containing a valid DNA sequence (*e.g.* ATCTGA). If not specified, the sequence will be chosen randomly
+
+### Output
+* An oxDNA topology file (named by suffixing the cadnano file with ".top")
+* An oxDNA configuration file (named by suffixing the cadnano file with ".oxdna")
 
 ## Acknowledgements
 

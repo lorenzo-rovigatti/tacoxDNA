@@ -9,8 +9,6 @@ import pickle
 import re
 import os
 
-np.random.seed(123456)
-
 DEBUG = 0
 DIST_HEXAGONAL = 2.55  # distance between centres of virtual helices (hexagonal array)
 DIST_SQUARE = 2.60  # distance between centres of virtual helices (square array)
@@ -34,13 +32,6 @@ class vh_nodes(object):
         # the first condition tries to mitigate a crash that occurs whenever self.begin and self.end have the same length at the end of the generation procedure
         if len(self.begin) != len(self.end) or end_index not in self.end:
             self.end.append(end_index)
-
-
-def print_usage():
-    print >> sys.stderr, "usage: %s source cadnano_type [box_length]" % sys.argv[0]
-    print >> sys.stderr, "cadnano_type: lattice type, either sq (square lattice) or he (honeycomb lattice)"
-    print >> sys.stderr, "box_length: choose the size of the simulation box (in simulation units)"
-    sys.exit()
 
 
 def vhelix_rotation_origami_sq(direction, perp):
@@ -740,13 +731,23 @@ def parse_helix (string):
 
 
 if __name__ == '__main__':
-
-
-    vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
-    vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
+    
+    def print_usage():
+        print >> sys.stderr, "USAGE:"
+        print >> sys.stderr, "\t%s cadnano_file lattice_type" % sys.argv[0]
+        print >> sys.stderr, "\t[-s\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE]" 
+        exit(1)
+        
     if len(sys.argv) < 3:
         print_usage()
-
+        
+    shortArgs = 's:b:e:'
+    longArgs = ['sequence=', 'box=','seed=']
+    
+    side = False
+    sequence_filename = False
+    source_file = sys.argv[1]
+    
     origami_sq = False
     origami_he = False
     if sys.argv[2] == "sq":
@@ -754,31 +755,36 @@ if __name__ == '__main__':
     elif sys.argv[2] == "he":
         origami_he = True
     else:
+        print >> sys.stderr, "Lattice_type should be either 'sq' or 'he'"
+        exit(1)
+    
+    try:
+        import getopt
+        args, files = getopt.gnu_getopt(sys.argv[3:], shortArgs, longArgs)
+        for k in args:
+            if k[0] == '-q' or k[0] == "--sequence": sequence_filename = k[1]
+            if k[0] == '-b' or k[0] == "--box": 
+                side = float(k[1])
+                base.Logger.log("The system will be put in a box of side %s (in oxDNA simulation units)" % str(side), base.Logger.INFO)
+            if k[0] == '-e' or k[0] == "--seed": np.random.seed(int(k[1]))
+            
+    except Exception:
         print_usage()
 
-    source_file = sys.argv[1]
+    vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
+    vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
 
-    side = False
-    if len(sys.argv) > 3:
-            # read 4th arg as system size in oxDNA simulation units
-            side = float(sys.argv[3])
-            base.Logger.log("using side option; system will be in a box of side %s in simulation units" % str(side), base.Logger.INFO)
-
-    cadsys = parse_cadnano (source_file)
-    base.Logger.log("using json file %s" % source_file, base.Logger.INFO)
+    cadsys = parse_cadnano(source_file)
+    base.Logger.log("Using json file %s" % source_file, base.Logger.INFO)
 
     # define sequences by vhelix
     sequence_file = 0
     single_strand_system = False
-    try:
-        sequence_file = open("caca.sqs", "r")
-    except:
-        base.Logger.log("no sequence file found, using random sequence", base.Logger.INFO)
-
     sequences = []
     block_seq = True
-    if sequence_file:
-        base.Logger.log("using sequence file caca.sqs", base.Logger.INFO)
+    if sequence_filename:
+        sequence_file = open(sequence_filename, "r")
+        base.Logger.log("Using sequence file '%s'" % sequence_filename, base.Logger.INFO)
         # with this we can remove all whitespace and we don't have issues with the different newline sequences (\n vs \r\n)
         pattern = re.compile('\s+')
         lines = sequence_file.readlines()
@@ -791,10 +797,11 @@ if __name__ == '__main__':
                     try:
                         seq.append(base.base_to_number[x])
                     except KeyError:
-                        base.Logger.log("KeyError while converting base to integer; check caca.sqs", base.Logger.CRITICAL)
+                        base.Logger.log("KeyError while converting base names to integer; check the sequence file", base.Logger.CRITICAL)
                         sys.exit()
             sequences.append(seq)
     else:
+        base.Logger.log("No sequence file given, using random sequence", base.Logger.INFO)
         for ii in range(len(cadsys.vhelices)):
             seq = []
             for _ in range(cadsys.vhelices[ii].skiploop_bases):
@@ -803,14 +810,14 @@ if __name__ == '__main__':
 
     # check whether we're dealing with a 1 strand system (i.e. NOT double helix) across many vhelices and defined with 1 .sqs line
     if len(sequences) == 1 and len(cadsys.vhelices) > 1:
-        base.Logger.log("1 .sqs line detected and more than 1 cadnano virtual helix detected; assuming using sequence from file assuming a single strand system", base.Logger.INFO)
+        base.Logger.log("One line detected in the sequence file. Since the cadnano file contains more than 1 virtual helix, the sequence found will be used as we were dealing with a single-strand system", base.Logger.INFO)
         single_strand_system = True
         block_seq = False
 
     vhelix_counter = 0
     if not side:
         side = cadsys.bbox()
-        base.Logger.log("using default box size, a factor %s larger than size of cadnano system" % str(BOX_FACTOR), base.Logger.INFO)
+        base.Logger.log("Using default box size, a factor %s larger than size of cadnano system" % str(BOX_FACTOR), base.Logger.INFO)
     vhelix_direction_initial = np.array([0., 0., 1.])
     vhelix_perp_initial = np.array([1., 0., 0.])
     if origami_sq:
