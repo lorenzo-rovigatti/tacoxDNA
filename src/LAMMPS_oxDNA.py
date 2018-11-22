@@ -4,9 +4,7 @@ import numpy as np
 import sys, os
 from libs import base
 from libs import reader_lammps_init 
-
-number_oxdna_to_lammps = {0 : 0, 1 : 2, 2 : 1, 3 : 3}
-
+from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
 #rules to convert from a1 a3 vectors to quaternions based on
 # http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
@@ -113,10 +111,10 @@ if __name__ == '__main__':
             a1, a3 = quat_to_exyz(quaternions)
             b = number_oxdna_to_lammps[conf.bases[i]-1] 
 
-            v = conf.v[i,:]
-            Lv = conf.Lv[i,:]
+            v = np.array(conf.v[i,:]) * np.sqrt(mass_in_lammps)
+            Lv = np.array(conf.Lv[i,:]) / np.sqrt(inertia_in_lammps)
 
-            strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b,v,Lv))
+            strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b, v, Lv))
 
             #close strand 
             next_bond=conf.bonds[i][1]
@@ -131,5 +129,9 @@ if __name__ == '__main__':
         system.add_strand(strands[i])
 
     basename = os.path.basename(sys.argv[1])
-    system.print_lorenzo_output(basename + ".oxdna", basename + ".top")
+    topology_file = basename + ".top"
+    configuration_file = basename + ".oxdna"
+    system.print_lorenzo_output(configuration_file, topology_file)
 
+    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
+    print >> sys.stderr, "## DONE"

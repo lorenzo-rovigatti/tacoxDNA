@@ -3,8 +3,7 @@
 import numpy as np
 import sys
 from libs.readers import LorenzoReader
-
-number_oxdna_to_lammps = {0 : 0, 1 : 2, 2 : 1, 3 : 3}
+from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
 def exyz_to_quat (mya1, mya3):
     mya2 = np.cross(mya3, mya1)
@@ -110,8 +109,10 @@ if __name__ == '__main__':
     out.write('\n')
 
     for nucleotide in s._nucleotides:
+        v_rescaled = np.array(nucleotide._v) / np.sqrt(mass_in_lammps)
+        L_rescaled = np.array(nucleotide._L) * np.sqrt(inertia_in_lammps)
         out.write("%d %22.15le %22.15le %22.15le %22.15le %22.15le %22.15le\n" \
-              % (nucleotide.index + 1, nucleotide._v[0], nucleotide._v[1], nucleotide._v[2], nucleotide._L[0], nucleotide._L[1], nucleotide._L[2]))
+              % (nucleotide.index + 1, v_rescaled[0], v_rescaled[1], v_rescaled[2], L_rescaled[0], L_rescaled[1], L_rescaled[2]))
 
     out.write('\n')
     out.write('# Atom-ID, shape, quaternion\n')
