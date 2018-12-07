@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 from base import FLT_EPSILON
 
@@ -70,48 +71,11 @@ def get_random_rotation_matrix():
     return R
 
 
-def get_rotation_matrix(axis, anglest):
-    """
-    The argument anglest can be either an angle in radiants
-    (accepted types are float, int or np.float64 or np.float64)
-    or a tuple [angle, units] where angle a number and
-    units is a string. It tells the routine whether to use degrees,
-    radiants (the default) or base pairs turns
+def get_rotation_matrix(axis, angle):
+    axis /= math.sqrt(np.dot(axis, axis))
 
-    axis --- Which axis to rotate about
-        Ex: [0,0,1]
-    anglest -- rotation in radians OR [angle, units]
-        Accepted Units:
-            "bp"
-            "degrees"
-            "radiants"
-        Ex: [np.pi/2] == [np.pi/2, "radians"]
-        Ex: [1, "bp"]
-
-    """
-    if not isinstance (anglest, (np.float64, np.float32, float, int)):
-        if len(anglest) > 1:
-            if anglest[1] in ["degrees", "deg", "o"]:
-                angle = (np.pi / 180.) * anglest[0]
-                # angle = np.deg2rad (anglest[0])
-            elif anglest[1] in ["bp"]:
-                # Allow partial bp turns
-                angle = float(anglest[0]) * (np.pi / 180.) * 35.9
-                # angle = int(anglest[0]) * (np.pi / 180.) * 35.9
-                # Older versions of numpy don't implement deg2rad()
-                # angle = int(anglest[0]) * np.deg2rad(35.9)
-            else:
-                angle = float(anglest[0])
-        else:
-            angle = float(anglest[0])
-    else:
-        angle = float(anglest)  # in degrees, I think
-
-    axis = np.array(axis)
-    axis /= np.sqrt(np.dot(axis, axis))
-
-    ct = np.cos(angle)
-    st = np.sin(angle)
+    ct = math.cos(angle)
+    st = math.sin(angle)
     olc = 1. - ct
     x, y, z = axis
 

@@ -143,7 +143,7 @@ if __name__ == '__main__':
 		print  >> sys.stderr, "1) Equilibrium number of DNA turns %f" % (nbases / pitch)
 		print  >> sys.stderr, "2) Target writhe %f = Topological writhe %f + Turns imposed by supercoiling  %f " % (opts.writhe+(nbases / pitch) *opts.supercoiling,opts.writhe,(nbases / pitch) *opts.supercoiling)
 		print >> sys.stderr, "LK has been rounded to %f" % LK
-		print >> sys.stderr, "Intial chain writhe %f" % WR
+		print >> sys.stderr, "Initial chain writhe %f" % WR
 
 
 	####################################
