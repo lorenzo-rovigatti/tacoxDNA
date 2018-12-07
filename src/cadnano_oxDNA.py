@@ -448,19 +448,19 @@ def generate_vhelices_origami_he(vhelix_direction, vhelix_perp, h, sequence_file
 # cadnano object structure
 class vstrands (object):
 
-    def __init__ (self):
+    def __init__(self):
         self.vhelices = []
 
-    def add_vhelix (self, toadd):
+    def add_vhelix(self, toadd):
         self.vhelices.append(toadd)
 
-    def bbox (self):
+    def bbox(self):
         rows = []
         cols = []
         lens = []
         for h in self.vhelices:
-            rows.append (h.row)
-            cols.append (h.col)
+            rows.append(h.row)
+            cols.append(h.col)
             lens.append(len(h.stap))
 
         dr = DIST_SQUARE * (max(rows) - min(rows) + 2)
@@ -469,7 +469,7 @@ class vstrands (object):
         
         return 2 * max([dr, dc, dl]) * BOX_FACTOR
     
-    def __str__ (self):
+    def __str__(self):
         a = '{\n"vstrands":[\n'
         if len(self.vhelices) > 0:
             for h in self.vhelices:
@@ -481,7 +481,7 @@ class vstrands (object):
 
 class vhelix (object):
 
-    def __init__ (self):
+    def __init__(self):
         self.stapLoop = []
         self.scafLoop = []
         self.skip = []
@@ -495,12 +495,12 @@ class vhelix (object):
         self.cad_index = -1
         self.skiploop_bases = 0
 
-    def get_length (self):
+    def get_length(self):
         return max (len(self.scaf), len(self.stap))
 
     len = property (get_length)
 
-    def add_square (self, toadd, which):
+    def add_square(self, toadd, which):
         if which == 'stap':
             self.stap.append(toadd)
         elif which == 'scaf':
@@ -509,7 +509,7 @@ class vhelix (object):
             print >> sys.stderr, "cannot add square that is not scaf or stap. Dying now"
             sys.exit (-1)
     
-    def __str__ (self):
+    def __str__(self):
         a = '{\n'
 
         a = a + '"stapLoop":['
@@ -567,7 +567,7 @@ class vhelix (object):
         return a
 
 
-class square (object):
+class square(object):
 
     def __init__ (self, V_0=-1, b_0=-1, V_1=-1, b_1=-1):
         """
@@ -660,7 +660,7 @@ if __name__ == '__main__':
         print_usage()
         
     shortArgs = 's:b:e:'
-    longArgs = ['sequence=', 'box=','seed=']
+    longArgs = ['sequence=', 'box=', 'seed=']
     
     side = False
     sequence_filename = False

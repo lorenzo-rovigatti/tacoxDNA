@@ -88,20 +88,7 @@ class Logger(object):
         sys.exit()
 
 
-class Printable(object):
-
-    def __init__(self):
-        self._output_callables = {OUT_LORENZO : self._get_lorenzo_output,
-                                  }
-
-    def get_output(self, t):
-        return self._output_callables[t]()
-
-    def _get_lorenzo_output(self):
-        raise NotImplementedError
-
-
-class Nucleotide(Printable):
+class Nucleotide():
     """
     Nucleotides compose Strands
 
@@ -133,7 +120,6 @@ class Nucleotide(Printable):
     index = 0
 
     def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1):
-        Printable.__init__(self)
         self.index = Nucleotide.index
         Nucleotide.index += 1
         self.cm_pos = np.array(cm_pos)
@@ -262,7 +248,7 @@ class Nucleotide(Printable):
         return "%lf %lf %lf %lf %lf %lf %lf %lf %lf" % (tuple(s1) + tuple (self._a1) + tuple (self._a2))
 
 
-class Strand(Printable):
+class Strand():
     """
     Strand composed of Nucleotides
     Strands can be contained in System
@@ -270,14 +256,11 @@ class Strand(Printable):
     index = 0
 
     def __init__(self):
-        Printable.__init__(self)
         self.index = Strand.index
         Strand.index += 1
         self._first = -1
         self._last = -1
         self._nucleotides = []
-        self._cm_pos = np.array([0., 0., 0.])
-        self._cm_pos_tot = np.array([0., 0., 0.])
         self._sequence = []
         self.visible = True
         self._circular = False  # bool on circular DNA
@@ -305,24 +288,20 @@ class Strand(Printable):
         return copy
 
     def get_cm_pos(self):
-        return self._cm_pos
+        return sum(map(lambda x: x.cm_pos, self._nucleotides)) / self.N
 
     def set_cm_pos(self, new_pos):
-        diff = new_pos - self._cm_pos
+        diff = new_pos - self.cm_pos
         for n in self._nucleotides: n.translate(diff)
 
-        self._cm_pos = new_pos
-
     def translate(self, amount):
-        new_pos = self._cm_pos + amount
+        new_pos = self.cm_pos + amount
         self.set_cm_pos(new_pos)
 
     def rotate(self, R, origin=None):
         if origin == None: origin = self.cm_pos
 
         for n in self._nucleotides: n.rotate(R, origin)
-
-        self._cm_pos = np.dot(R, self._cm_pos - origin) + origin
 
     def append (self, other):
         if not isinstance (other, Strand):
@@ -372,15 +351,13 @@ class Strand(Printable):
         n.strand = self.index
         self._nucleotides.append(n)
         self._last = n.index
-        self._cm_pos_tot += n.cm_pos
-        self._cm_pos = self._cm_pos_tot / self.N
         self.sequence.append(n._base)
 
     def _get_lorenzo_output(self):
         if not self.visible:
             return ""
 
-        conf = "\n".join(n.get_output(OUT_LORENZO) for n in self._nucleotides) + "\n"
+        conf = "\n".join(n._get_lorenzo_output() for n in self._nucleotides) + "\n"
 
         top = ""
         for n in self._nucleotides:
@@ -750,7 +727,7 @@ class System(object):
 
         topology = "%d %d\n" % (visible_nucleotides, visible_strands)
         for s in self._strands:
-            sc, st = s.get_output(OUT_LORENZO)
+            sc, st = s._get_lorenzo_output()
             topology += st
             conf += sc
 

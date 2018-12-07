@@ -201,7 +201,7 @@ class StrandGenerator (object):
         else:
             return ns1
 
-    def generate_or_sq(self, bp, sequence=None, start_pos=np.array([0, 0, 0]), direction=np.array([0, 0, 1]), perp=None, double=True, rot=0., angle=np.pi / 180 * 33.75, length_change=0, region_begin=0, region_end=0):
+    def generate_or_sq(self, bp, sequence=None, start_pos=np.array([0., 0., 0.]), direction=np.array([0., 0., 1.]), perp=None, double=True, rot=0., angle=np.pi / 180 * 33.75, length_change=0, region_begin=0, region_end=0):
         # we need numpy array for these
         start_pos = np.array(start_pos, dtype=float)
         direction = np.array(direction, dtype=float)
@@ -225,7 +225,8 @@ class StrandGenerator (object):
         if dir_norm < 1e-10:
             base.Logger.log("direction must be a valid vector, defaulting to (0, 0, 1)", base.Logger.WARNING)
             direction = np.array([0, 0, 1])
-        else: direction /= dir_norm
+        else: 
+            direction /= dir_norm
 
         if perp is None:
             v1 = np.random.random_sample(3)
@@ -236,18 +237,18 @@ class StrandGenerator (object):
 
         # and we need to generate a rotational matrix
         R0 = utils.get_rotation_matrix(direction, rot)
-#        R = utils.get_rotation_matrix(direction, angle)
-        # R = get_rotation_matrix(direction, [1, BP])
 
         ns1 = base.Strand()
         a1 = v1
         a1 = np.dot (R0, a1)
         rb = np.array(start_pos)
         a3 = direction
+        Rs = []
         for i in range(bp):
             ns1.add_nucleotide(base.Nucleotide(rb - base.CM_CENTER_DS * a1, a1, a3, sequence[i]))
             if i != bp - 1:
                 R = utils.get_rotation_matrix(direction, angle[i])
+                Rs.append(R)
                 a1 = np.dot(R, a1)
                 rb += a3 * base.BASE_BASE
                 if length_change:
@@ -257,8 +258,6 @@ class StrandGenerator (object):
                                 rb += a3 * base.BASE_BASE * (-(float(length_change[j]) / (region_end[j] - region_begin[j])))
 
         if double == True:
-
-            angle = np.flipud(angle)
             a1 = -a1
             a3 = -direction
             ns2 = base.Strand()
@@ -267,8 +266,8 @@ class StrandGenerator (object):
 
                 ns2.add_nucleotide(base.Nucleotide(rb - base.CM_CENTER_DS * a1, a1, a3, sequence2[i]))
                 if i != bp - 1:
-                    R = utils.get_rotation_matrix(direction, angle[i]).transpose()
-                    a1 = np.dot(R, a1)
+                    # we loop over the rotation matrices in the reverse order, and use the transpose of each matrix
+                    a1 = np.dot(Rs.pop().transpose(), a1)
                     rb += a3 * base.BASE_BASE
                     if length_change:
                         for j in range(len(length_change)):

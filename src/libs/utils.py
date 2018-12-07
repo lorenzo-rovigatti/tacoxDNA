@@ -15,9 +15,12 @@ def get_angle(a, b):
 
     """
     ab = np.dot(a, b)
-    if ab > (1. - FLT_EPSILON): return 0
-    elif ab < (-1. + FLT_EPSILON): return np.pi
-    else: return np.arccos(ab)
+    if ab > (1. - FLT_EPSILON): 
+        return 0
+    elif ab < (-1. + FLT_EPSILON): 
+        return np.pi
+    else: 
+        return np.arccos(ab)
 
 
 def get_orthonormalized_base(v1, v2, v3):
@@ -72,12 +75,10 @@ def get_random_rotation_matrix():
 
 
 def get_rotation_matrix(axis, angle):
-    axis /= math.sqrt(np.dot(axis, axis))
-
     ct = math.cos(angle)
     st = math.sin(angle)
     olc = 1. - ct
-    x, y, z = axis
+    x, y, z = axis / math.sqrt(np.dot(axis, axis))
 
     return np.array([[olc * x * x + ct, olc * x * y - st * z, olc * x * z + st * y],
                     [olc * x * y + st * z, olc * y * y + ct, olc * y * z - st * x],
