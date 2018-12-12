@@ -16,18 +16,19 @@ DD12_PDB_PATH = "dd12.pdb"
 def print_usage():
         print >> sys.stderr, "USAGE:"
         print >> sys.stderr, "\t%s topology configuration direction" % sys.argv[0]
-        print >> sys.stderr, "\t[-H\--hydrogens=True]"
+        print >> sys.stderr, "\t[-H\--hydrogens=True] [-u\--uniform-residue-names]"
         exit(1)
 
 def parse_options():
-    shortArgs = 'H:'
-    longArgs = ['hydrogens=']
+    shortArgs = 'H:u'
+    longArgs = ['hydrogens=','uniform-residue-names']
     
     opts = {
         "configuration" : "",
         "topology" : "",
         "oxDNA_direction" : True,
-        "print_hydrogens" : True
+        "print_hydrogens" : True,
+        "uniform_residue_names" : False
     }
     
     try:
@@ -44,6 +45,8 @@ def parse_options():
                 else:
                     print >> sys.stderr, "The argument of '%s' should be either 'true' or 'false' (got '%s' instead)" % (k[0], k[1])
                     exit(1)
+            elif k[0] == '-u' or k[0] == '--uniform-residue-names':
+                    opts["uniform_residue_names"] = True
             
         opts['topology'] = positional_args[0]
         opts['configuration'] = positional_args[1]
@@ -128,7 +131,8 @@ if __name__ == '__main__':
     print >> out, "HEADER    t=1.12"
     print >> out, "MODEL     1"
     print >> out, "REMARK ## 0,0"
-    
+
+    current_base_identifier = 'A'    
     for strand in s._strands:
         strand_pdb = []
         nucleotides_in_strand = strand._nucleotides
@@ -139,11 +143,12 @@ if __name__ == '__main__':
             my_base = copy.deepcopy(bases[nb])
             my_base.chain_id = s._nucleotide_to_strand[nucleotide.index]
             residue_suffix = ""
-            # 3' end
-            if nucleotide == strand._nucleotides[0] and not strand.is_circular(): 
+            if options["uniform_residue_names"] == False:
+                # 3' end
+                if nucleotide == strand._nucleotides[0] and not strand.is_circular(): 
                     residue_suffix = "3"
-            # 5' end
-            elif nucleotide == strand._nucleotides[-1]: 
+                # 5' end
+                elif nucleotide == strand._nucleotides[-1]: 
                     residue_suffix = "5"
 
             my_base.idx = (nucleotide.index % 12) + 1
@@ -154,12 +159,19 @@ if __name__ == '__main__':
                 my_base.correct_for_large_boxes(box_angstrom)
             
             serial_residue = n_idx % 9999
-            nucleotide_pdb = my_base.to_pdb("A", options['print_hydrogens'], serial_residue, residue_suffix)
+            base_identifier = current_base_identifier
+            nucleotide_pdb = my_base.to_pdb(base_identifier, options['print_hydrogens'], serial_residue, residue_suffix)
             strand_pdb.append(nucleotide_pdb)
+            
                 
         print >> out, "\n".join(x for x in strand_pdb)
-            
         print >> out, "TER"
+        
+        if current_base_identifier == 'Z':
+            current_base_identifier = 'A'
+        else:
+            current_base_identifier = chr(ord(current_base_identifier) + 1)
+        
     print >> out, "ENDMDL"
     out.close()
     
