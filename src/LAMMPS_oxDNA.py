@@ -24,25 +24,25 @@ def exyz_to_quat (mya1, mya3):
     # compute other components from it
 
     if q0sq >= 0.25:
-	myquat[0] = np.sqrt(q0sq)
-	myquat[1] = (mya2[2] - mya3[1]) / (4.0 * myquat[0])
-	myquat[2] = (mya3[0] - mya1[2]) / (4.0 * myquat[0])
-	myquat[3] = (mya1[1] - mya2[0]) / (4.0 * myquat[0])
+        myquat[0] = np.sqrt(q0sq)
+        myquat[1] = (mya2[2] - mya3[1]) / (4.0 * myquat[0])
+        myquat[2] = (mya3[0] - mya1[2]) / (4.0 * myquat[0])
+        myquat[3] = (mya1[1] - mya2[0]) / (4.0 * myquat[0])
     elif q1sq >= 0.25:
-	myquat[1] = np.sqrt(q1sq)
-	myquat[0] = (mya2[2] - mya3[1]) / (4.0 * myquat[1])
-	myquat[2] = (mya2[0] + mya1[1]) / (4.0 * myquat[1])
-	myquat[3] = (mya1[2] + mya3[0]) / (4.0 * myquat[1])
+        myquat[1] = np.sqrt(q1sq)
+        myquat[0] = (mya2[2] - mya3[1]) / (4.0 * myquat[1])
+        myquat[2] = (mya2[0] + mya1[1]) / (4.0 * myquat[1])
+        myquat[3] = (mya1[2] + mya3[0]) / (4.0 * myquat[1])
     elif q2sq >= 0.25:
-	myquat[2] = np.sqrt(q2sq)
-	myquat[0] = (mya3[0] - mya1[2]) / (4.0 * myquat[2])
-	myquat[1] = (mya2[0] + mya1[1]) / (4.0 * myquat[2])
-	myquat[3] = (mya3[1] + mya2[2]) / (4.0 * myquat[2])
+        myquat[2] = np.sqrt(q2sq)
+        myquat[0] = (mya3[0] - mya1[2]) / (4.0 * myquat[2])
+        myquat[1] = (mya2[0] + mya1[1]) / (4.0 * myquat[2])
+        myquat[3] = (mya3[1] + mya2[2]) / (4.0 * myquat[2])
     elif q3sq >= 0.25:
-	myquat[3] = np.sqrt(q3sq)
-	myquat[0] = (mya1[1] - mya2[0]) / (4.0 * myquat[3])
-	myquat[1] = (mya3[0] + mya1[2]) / (4.0 * myquat[3])
-	myquat[2] = (mya3[1] + mya2[2]) / (4.0 * myquat[3])
+        myquat[3] = np.sqrt(q3sq)
+        myquat[0] = (mya1[1] - mya2[0]) / (4.0 * myquat[3])
+        myquat[1] = (mya3[0] + mya1[2]) / (4.0 * myquat[3])
+        myquat[2] = (mya3[1] + mya2[2]) / (4.0 * myquat[3])
 
     norm = 1.0 / np.sqrt(myquat[0] * myquat[0] + myquat[1] * myquat[1] + \
 			  myquat[2] * myquat[2] + myquat[3] * myquat[3])
@@ -54,6 +54,7 @@ def exyz_to_quat (mya1, mya3):
     return np.array([myquat[0], myquat[1], myquat[2], myquat[3]])
 
 
+# the three commented lines would define quantities that are not necessary
 def quat_to_exyz (myquat):
     sqw = myquat[0] * myquat[0];
     sqx = myquat[1] * myquat[1];
@@ -62,13 +63,13 @@ def quat_to_exyz (myquat):
 
     invs = 1 / (sqx + sqy + sqz + sqw)
     m00 = (sqx - sqy - sqz + sqw) * invs ;
-    m11 = (-sqx + sqy - sqz + sqw) * invs ;
+    #m11 = (-sqx + sqy - sqz + sqw) * invs ;
     m22 = (-sqx - sqy + sqz + sqw) * invs ;
     
     tmp1 = myquat[1] * myquat[2];
     tmp2 = myquat[3] * myquat[0];
     m10 = 2.0 * (tmp1 + tmp2) * invs ;
-    m01 = 2.0 * (tmp1 - tmp2) * invs ;
+    #m01 = 2.0 * (tmp1 - tmp2) * invs ;
 
     tmp1 = myquat[1] * myquat[3];
     tmp2 = myquat[2] * myquat[0];
@@ -76,7 +77,7 @@ def quat_to_exyz (myquat):
     m02 = 2.0 * (tmp1 + tmp2) * invs ;
     tmp1 = myquat[2] * myquat[3];
     tmp2 = myquat[1] * myquat[0];
-    m21 = 2.0 * (tmp1 + tmp2) * invs ;
+    #m21 = 2.0 * (tmp1 + tmp2) * invs ;
     m12 = 2.0 * (tmp1 - tmp2) * invs ; 
 
     mya1 = np.array([m00, m10, m20])
@@ -116,7 +117,7 @@ if __name__ == '__main__':
 
             strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b, v, Lv))
 
-            #close strand 
+            # close strand 
             next_bond=conf.bonds[i][1]
             if next_bond!=-1 and next_bond!=i+1:
                 if conf.strand[i]!=conf.strand[next_bond]:
