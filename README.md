@@ -67,8 +67,10 @@ The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single f
 * The direction according to which the nucleotides are to be listed in the PDB file. It should be either "35" (for 3' -> 5') or 53 (for 5' -> 3').
 
 ### Optional arguments
-* `-H, --hydrogens=[true|false]` if true, include hydrogen atoms in the PDB file (defaults to true)
-* `-u\--uniform-residue-names` drop the `3` and `5` suffixes from the names of residues that are placed at the strands' ends 
+* `-H, --hydrogens=[true|false]` 
+if true, include hydrogen atoms in the PDB file (defaults to true)
+* `-u\--uniform-residue-names`
+drop the `3` and `5` suffixes from the names of residues that are placed at the strands' ends 
 
 ### Output
 * A [PDB](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) file containing the positions of all atoms composing the strand(s) contained in the oxDNA configuration file
@@ -104,6 +106,42 @@ text file containing a valid DNA sequence (*e.g.* ATCTGA). If not specified, the
 ### Output
 * An oxDNA topology file (named by suffixing the cadnano file with ".top")
 * An oxDNA configuration file (named by suffixing the cadnano file with ".oxdna")
+
+## CanDo-to-oxDNA converter
+
+The `CanDo_oxDNA.py` script takes one mandatory argument.
+
+### Mandatory arguments
+* The input CanDo file
+
+### Optional arguments
+* `-b\--box=VALUE`
+the length of the box side (in oxDNA simulation units) where the system will be placed (defaults to 100)
+* `-f\--print-force-file`
+also print a file containing the specifics for a oxDNA-compatible set of external forces that may be useful to relax the system  
+
+### Output
+* An oxDNA topology file (named by suffixing the CanDo file with ".top")
+* An oxDNA configuration file (named by suffixing the CanDo file with ".oxdna")
+
+## Tiamat-to-oxDNA converter
+
+The `Tiamat_oxDNA.py` script takes one mandatory argument.
+
+### Mandatory arguments
+* The input Tiamat file (in json format)
+
+### Optional arguments
+* `-m\--molecule=[DNA|RNA]`
+the type of molecule contained in the input file (defaults to DNA)
+* `-t\--tiamat-version=[1|2]`
+The Tiamat version the input file was generated with. If you are not sure, it's probably 2, the default value
+* `-f\--print-force-file`
+also print a file containing the specifics for a oxDNA-compatible set of external forces that may be useful to relax the system  
+
+### Output
+* An oxDNA topology file (named by suffixing the CanDo file with ".top")
+* An oxDNA configuration file (named by suffixing the CanDo file with ".oxdna")
 
 ## Acknowledgements
 
