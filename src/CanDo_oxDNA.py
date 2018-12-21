@@ -353,7 +353,7 @@ def load_cando(opts, invert_preference=False):
     write_conf(bases, cando_file + '.oxdna', box)
 
     if opts['print_force_file']:
-        force_file = cando_file + '.forces'
+        force_file = cando_file + '.forces.txt'
         print >> sys.stderr, "## Printing forces to the '%s' file" % force_file
         write_force(bases, pair_ids, force_file)
         
@@ -384,9 +384,10 @@ def parse_options():
         import getopt
         args, positional_args = getopt.gnu_getopt(sys.argv[1:], shortArgs, longArgs)
         for k in args:
-            if k[0] == '-m' or k[0] == '--molecule':
+            if k[0] == '-b' or k[0] == '--box':
                 try:
                     opts['box'] = float(k[1])
+                    print >> sys.stderr, "## Setting the box size to %f" % opts['box']
                 except ValueError:
                     print >> sys.stderr, "The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1])
                     exit(1)
