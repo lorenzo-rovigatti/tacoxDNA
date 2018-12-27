@@ -422,3 +422,6 @@ if __name__ == '__main__':
         s = load_cando(opts, invert_preference=True)
 
     # write_topology(s,candofile+'.top')
+    
+    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (opts['cando_file'] + '.oxdna', opts['cando_file'] + '.top')
+    print >> sys.stderr, "## DONE"
