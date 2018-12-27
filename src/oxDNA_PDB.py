@@ -20,15 +20,16 @@ def print_usage():
         exit(1)
 
 def parse_options():
-    shortArgs = 'H:u'
-    longArgs = ['hydrogens=','uniform-residue-names']
+    shortArgs = 'H:uo'
+    longArgs = ['hydrogens=','uniform-residue-names', 'one-file-per-strand']
     
     opts = {
         "configuration" : "",
         "topology" : "",
         "oxDNA_direction" : True,
         "print_hydrogens" : True,
-        "uniform_residue_names" : False
+        "uniform_residue_names" : False,
+        "one_file_per_strand" : False
     }
     
     try:
@@ -47,6 +48,8 @@ def parse_options():
                     exit(1)
             elif k[0] == '-u' or k[0] == '--uniform-residue-names':
                     opts["uniform_residue_names"] = True
+            elif k[0] == '-o' or k[0] == '--one-file-per-strand':
+                    opts["one_file_per_strand"] = True
             
         opts['topology'] = positional_args[0]
         opts['configuration'] = positional_args[1]
@@ -81,7 +84,7 @@ def align(full_base, ox_base):
             full_base.rotate(R)
 
 if __name__ == '__main__':
-    options = parse_options()
+    opts = parse_options()
         
     with open(os.path.join(os.path.dirname(__file__), DD12_PDB_PATH)) as f:
         nucleotides = []
@@ -106,7 +109,7 @@ if __name__ == '__main__':
         n.a1, n.a2, n.a3 = utils.get_orthonormalized_base(n.a1, n.a2, n.a3)
     
     try:
-        lr = LorenzoReader(options['topology'], options['configuration'])
+        lr = LorenzoReader(opts['topology'], opts['configuration'])
         s = lr.get_system()
     except Exception as e:
         print >> sys.stderr, "Parser error: %s" % e
@@ -125,25 +128,29 @@ if __name__ == '__main__':
         print >> sys.stderr, "At least one of the box sizes is larger than 999: all the atoms which are outside of the box will be brought back"
         correct_for_large_boxes = True
     
-    out_name = options['configuration'] + ".pdb"
-    out = open (out_name, "w")
+    if opts['one_file_per_strand']:
+        out_name = opts['configuration'] + "_1.pdb"
+    else:
+        out_name = opts['configuration'] + ".pdb"
+        
+    out = open(out_name, "w")
     
     print >> out, "HEADER    t=1.12"
     print >> out, "MODEL     1"
     print >> out, "REMARK ## 0,0"
 
     current_base_identifier = 'A'    
-    for strand in s._strands:
+    for s_id, strand in enumerate(s._strands):
         strand_pdb = []
         nucleotides_in_strand = strand._nucleotides
-        if not options['oxDNA_direction']:
+        if not opts['oxDNA_direction']:
                 nucleotides_in_strand = reversed(nucleotides_in_strand)
         for n_idx, nucleotide in enumerate(nucleotides_in_strand, 1):
             nb = base.number_to_base[nucleotide._base]
             my_base = copy.deepcopy(bases[nb])
             my_base.chain_id = s._nucleotide_to_strand[nucleotide.index]
             residue_suffix = ""
-            if options["uniform_residue_names"] == False:
+            if opts["uniform_residue_names"] == False:
                 # 3' end
                 if nucleotide == strand._nucleotides[0] and not strand.is_circular(): 
                     residue_suffix = "3"
@@ -160,20 +167,31 @@ if __name__ == '__main__':
             
             serial_residue = n_idx % 9999
             base_identifier = current_base_identifier
-            nucleotide_pdb = my_base.to_pdb(base_identifier, options['print_hydrogens'], serial_residue, residue_suffix)
+            nucleotide_pdb = my_base.to_pdb(base_identifier, opts['print_hydrogens'], serial_residue, residue_suffix)
             strand_pdb.append(nucleotide_pdb)
             
                 
         print >> out, "\n".join(x for x in strand_pdb)
         print >> out, "TER"
         
-        if current_base_identifier == 'Z':
-            current_base_identifier = 'A'
+        if opts['one_file_per_strand']:
+            print >> out, "ENDMDL"
+            out.close()
+            print >> sys.stderr, "## Wrote strand %d's data to '%s'" % (s_id + 1, out_name)
+            # open a new file if needed
+            if strand != s._strands[-1]:
+                out_name = opts['configuration'] + "_%d.pdb" % (s_id + 2, )
+                out = open(out_name, "w")
         else:
-            current_base_identifier = chr(ord(current_base_identifier) + 1)
-        
-    print >> out, "ENDMDL"
-    out.close()
+            # we update the base identifier only if a single file is printed
+            if current_base_identifier == 'Z':
+                current_base_identifier = 'A'
+            else:
+                current_base_identifier = chr(ord(current_base_identifier) + 1)
     
-    print >> sys.stderr, "## Wrote data to '%s'" % out_name
+    if not opts['one_file_per_strand']:
+        print >> out, "ENDMDL"
+        out.close()
+        print >> sys.stderr, "## Wrote data to '%s'" % out_name
+        
     print >> sys.stderr, "## DONE"

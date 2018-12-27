@@ -70,7 +70,9 @@ The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single f
 * `-H, --hydrogens=[true|false]` 
 if true, include hydrogen atoms in the PDB file (defaults to true)
 * `-u\--uniform-residue-names`
-drop the `3` and `5` suffixes from the names of residues that are placed at the strands' ends 
+drop the `3` and `5` suffixes from the names of residues that are placed at the strands' ends. It increases the compatibility with some tools (*e.g.* Chimera and Molecular Maya).
+* `-o\--one-file-per-strand`
+print one PDB file for each strand
 
 ### Output
 * A [PDB](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) file containing the positions of all atoms composing the strand(s) contained in the oxDNA configuration file
