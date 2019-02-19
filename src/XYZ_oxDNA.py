@@ -167,9 +167,11 @@ if __name__ == '__main__':
 		alpha = top.py_ang(v_perp_ssdna1[ind_1, :] , p[ind, :] , dist[ind_1, :])
 		gamma = rot_base - alpha
 		
-		R = utils.get_rotation_matrix(dist[ind, :], gamma)
-		v_perp_ssdna1[ind, :] = np.dot(R , p[ind, :])  
-		v_perp_ssdna2[ind, :] = -v_perp_ssdna1[ind, :]
+		#prevent change when ind=0 on open chain
+                if opts.closed or (not opts.closed and ind!=0):
+			R = utils.get_rotation_matrix(dist[ind, :], gamma)
+			v_perp_ssdna1[ind, :] = np.dot(R , p[ind, :])  
+			v_perp_ssdna2[ind, :] = -v_perp_ssdna1[ind, :]
 		
 	# check LK imposed and measured
 	TW_measured = top.get_twist(coordxyz, ssdna1)
