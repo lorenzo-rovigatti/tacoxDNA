@@ -79,7 +79,10 @@ print one PDB file for each strand
 
 ## PDB-to-oxDNA converter
 
-The `PDB_oxDNA.py` script takes two mandatory arguments. Note that, if the PDB file contains more than one MODEL, only the first one will be converted.
+The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes messy nature of PDB files, the script makes some choices during the parsing of the input file. In particular, note the following points:
+
+* if the PDB file contains more than one MODEL, only the first one will be converted;
+* if the PDB file contains alternate locations for some (or all) of the atoms, only those marked with either "1" or "A" will be considered. If the PDB file uses a different notation, the script may fail or crash.
 
 ### Mandatory arguments
 * The input PDB file

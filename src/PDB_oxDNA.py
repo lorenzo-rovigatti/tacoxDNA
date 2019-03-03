@@ -30,6 +30,9 @@ if __name__ == '__main__':
             line = line.strip()
             if line.startswith("ATOM"):
                 na = Atom(line)
+                if na.alternate != "":
+                    if na.alternate == "A" or na.alternate == "1":
+                        print >> sys.stderr, "Alternate location for atom '%s' of residue '%s' encountered, using the line marked with the '%s' character." % (na.name, na.residue, na.alternate)
                 if na.residue_idx != old_residue:
                     nn = Nucleotide(na.residue, na.residue_idx)
                     if oxDNA_direction:

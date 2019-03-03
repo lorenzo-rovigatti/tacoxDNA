@@ -155,11 +155,12 @@ class Atom(object):
         object.__init__(self)
         # http://cupnet.net/pdb-format/
         self.name = pdb_line[12:16].strip()
-        self.chain_id = pdb_line[21:22].strip()
+        self.alternate = pdb_line[16]
         self.residue = pdb_line[17:20].strip()
+        self.chain_id = pdb_line[21:22].strip()
         self.residue_idx = int(pdb_line[22:26])
         self.pos = np.array([float(pdb_line[31:38]), float(pdb_line[38:46]), float(pdb_line[46:54])])
-
+        
     def is_hydrogen(self):
         return "H" in self.name
 
