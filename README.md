@@ -64,7 +64,7 @@ The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single f
 ### Mandatory arguments
 * An oxDNA topology file
 * An oxDNA configuration file
-* The direction according to which the nucleotides are to be listed in the PDB file. It should be either "35" (for 3' -> 5') or 53 (for 5' -> 3').
+* The direction according to which the nucleotides are to be listed in the PDB file. It should be either 35 (for 3' -> 5') or 53 (for 5' -> 3'). Most of the all-atoms tools (*e.g.* GROMACS) assume the 5' -> 3' order.
 
 ### Optional arguments
 * `-H, --hydrogens=[true|false]` 
@@ -79,11 +79,11 @@ print one PDB file for each strand
 
 ## PDB-to-oxDNA converter
 
-The `PDB_oxDNA.py` script takes two mandatory arguments.
+The `PDB_oxDNA.py` script takes two mandatory arguments. Note that, if the PDB file contains more than one MODEL, only the first one will be converted.
 
 ### Mandatory arguments
 * The input PDB file
-* The direction according to which the nucleotides are listed in the PDB file. It should be either "35" (for 3' -> 5') or 53 (for 5' -> 3').
+* The direction according to which the nucleotides are listed in the PDB file. It should be either 35 (for 3' -> 5') or 53 (for 5' -> 3').
 
 ### Output
 * An oxDNA topology file (named by suffixing the PDB file with ".top")

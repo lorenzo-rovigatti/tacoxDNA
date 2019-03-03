@@ -38,7 +38,13 @@ if __name__ == '__main__':
                         strand.insert(0, nn)
                     old_residue = na.residue_idx
                 nn.add_atom(na)
-            elif line.split()[0].strip() == "TER":
+            elif line.startswith("MODEL"):
+                N_model = line.split()[1]
+                print >> sys.stderr, "MODEL line detected: using the first MODEL encountered (%s)" % (N_model)
+            elif line.startswith("ENDMDL"):
+                # we treat ENDMDL as the end of the file 
+                break;
+            elif line.startswith("TER"):
                 pdb_strands.append(strand)
                 strand = []
             # if the file does not contain any TER line we need to manually add the current strand to the list of strands
@@ -67,7 +73,6 @@ if __name__ == '__main__':
     
     system = base.System(box)
     strand = base.Strand()
-    print len(pdb_strands)
     
     for pdb_strand in pdb_strands:
         strand = base.Strand()
