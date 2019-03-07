@@ -44,9 +44,9 @@ class Base:
 
     def pos_str(self):
         if self.cm_pos is None:
-            print "Warning, base ", self.id, self.oxid, 'was not assigned cm'
+            print >> sys.stderr, "Warning, base ", self.id, self.oxid, 'was not assigned cm'
         if self.cm_pos[0] == 0 and self.cm_pos[1] == 0 and self.cm_pos[2] == 0:
-            print "Warning, cm of base ", self.id, self.oxid, 'was set to 0 0 0'
+            print >> sys.stderr, "Warning, cm of base ", self.id, self.oxid, 'was set to 0 0 0'
 
         cm = self.cm_pos
         a1 = self.a1

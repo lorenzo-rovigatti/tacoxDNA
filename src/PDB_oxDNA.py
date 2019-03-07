@@ -26,10 +26,19 @@ if __name__ == '__main__':
     with open(pdb_file) as f:
         strand = []
         old_residue = ""
+        old_chain = ""
         for line in f.readlines():
             line = line.strip()
             if line.startswith("ATOM"):
                 na = Atom(line)
+                if old_chain != "":
+                    if na.chain_id != old_chain and len(strand) != 0:
+                        print >> sys.stderr, "WARNING: a TER statement separating different strands is missing"
+                        pdb_strands.append(strand)
+                        strand = []
+                    elif na.chain_id == old_chain and len(strand) == 0:
+                        print >> sys.stderr, "WARNING: a TER statement separates strand having the same chain id"
+                        
                 if na.alternate != "":
                     if na.alternate == "A" or na.alternate == "1":
                         print >> sys.stderr, "Alternate location for atom '%s' of residue '%s' encountered, using the line marked with the '%s' character." % (na.name, na.residue, na.alternate)
@@ -41,6 +50,7 @@ if __name__ == '__main__':
                         strand.insert(0, nn)
                     old_residue = na.residue_idx
                 nn.add_atom(na)
+                old_chain = na.chain_id
             elif line.startswith("MODEL"):
                 N_model = line.split()[1]
                 print >> sys.stderr, "MODEL line detected: using the first MODEL encountered (%s)" % (N_model)
