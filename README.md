@@ -59,7 +59,10 @@ The `LAMMPS_oxDNA.py` script takes one mandatory argument and outputs two files.
 
 ## oxDNA-to-PDB converter
 
-The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single file.
+The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single file. Since oxDNA bases has no one-to-one explicit mapping to all-atom representations, the converted structure will most likely require some sort of relaxation procedure before being used as input for all-atom simulation packages. Moreover, when using this script the following points should be taken into account:
+
+* the phosphate groups of nucleobases at the 5' end of each strand are removed
+* a hydrogen is added to each of the 3' and 5' end nucleobases (HO3' and HO5', respectively)
 
 ### Mandatory arguments
 * An oxDNA topology file
@@ -70,7 +73,7 @@ The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single f
 * `-H, --hydrogens=[true|false]` 
 if true, include hydrogen atoms in the PDB file (defaults to true)
 * `-u\--uniform-residue-names`
-drop the `3` and `5` suffixes from the names of residues that are placed at the strands' ends. It increases the compatibility with some tools (*e.g.* Chimera and Molecular Maya).
+drop the `3` and `5` suffixes from the names of residues that are placed at the strands' ends. It increases the compatibility with some tools (*e.g.* Chimera and Molecular Maya)
 * `-o\--one-file-per-strand`
 print one PDB file for each strand
 
@@ -81,8 +84,8 @@ print one PDB file for each strand
 
 The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes messy nature of PDB files, the script makes some choices during the parsing of the input file. In particular, note the following points:
 
-* if the PDB file contains more than one MODEL, only the first one will be converted;
-* if the PDB file contains alternate locations for some (or all) of the atoms, only those marked with either "1" or "A" will be considered. If the PDB file uses a different notation, the script may fail or crash.
+* if the PDB file contains more than one MODEL, only the first one will be converted
+* if the PDB file contains alternate locations for some (or all) of the atoms, only those marked with either "1" or "A" will be considered. If the PDB file uses a different notation, the script may fail or crash
 
 ### Mandatory arguments
 * The input PDB file
