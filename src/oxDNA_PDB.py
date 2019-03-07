@@ -103,7 +103,8 @@ if __name__ == '__main__':
         n.compute_as()
         if n.base in bases:
             if n.check < bases[n.base].check: bases[n.base] = copy.deepcopy(n)
-        else: bases[n.base] = n
+        else: 
+            bases[n.base] = n
     
     for n in nucleotides:
         n.a1, n.a2, n.a3 = utils.get_orthonormalized_base(n.a1, n.a2, n.a3)
@@ -125,7 +126,7 @@ if __name__ == '__main__':
     box_angstrom = s._box * FROM_OXDNA_TO_ANGSTROM
     correct_for_large_boxes = False
     if np.any(box_angstrom[box_angstrom > 999]):
-        print >> sys.stderr, "At least one of the box sizes is larger than 999: all the atoms which are outside of the box will be brought back"
+        print >> sys.stderr, "At least one of the box sizes is larger than 999: all the atoms which are outside of the box will be brought back through periodic boundary conditions"
         correct_for_large_boxes = True
     
     if opts['one_file_per_strand']:
@@ -135,39 +136,39 @@ if __name__ == '__main__':
         
     out = open(out_name, "w")
     
-    print >> out, "HEADER    t=1.12"
-    print >> out, "MODEL     1"
-    print >> out, "REMARK ## 0,0"
-
     current_base_identifier = 'A'    
     for s_id, strand in enumerate(s._strands):
         strand_pdb = []
         nucleotides_in_strand = strand._nucleotides
         if not opts['oxDNA_direction']:
-                nucleotides_in_strand = reversed(nucleotides_in_strand)
+            nucleotides_in_strand = reversed(nucleotides_in_strand)
         for n_idx, nucleotide in enumerate(nucleotides_in_strand, 1):
             nb = base.number_to_base[nucleotide._base]
             my_base = copy.deepcopy(bases[nb])
             my_base.chain_id = s._nucleotide_to_strand[nucleotide.index]
-            residue_suffix = ""
-            if opts["uniform_residue_names"] == False:
-                # 3' end
-                if nucleotide == strand._nucleotides[0] and not strand.is_circular(): 
-                    residue_suffix = "3"
-                # 5' end
-                elif nucleotide == strand._nucleotides[-1]: 
-                    residue_suffix = "5"
+            residue_type = ""
+            
+            # 3' end
+            if nucleotide == strand._nucleotides[0] and not strand.is_circular():
+                residue_type = "3"
+            # 5' end
+            elif nucleotide == strand._nucleotides[-1]:
+                residue_type = "5" 
+                
+            if opts["uniform_residue_names"] == True:
+                residue_suffix = ""
+            else:
+                residue_suffix = residue_type
 
-            my_base.idx = (nucleotide.index % 12) + 1
             align(my_base, nucleotide)
             my_base.set_base((nucleotide.pos_base - com) * FROM_OXDNA_TO_ANGSTROM)
 
             if correct_for_large_boxes:
                 my_base.correct_for_large_boxes(box_angstrom)
             
-            serial_residue = n_idx % 9999
+            residue_serial = n_idx % 9999
             base_identifier = current_base_identifier
-            nucleotide_pdb = my_base.to_pdb(base_identifier, opts['print_hydrogens'], serial_residue, residue_suffix)
+            nucleotide_pdb = my_base.to_pdb(base_identifier, opts['print_hydrogens'], residue_serial, residue_suffix, residue_type)
             strand_pdb.append(nucleotide_pdb)
             
                 
@@ -175,7 +176,6 @@ if __name__ == '__main__':
         print >> out, "TER"
         
         if opts['one_file_per_strand']:
-            print >> out, "ENDMDL"
             out.close()
             print >> sys.stderr, "## Wrote strand %d's data to '%s'" % (s_id + 1, out_name)
             # open a new file if needed
@@ -190,7 +190,6 @@ if __name__ == '__main__':
                 current_base_identifier = chr(ord(current_base_identifier) + 1)
     
     if not opts['one_file_per_strand']:
-        print >> out, "ENDMDL"
         out.close()
         print >> sys.stderr, "## Wrote data to '%s'" % out_name
         
