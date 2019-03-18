@@ -200,7 +200,7 @@ class Atom(object):
 
     def to_pdb(self, chain_identifier, residue_serial, residue_suffix):
         residue = self.residue + residue_suffix
-        res = "%-6s%5d %-4s%1s%3s %1s%4d%1s   %8.3f%8.3f%8.3f%6.2f%6.2f%-4s%-2s%-2s" % ("ATOM", Atom.serial_atom, self.name, " ", residue, chain_identifier, residue_serial, " ", self.pos[0], self.pos[1], self.pos[2], 1.00, 0.00, " ", " ", " ")
+        res = "{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}          {:>2s}{:2s}".format("ATOM", Atom.serial_atom, self.name, " ", residue, chain_identifier, residue_serial, " ", self.pos[0], self.pos[1], self.pos[2], 1.00, 0.00, " ", " ", " ")
         Atom.serial_atom += 1
         if Atom.serial_atom > 99999:
             Atom.serial_atom = 1

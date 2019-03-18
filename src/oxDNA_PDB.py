@@ -11,7 +11,7 @@ import libs.base as base
 import libs.utils as utils
 from libs.readers import LorenzoReader
 
-DD12_PDB_PATH = "dd12.pdb"
+DD12_PDB_PATH = "dd12_na.pdb"
 
 def print_usage():
         print >> sys.stderr, "USAGE:"
