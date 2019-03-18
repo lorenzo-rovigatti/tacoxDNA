@@ -1,6 +1,17 @@
 # tacoxDNA
 
-tacoxDNA (Tools and Converters for oxDNA) is a collection of tools developed to help [oxDNA](http://dna.physics.ox.ac.uk/) users. The sections that follow introduce the tools and their usage.
+tacoxDNA (Tools and Converters for oxDNA) is a collection of tools initially developed to help [oxDNA](http://dna.physics.ox.ac.uk/) users. However, it will soon be expanded so as to support additional models. The sections that follow introduce the tools and their usage.
+
+* [Generator for twisted and knotted configurations](#generator-for-twisted-and-knotted-configurations)
+* [oxDNA-to-LAMMPS converter](#oxdna-to-lammps-converter)
+* [LAMMPS-to-oxDNA converter](#lammps-to-oxdna-converter)
+* [oxDNA-to-PDB converter](#oxdna-to-pdb-converter)
+* [PDB-to-oxDNA converter](#pdb-to-oxdna-converter)
+* [cadnano-to-oxDNA converter](#cadnano-to-oxdna-converter)
+* [CanDo-to-oxDNA converter](#cando-to-oxdna-converter)
+* [Tiamat-to-oxDNA converter](#tiamat-to-oxdna-converter)
+
+---
 
 ## Generator for twisted and knotted configurations
 
@@ -35,9 +46,11 @@ text file containing a valid DNA sequence (*e.g.* ATCTGA). The length of the seq
 * An oxDNA topology file (named by suffixing the centerline file with ".top")
 * An oxDNA configuration file (named by suffixing the centerline file with ".oxdna")
 
+---
+
 ## oxDNA-to-LAMMPS converter
 
-The `oxDNA_LAMMPS.py` script takes two mandatory arguments and outputs a single file.
+The `oxDNA_LAMMPS.py` script takes two mandatory arguments and outputs a single file that can be used as input to run oxDNA simulations [USER-CGDNA](https://lammps.sandia.gov/doc/Packages_details.html#pkg-user-cgdna) LAMMPS package.
 
 ### Arguments
 * An oxDNA topology file
@@ -45,6 +58,8 @@ The `oxDNA_LAMMPS.py` script takes two mandatory arguments and outputs a single 
 
 ### Output
 * A file containing the list of nucleotide positions, quaternions, velocities, angular velocities and bonds which can be used as a start file in LAMMPS. The name of the file is just the oxDNA configuration filename, prefixed with "LAMMPS_"
+
+---
 
 ## LAMMPS-to-oxDNA converter
 
@@ -80,6 +95,8 @@ print one PDB file for each strand
 ### Output
 * A [PDB](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) file containing the positions of all atoms composing the strand(s) contained in the oxDNA configuration file
 
+---
+
 ## PDB-to-oxDNA converter
 
 The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes messy nature of PDB files, the script makes some choices during the parsing of the input file. In particular, note the following points:
@@ -95,9 +112,11 @@ The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes mes
 * An oxDNA topology file (named by suffixing the PDB file with ".top")
 * An oxDNA configuration file (named by suffixing the PDB file with ".oxdna")
 
+---
+
 ## cadnano-to-oxDNA converter
 
-The `cadnano_oxDNA.py` script takes two mandatory arguments.
+The `cadnano_oxDNA.py` script converts [https://cadnano.org/](cadnano) files into oxDNA configurations. It takes two mandatory arguments.
 
 ### Mandatory arguments
 * The input cadnano file (in json format)
@@ -115,9 +134,11 @@ text file containing a valid DNA sequence (*e.g.* ATCTGA). If not specified, the
 * An oxDNA topology file (named by suffixing the cadnano file with ".top")
 * An oxDNA configuration file (named by suffixing the cadnano file with ".oxdna")
 
+---
+
 ## CanDo-to-oxDNA converter
 
-The `CanDo_oxDNA.py` script takes one mandatory argument.
+The `CanDo_oxDNA.py` script converts [https://cando-dna-origami.org/](CanDo) files into oxDNA configurations. It takes one mandatory argument.
 
 ### Mandatory arguments
 * The input CanDo file
@@ -132,9 +153,11 @@ also print a file containing the specifics for a oxDNA-compatible set of externa
 * An oxDNA topology file (named by suffixing the CanDo file with ".top")
 * An oxDNA configuration file (named by suffixing the CanDo file with ".oxdna")
 
+---
+
 ## Tiamat-to-oxDNA converter
 
-The `Tiamat_oxDNA.py` script takes one mandatory argument.
+The `Tiamat_oxDNA.py` script converts [http://yanlab.asu.edu/Resources.html](Tiamat) files into oxDNA configurations. It takes one mandatory argument.
 
 ### Mandatory arguments
 * The input Tiamat file (in json format)
@@ -145,11 +168,13 @@ the type of molecule contained in the input file (defaults to DNA)
 * `-t\--tiamat-version=[1|2]`
 The Tiamat version the input file was generated with. If you are not sure, it's probably 2, the default value
 * `-f\--print-force-file`
-also print a file containing the specifics for a oxDNA-compatible set of external forces that may be useful to relax the system  
+also print a file containing the specifics for a oxDNA-compatible set of external forces that may be useful to relax the system
 
 ### Output
 * An oxDNA topology file (named by suffixing the CanDo file with ".top")
 * An oxDNA configuration file (named by suffixing the CanDo file with ".oxdna")
+
+---
 
 ## Acknowledgements
 
