@@ -72,6 +72,8 @@ The `LAMMPS_oxDNA.py` script takes one mandatory argument and outputs two files.
 * An oxDNA topology file (named by suffixing the LAMMPS output file with ".top")
 * An oxDNA configuration file (named by suffixing the LAMMPS output file with ".oxdna")
 
+---
+
 ## oxDNA-to-PDB converter
 
 The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single file. Since oxDNA bases has no one-to-one explicit mapping to all-atom representations, the converted structure will most likely require some sort of relaxation procedure before being used as input for all-atom simulation packages. Moreover, when using this script the following points should be taken into account:
