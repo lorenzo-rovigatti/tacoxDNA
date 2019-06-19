@@ -176,6 +176,10 @@ also print a file containing the specifics for a oxDNA-compatible set of externa
 
 ---
 
+## Testing
+
+tacoxDNA contains a very simple testing suite to verify the working status of the scripts. The `tests` directory contains a directory for each script. Within each directory there is a `run.sh` bash script that performs one or more tests on the specific script. Execute `run_all.sh` to run all tests and get a summary of the results. 
+
 ## Acknowledgements
 
 * Some of the code has been adapted from the [oxDNA](http://dna.physics.ox.ac.uk/) source
