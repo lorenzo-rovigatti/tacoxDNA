@@ -118,7 +118,7 @@ The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes mes
 
 ## cadnano-to-oxDNA converter
 
-The `cadnano_oxDNA.py` script converts [https://cadnano.org/](cadnano) files into oxDNA configurations. It takes two mandatory arguments.
+The `cadnano_oxDNA.py` script converts [cadnano](https://cadnano.org/) files into oxDNA configurations. It takes two mandatory arguments.
 
 ### Mandatory arguments
 * The input cadnano file (in json format)
@@ -140,7 +140,7 @@ text file containing a valid DNA sequence (*e.g.* ATCTGA). If not specified, the
 
 ## CanDo-to-oxDNA converter
 
-The `CanDo_oxDNA.py` script converts [https://cando-dna-origami.org/](CanDo) files into oxDNA configurations. It takes one mandatory argument.
+The `CanDo_oxDNA.py` script converts [CanDo](https://cando-dna-origami.org/) files into oxDNA configurations. It takes one mandatory argument.
 
 ### Mandatory arguments
 * The input CanDo file
@@ -159,7 +159,7 @@ also print a file containing the specifics for a oxDNA-compatible set of externa
 
 ## Tiamat-to-oxDNA converter
 
-The `Tiamat_oxDNA.py` script converts [http://yanlab.asu.edu/Resources.html](Tiamat) files into oxDNA configurations. It takes one mandatory argument.
+The `Tiamat_oxDNA.py` script converts [Tiamat](http://yanlab.asu.edu/Resources.html) files into oxDNA configurations. It takes one mandatory argument.
 
 ### Mandatory arguments
 * The input Tiamat file (in json format)
