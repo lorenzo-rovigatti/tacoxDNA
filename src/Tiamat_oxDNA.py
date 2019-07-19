@@ -3,11 +3,15 @@
 import sys
 from json import load
 import numpy as np
+import random
+
+DNA_BASES = ['A', 'C', 'G', 'T']
 
 
 # TODO: use the stuff in base.py
 class Base(object):
     scale = 1 / 0.85
+    default_val = 'R'
     
     def __init__(self, local_id, base_info):
         self.base_info = base_info
@@ -16,7 +20,14 @@ class Base(object):
         self.up = None
         self.down = None
         self.across = None
-        self.val = base_info['type'][0]
+        try:
+            self.val = base_info['type'][0]
+        except:
+            if Base.default_val == 'R':
+                self.val = random.choice(DNA_BASES)
+            else:
+                self.val = Base.default_val
+            print >> sys.stderr, "WARNING: base n.%s has no associated type, setting it to '%s'" % (self.global_id, self.val)
         self.pos = np.array(base_info['position'])
 
     def __get_connected_id(self, neighbor):
@@ -188,7 +199,7 @@ class NoBase(Base):
         return self  # Returns itself to reduce memory consumtion 
 
 
-def write_topology_file(strands, top_file_name):
+def write_topology_file(strands, topology_file):
     # setup the topology header 
     top_lines = [
         '%d %d' % (len(bases), len(strands))  # number of bases, number of strands
@@ -202,7 +213,7 @@ def write_topology_file(strands, top_file_name):
             )
 
     # spit out topology file
-    with open(top_file_name, "w") as f_out:
+    with open(topology_file, "w") as f_out:
         f_out.write('\n'.join(top_lines))
 
 
@@ -220,7 +231,7 @@ def write_force_file(strands, force_file_name):
         f_out.write("\n".join(lines))
 
 
-def write_configuration_file(strands, conf_file_name, opts):
+def write_configuration_file(strands, configuration_file, opts):
     # Decide on a box size based on strand length and number of strands - there's not a good way to do this blind
     # Need to know strand lengths, organization, shape
     # strand_lengths = map(len, strands)
@@ -293,7 +304,7 @@ def write_configuration_file(strands, conf_file_name, opts):
                 ])
             )
     # spit out the configuration file 
-    with open(conf_file_name, 'w') as f_out: 
+    with open(configuration_file, 'w') as f_out: 
         f_out.write('\n'.join(configuration_lines) + "\n")
     
 
@@ -301,15 +312,16 @@ def print_usage():
         print >> sys.stderr, "USAGE:"
         print >> sys.stderr, "\t%s Tiamat_json_file" % sys.argv[0]
         print >> sys.stderr, "\t[-m\--molecule=DNA|RNA]"
-        print >> sys.stderr, "\t[-t\--tiamat-version=2]"
-        print >> sys.stderr, "\t[-f\--print-force-file]\n\n"
-        print >> sys.stderr, "\tThe defaults options are --molecule=DNA and --tiamat-version=1\n"
+        print >> sys.stderr, "\t[-t\--tiamat-version=1|2]"
+        print >> sys.stderr, "\t[-t\--default-base=A|C|G|T|R|i (R = random, i = any integer)]"
+        print >> sys.stderr, "\t[-f\--print-force-file]\n"
+        print >> sys.stderr, "\tThe defaults options are --molecule=DNA, --tiamat-version=1, --default-base=R"
         exit(1)
 
 
 def parse_options():
-    shortArgs = 'm:t:f'
-    longArgs = ['molecule=', 'tiamat-version=', 'print-force-file']
+    shortArgs = 'd:m:t:f'
+    longArgs = ['default-base=', 'molecule=', 'tiamat-version=', 'print-force-file']
     
     # for some reason, files originally made in T1 have a different .json form than T2
     # it would be possible to rewrite all the parameters to fix it, but tossing a factor
@@ -338,6 +350,16 @@ def parse_options():
                     exit(1)
             elif k[0] == '-t' or k[0] == '--tiamat-version':
                 tiamat_version = int(k[1])
+            elif k[0] == '-d' or k[0] == '--default-base':
+                db = k[1].upper()
+                if db != 'R' and db not in DNA_BASES:
+                    try:
+                        int(k[1])
+                    except Exception:
+                        print >> sys.stderr, "Invalid default base value '%s'. The only accepted values are %s, R or an integer)" % (k[1], ", ".join(DNA_BASES))
+                        exit(1)
+                        
+                Base.default_val = db
             elif k[0] == '-f' or k[0] == '--print-force-file':
                 opts['print_force_file'] = True
             
@@ -351,22 +373,22 @@ def parse_options():
         else:
             print >> sys.stderr, "The argument of '%s' should be either '1' or '2' (got '%s' instead)" % (k[0], k[1])
             exit(1)
+
+        opts['tiamat_file'] = positional_args[0]
             
         print >> sys.stderr, "## Assuming Tiamat version %d" % tiamat_version
-            
-        opts['tiamat_file'] = positional_args[0]
         
     except Exception:
         print_usage()
-        
+    
     return opts
 
 
 if __name__ == '__main__':
     opts = parse_options()
 
-    top_file_name = opts['tiamat_file'] + ".top"
-    conf_file_name = opts['tiamat_file'] + ".oxdna"
+    topology_file = opts['tiamat_file'] + ".top"
+    configuration_file = opts['tiamat_file'] + ".oxdna"
     force_file_name = opts['tiamat_file'] + ".forces.txt"
     
     # read and parse json
@@ -381,13 +403,14 @@ if __name__ == '__main__':
     define_connections(strands)
     
     # # build topology file first 
-    write_topology_file(strands, top_file_name)
+    write_topology_file(strands, topology_file)
 
     # write forces file
     if opts['print_force_file']:
         write_force_file(strands, force_file_name)
     
     # work on the configuration file 
-    write_configuration_file(strands, conf_file_name, opts)
+    write_configuration_file(strands, configuration_file, opts)
     
-#     print("wrote files", top_file_name, conf_file_name, force_file_name)
+    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
+    print >> sys.stderr, "## DONE"

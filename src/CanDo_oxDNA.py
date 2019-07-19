@@ -5,7 +5,6 @@ import sys
 import numpy as np
 
 
-import libs.base as base
 from libs.readers import LorenzoReader
 
 BASE_SHIFT = 1.13
@@ -118,7 +117,6 @@ class Strand:
                     last_assigned = b.cm_pos
                 else:
                     new_assigned = b.cm_pos
-                    N = len(unassigned)
                     v = np.array(new_assigned) - cm
                     v = normalize(v)
 
@@ -138,40 +136,35 @@ def reconstruct_strands(three_ends, bases):
     strands = []
     strand_id = 0
     added = []
-    for id in three_ends:
+    for s_id in three_ends:
         s = Strand(strand_id)
         strand_id += 1
-        b = bases[id]
-        added.append(id)
+        b = bases[s_id]
+        added.append(s_id)
         s.add_base_at_5_prime(b)
-        next = b.get_5prime()
-        while next != -1:
-            b = bases[next]
+        s_next = b.get_5prime()
+        while s_next != -1:
+            b = bases[s_next]
             s.add_base_at_5_prime(b)
-            added.append(next)
-            next = b.get_5prime()
+            added.append(s_next)
+            s_next = b.get_5prime()
         strands.append(s)
     
-    # print sorted(added)
-    # print 'Added', len(strands)
-    # print 'Three ends',three_ends
     if(len(bases) != len(added)):  # maybe circular strands?
         s = None
-        for id, b in bases.items():
-            if id not in added:  # maybe new strand:
+        for b_id, b in bases.items():
+            if b_id not in added:  # maybe new strand:
                 s = Strand(strand_id)
-                start = id
+                start = b_id
                 strand_id += 1
                 s.add_base_at_5_prime(b)
-                added.append(id)
-                # print 'Adding', next
-                next = b.get_5prime()
-                while next != -1 and next != start and next not in added:
-                    nb = bases[next]
+                added.append(b_id)
+                b_next = b.get_5prime()
+                while b_next != -1 and b_next != start and b_next not in added:
+                    nb = bases[b_next]
                     s.add_base_at_5_prime(nb)
-                    added.append(next)
-                    # print 'Adding', next
-                    next = nb.get_5prime()
+                    added.append(b_next)
+                    b_next = nb.get_5prime()
                     
                     if len(added) > len(bases.keys()):
                         raise Exception("error while processing circular strand")
@@ -242,7 +235,7 @@ def get_mutual_force(id1, id2, stiffness=0.1):
     return s
 
 
-def load_cando(opts, invert_preference=False):
+def load_and_convert(opts, invert_preference=False):
     cando_file = opts['cando_file']
     box = opts['box']
     # loads cando file into oxDNA system
@@ -294,12 +287,12 @@ def load_cando(opts, invert_preference=False):
         vals = line.strip().split(',')
 
         # print vals
-        id = int(vals[0])
+        t_id = int(vals[0])
         vectors = [float(v) for v in vals[1:]]
         e1 = np.array(vectors[0:3])
         e2 = np.array(vectors[3:6])
         e3 = np.array(vectors[6:9])
-        triads[id] = [e1, e2, e3]
+        triads[t_id] = [e1, e2, e3]
 
     # find paired nucletides
     pair_ids = {}
@@ -406,22 +399,15 @@ def parse_options():
 if __name__ == '__main__':
     opts = parse_options()
     
-    s = load_cando(opts)
+    s = load_and_convert(opts)
     r = LorenzoReader(opts['cando_file'] + '.top', opts['cando_file'] + '.oxdna')
     mys = r.get_system()
-    # print 'Direction is',abs(np.dot(mys._strands[0]._nucleotides[0]._a3, mys._strands[0]._nucleotides[1]._a3) )
     refdir = mys._strands[0]._nucleotides[1].get_pos_base() - mys._strands[0]._nucleotides[0].get_pos_base()
     refdir /= np.sqrt(np.dot(refdir, refdir))
     ref_angle = np.dot(mys._strands[0]._nucleotides[0]._a3, refdir) 
-    # print 'Direction to a3 is', np.dot(mys._strands[0]._nucleotides[0]._a3,refdir ) 
-    # print 'Direction is',abs(np.dot(mys._strands[0]._nucleotides[0]._a2, mys._strands[0]._nucleotides[1]._a2) )
-    # 
     if ref_angle < 0 and abs(ref_angle) > 0.8:  # likely selected the wrong orientation for preferred nucleotide!
-        # print 'This is the wrong choice of axes, trying other option'
         Strand.base_counter = 0
-        s = load_cando(opts, invert_preference=True)
+        s = load_and_convert(opts, invert_preference=True)
 
-    # write_topology(s,candofile+'.top')
-    
     print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (opts['cando_file'] + '.oxdna', opts['cando_file'] + '.top')
     print >> sys.stderr, "## DONE"
