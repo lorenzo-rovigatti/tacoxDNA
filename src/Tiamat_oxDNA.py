@@ -3,11 +3,15 @@
 import sys
 from json import load
 import numpy as np
+import random
+
+DNA_BASES = ['A', 'C', 'G', 'T']
 
 
 # TODO: use the stuff in base.py
 class Base(object):
     scale = 1 / 0.85
+    default_val = 'R'
     
     def __init__(self, local_id, base_info):
         self.base_info = base_info
@@ -16,7 +20,14 @@ class Base(object):
         self.up = None
         self.down = None
         self.across = None
-        self.val = base_info['type'][0]
+        try:
+            self.val = base_info['type'][0]
+        except:
+            if Base.default_val == 'R':
+                self.val = random.choice(DNA_BASES)
+            else:
+                self.val = Base.default_val
+            print >> sys.stderr, "WARNING: base n.%s has no associated type, setting it to '%s'" % (self.global_id, self.val)
         self.pos = np.array(base_info['position'])
 
     def __get_connected_id(self, neighbor):
@@ -301,15 +312,16 @@ def print_usage():
         print >> sys.stderr, "USAGE:"
         print >> sys.stderr, "\t%s Tiamat_json_file" % sys.argv[0]
         print >> sys.stderr, "\t[-m\--molecule=DNA|RNA]"
-        print >> sys.stderr, "\t[-t\--tiamat-version=2]"
-        print >> sys.stderr, "\t[-f\--print-force-file]\n\n"
-        print >> sys.stderr, "\tThe defaults options are --molecule=DNA and --tiamat-version=1"
+        print >> sys.stderr, "\t[-t\--tiamat-version=1|2]"
+        print >> sys.stderr, "\t[-t\--default-base=A|C|G|T|R|i (R = random, i = any integer)]"
+        print >> sys.stderr, "\t[-f\--print-force-file]\n"
+        print >> sys.stderr, "\tThe defaults options are --molecule=DNA, --tiamat-version=1, --default-base=R"
         exit(1)
 
 
 def parse_options():
-    shortArgs = 'm:t:f'
-    longArgs = ['molecule=', 'tiamat-version=', 'print-force-file']
+    shortArgs = 'd:m:t:f'
+    longArgs = ['default-base=', 'molecule=', 'tiamat-version=', 'print-force-file']
     
     # for some reason, files originally made in T1 have a different .json form than T2
     # it would be possible to rewrite all the parameters to fix it, but tossing a factor
@@ -338,6 +350,16 @@ def parse_options():
                     exit(1)
             elif k[0] == '-t' or k[0] == '--tiamat-version':
                 tiamat_version = int(k[1])
+            elif k[0] == '-d' or k[0] == '--default-base':
+                db = k[1].upper()
+                if db != 'R' and db not in DNA_BASES:
+                    try:
+                        int(k[1])
+                    except Exception:
+                        print >> sys.stderr, "Invalid default base value '%s'. The only accepted values are %s, R or an integer)" % (k[1], ", ".join(DNA_BASES))
+                        exit(1)
+                        
+                Base.default_val = db
             elif k[0] == '-f' or k[0] == '--print-force-file':
                 opts['print_force_file'] = True
             
@@ -358,7 +380,7 @@ def parse_options():
         
     except Exception:
         print_usage()
-        
+    
     return opts
 
 
