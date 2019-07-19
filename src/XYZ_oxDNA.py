@@ -109,35 +109,35 @@ if __name__ == '__main__':
 	for c in range(0, nbases): 
 		ind = c 
 		ind1 = (c + 1) % nbases
-                #open chain cannot compute dist at c=nbases-1 
-                #so we use as reference the previus dist
-                if opts.closed or (not opts.closed and c!=nbases-1):	
-		    dist[ind, :] = coordxyz[ind1, :] - coordxyz[ind, :]
-		    dist_norm[ind, :] = dist[ind, :] / la.norm(dist[ind, :])
-                else:
-                    dist[ind, :] = dist[ind-1, :]
-                    dist_norm[ind, :] = dist_norm[ind-1, :]
+		#open chain cannot compute dist at c=nbases-1 
+		#so we use as reference the previus dist
+		if opts.closed or (not opts.closed and c!=nbases-1):	
+			dist[ind, :] = coordxyz[ind1, :] - coordxyz[ind, :]
+			dist_norm[ind, :] = dist[ind, :] / la.norm(dist[ind, :])
+		else:
+			dist[ind, :] = dist[ind-1, :]
+			dist_norm[ind, :] = dist_norm[ind-1, :]
 
 	# vectors perpendicular between two consecutive centerline vectors (normalized)
 	for c in range(0, nbases): 
 		ind_1 = (c - 1 + nbases) % nbases 
 		ind = c
 			
-                #opens chain have random p at c=0 and at c=nbases-1 due to absence of neighbours
-                if opts.closed or (not opts.closed and c!=0 and c!=nbases-1):
-                    #check that dist[ind_1, :] and dist[ind, :] are not equals
-                    if not np.all(np.isclose( dist[ind_1, :] , dist[ind, :]) ):
-                        p[ind, :] = np.cross(dist[ind_1, :] , dist[ind, :])
-                        p[ind, :] /= la.norm(p[ind, :])
-                    #else assign random p
-                    else:
-                        rv=np.random.uniform(-1,1,3)
-                        p[ind, :] = rv - (np.dot(dist_norm[ind, :],rv)) * dist_norm[ind, :]
-                        p[ind, :] /= la.norm(p[ind, :])
-                else:
-	            rv=np.random.uniform(-1,1,3)
-                    p[ind, :] = rv - (np.dot(dist_norm[ind, :],rv)) * dist_norm[ind, :]
-                    p[ind, :] /= la.norm(p[ind, :])
+		#opens chain have random p at c=0 and at c=nbases-1 due to absence of neighbours
+		if opts.closed or (not opts.closed and c!=0 and c!=nbases-1):
+			#check that dist[ind_1, :] and dist[ind, :] are not equals
+			if not np.all(np.isclose( dist[ind_1, :] , dist[ind, :]) ):
+				p[ind, :] = np.cross(dist[ind_1, :] , dist[ind, :])
+				p[ind, :] /= la.norm(p[ind, :])
+			#else assign random p
+			else:
+				rv=np.random.uniform(-1,1,3)
+				p[ind, :] = rv - (np.dot(dist_norm[ind, :],rv)) * dist_norm[ind, :]
+				p[ind, :] /= la.norm(p[ind, :])
+		else:
+			rv=np.random.uniform(-1,1,3)
+			p[ind, :] = rv - (np.dot(dist_norm[ind, :],rv)) * dist_norm[ind, :]
+			p[ind, :] /= la.norm(p[ind, :])
 
 	# chain writhe
 	WR = 0.
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 	#First hydrogen-hydrogen bond vector
 	v_perp_ssdna1[0, :] = np.cross(dist_norm[0, :], p[0, :]) 
 	v_perp_ssdna1[0, :] /= la.norm(v_perp_ssdna1[0, :])
-        v_perp_ssdna2[0, :] = -v_perp_ssdna1[0, :]
+	v_perp_ssdna2[0, :] = -v_perp_ssdna1[0, :]
 	
 	for c in range(nbases): 
 		#dna center of mass positions
@@ -185,16 +185,15 @@ if __name__ == '__main__':
 		
 		alpha = top.py_ang(v_perp_ssdna1[ind_1, :] , p[ind, :] , dist[ind_1, :])
 		gamma = rot_base - alpha
-                #prevent change when ind=0 on open chain
-                if c!=nbases-1:		
-                    R = utils.get_rotation_matrix(dist[ind, :], gamma)
-                    v_perp_ssdna1[ind, :] = np.dot(R , p[ind, :])  
-                    v_perp_ssdna2[ind, :] = -v_perp_ssdna1[ind, :]
+		#prevent change when ind=0 on open chain
+		if c!=nbases-1:		
+			R = utils.get_rotation_matrix(dist[ind, :], gamma)
+			v_perp_ssdna1[ind, :] = np.dot(R , p[ind, :])  
+			v_perp_ssdna2[ind, :] = -v_perp_ssdna1[ind, :]
 		
 	# check LK imposed and measured
-        if opts.closed:
-            TW_measured = top.get_twist(coordxyz, ssdna1)
-            
+	if opts.closed:
+		TW_measured = top.get_twist(coordxyz, ssdna1)
 	box = np.array([boxmax, boxmax, boxmax])
 	system = base.System(box)
 	
@@ -239,4 +238,9 @@ if __name__ == '__main__':
 		system.add_strand(strand2)
 		
 	basename = os.path.basename(sys.argv[1])
-	system.print_lorenzo_output(basename + ".oxdna", basename + ".top")
+	topology_file = basename + ".top"
+	configuration_file = basename + ".oxdna"
+	system.print_lorenzo_output(configuration_file, topology_file)
+	
+	print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
+	print >> sys.stderr, "## DONE"

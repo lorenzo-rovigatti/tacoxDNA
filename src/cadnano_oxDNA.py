@@ -7,6 +7,7 @@ from libs import utils
 import libs.cadnano_utils as cu
 import re
 import os
+from numpy.compat.setup import configuration
 
 DEBUG = 0
 DIST_HEXAGONAL = 2.55  # distance between centres of virtual helices (hexagonal array)
@@ -1029,5 +1030,11 @@ if __name__ == '__main__':
         vh_vb2nuc_rev.add_stap(vh, vb, strandii, rev_nuciis)
 
     basename = os.path.basename(sys.argv[1])
-    rev_sys.print_lorenzo_output(basename + ".oxdna", basename + ".top")
+    topology_file = basename + ".top"
+    configuration_file = basename + ".oxdna"
+    
+    rev_sys.print_lorenzo_output(configuration, topology_file)
+    
+    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
+    print >> sys.stderr, "## DONE"
     

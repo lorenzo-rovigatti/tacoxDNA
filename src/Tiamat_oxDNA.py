@@ -188,7 +188,7 @@ class NoBase(Base):
         return self  # Returns itself to reduce memory consumtion 
 
 
-def write_topology_file(strands, top_file_name):
+def write_topology_file(strands, topology_file):
     # setup the topology header 
     top_lines = [
         '%d %d' % (len(bases), len(strands))  # number of bases, number of strands
@@ -202,7 +202,7 @@ def write_topology_file(strands, top_file_name):
             )
 
     # spit out topology file
-    with open(top_file_name, "w") as f_out:
+    with open(topology_file, "w") as f_out:
         f_out.write('\n'.join(top_lines))
 
 
@@ -220,7 +220,7 @@ def write_force_file(strands, force_file_name):
         f_out.write("\n".join(lines))
 
 
-def write_configuration_file(strands, conf_file_name, opts):
+def write_configuration_file(strands, configuration_file, opts):
     # Decide on a box size based on strand length and number of strands - there's not a good way to do this blind
     # Need to know strand lengths, organization, shape
     # strand_lengths = map(len, strands)
@@ -293,7 +293,7 @@ def write_configuration_file(strands, conf_file_name, opts):
                 ])
             )
     # spit out the configuration file 
-    with open(conf_file_name, 'w') as f_out: 
+    with open(configuration_file, 'w') as f_out: 
         f_out.write('\n'.join(configuration_lines) + "\n")
     
 
@@ -303,7 +303,7 @@ def print_usage():
         print >> sys.stderr, "\t[-m\--molecule=DNA|RNA]"
         print >> sys.stderr, "\t[-t\--tiamat-version=2]"
         print >> sys.stderr, "\t[-f\--print-force-file]\n\n"
-        print >> sys.stderr, "\tThe defaults options are --molecule=DNA and --tiamat-version=1\n"
+        print >> sys.stderr, "\tThe defaults options are --molecule=DNA and --tiamat-version=1"
         exit(1)
 
 
@@ -351,10 +351,10 @@ def parse_options():
         else:
             print >> sys.stderr, "The argument of '%s' should be either '1' or '2' (got '%s' instead)" % (k[0], k[1])
             exit(1)
+
+        opts['tiamat_file'] = positional_args[0]
             
         print >> sys.stderr, "## Assuming Tiamat version %d" % tiamat_version
-            
-        opts['tiamat_file'] = positional_args[0]
         
     except Exception:
         print_usage()
@@ -365,8 +365,8 @@ def parse_options():
 if __name__ == '__main__':
     opts = parse_options()
 
-    top_file_name = opts['tiamat_file'] + ".top"
-    conf_file_name = opts['tiamat_file'] + ".oxdna"
+    topology_file = opts['tiamat_file'] + ".top"
+    configuration_file = opts['tiamat_file'] + ".oxdna"
     force_file_name = opts['tiamat_file'] + ".forces.txt"
     
     # read and parse json
@@ -381,13 +381,14 @@ if __name__ == '__main__':
     define_connections(strands)
     
     # # build topology file first 
-    write_topology_file(strands, top_file_name)
+    write_topology_file(strands, topology_file)
 
     # write forces file
     if opts['print_force_file']:
         write_force_file(strands, force_file_name)
     
     # work on the configuration file 
-    write_configuration_file(strands, conf_file_name, opts)
+    write_configuration_file(strands, configuration_file, opts)
     
-#     print("wrote files", top_file_name, conf_file_name, force_file_name)
+    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
+    print >> sys.stderr, "## DONE"
