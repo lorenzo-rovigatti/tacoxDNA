@@ -12,7 +12,7 @@ from numpy.compat.setup import configuration
 DEBUG = 0
 DIST_HEXAGONAL = 2.55  # distance between centres of virtual helices (hexagonal array)
 DIST_SQUARE = 2.60  # distance between centres of virtual helices (square array)
-BOX_FACTOR = 2  # factor by which to expand the box(linear dimension)
+BOX_FACTOR = 2  # factor by which to expand the box (linear dimension)
 
 
 class vh_nodes(object):
@@ -29,8 +29,7 @@ class vh_nodes(object):
             self.begin.append(begin_index)
 
     def add_end(self, end_index):
-        # the first condition tries to mitigate a crash that occurs whenever self.begin and self.end have the same length at the end of the generation procedure
-        if len(self.begin) != len(self.end) or end_index not in self.end:
+        if end_index not in self.end:
             self.end.append(end_index)
 
 
@@ -48,22 +47,16 @@ def insert_loop_skip(strands, start_pos, direction, perp, rot, helix_angles, vhe
     # return a double strand which is a copy of the double strand in the first argument, but with skips and loops
 
     # strand is generated right to left i.e. opposite direction to even vhelix
-    g = cu.StrandGenerator()
     length_change = []
     length_change_total = 0
     new_nodes = vh_nodes()
     new_angle = []
-    helix_angles_new = np.array(range(len(helix_angles)), dtype=float)
-    for i in range(len(helix_angles)):
-        helix_angles_new[i] = helix_angles[i]
+    helix_angles_new = np.copy(helix_angles)
 
     if vhelix.num % 2 == 1:
         reverse_nodes = vh_nodes()
-        for i in range(len(nodes.begin)):
-            reverse_nodes.add_begin(nodes.begin[i])
-            reverse_nodes.add_end(nodes.end[i])
-        reverse_nodes.begin.reverse()
-        reverse_nodes.end.reverse()
+        reverse_nodes.begin = list(reversed(nodes.begin))
+        reverse_nodes.end = list(reversed(nodes.end))
 
     for i in range(len(nodes.begin)):
         # ltr: left to right; looking at the strand left to right (low to high square index), the beginning/end of the effective strand is here (before skips/loops)
@@ -131,6 +124,7 @@ def insert_loop_skip(strands, start_pos, direction, perp, rot, helix_angles, vhe
                 helix_angles_new = np.insert(helix_angles_new, begin_gs - deleted + inserted, new_angle[i])
                 inserted_this_iteration += 1
                 
+    g = cu.StrandGenerator()
     new_strands = g.generate_or_sq(len(helix_angles_new) + 1, start_pos=start_pos, direction=direction, perp=perp, double=True, rot=rot, angle=helix_angles_new, length_change=length_change, region_begin=new_nodes.begin, region_end=new_nodes.end)
     if use_seq:
         try:
@@ -153,7 +147,7 @@ def insert_loop_skip(strands, start_pos, direction, perp, rot, helix_angles, vhe
     return new_strands
 
 
-def add_slice(cuda_system, vhelix, begin, end, nodes, strands, pos, direction, perp, rot, helix_angles, strand_type, use_seq, seqs):
+def add_slice(current_system, vhelix, begin, end, nodes, strands, pos, direction, perp, rot, helix_angles, strand_type, use_seq, seqs):
     # add a slice of the virtual helix to the slice system, taking into account skips and loops
     length_change_begin = 0
     length_change_end = 0
@@ -187,8 +181,8 @@ def add_slice(cuda_system, vhelix, begin, end, nodes, strands, pos, direction, p
         end_slice = vhelix.len - end + length_change_end
 
     new_strands = insert_loop_skip(strands, pos, direction, perp, rot, helix_angles, vhelix, nodes, use_seq, seqs)
-    cuda_system.add_strand(new_strands[strand_type].get_slice(begin_slice, end_slice), check_overlap=False)
-    return cuda_system
+    current_system.add_strand(new_strands[strand_type].get_slice(begin_slice, end_slice), check_overlap=False)
+    return current_system
 
 
 def add_slice_nupack(vhelix, strand_number, begin_helix, end_helix, index_lookup, strand_type):
@@ -247,7 +241,7 @@ def add_slice_nupack(vhelix, strand_number, begin_helix, end_helix, index_lookup
 
 def build_nodes(vh):
     # returns a vh_nodes object which contains the beginning and end square indices of each effective strand. Effective strands
-    # on a given vhelix are a combination of information on staple and scaffold strands which. Together they tell us which
+    # on a given vhelix are a combination of information on staple and scaffold strands. Together they tell us which
     # nucleotides need to be held constant when we alter the angles/base-base distances for a section of nucleotides along a final strand
     nodes = vh_nodes()
     if vh.num % 2 == 0:
@@ -306,7 +300,7 @@ def build_nodes(vh):
                 elif vh.stap[i].type(vh, i) == 'end':
                     nodes.add_begin(i)
                     nodes.add_end(i - 1 * direction)
-
+                    
     return nodes
 
 
@@ -631,7 +625,10 @@ def parse_cadnano(path):
             for vstrand in cadnano["vstrands"]:
                 vh = vhelix()
                 for key, val in vstrand.items():
-                    setattr(vh, key, val)
+                    if key == "skip":
+                        vh.skip = [abs(int(x)) for x in val]
+                    else:
+                        setattr(vh, key, val)
                 vh.stap = [square(*i) for i in vh.stap]
                 vh.scaf = [square(*i) for i in vh.scaf]
                 vh.skiploop_bases = len(vh.skip) + sum(vh.loop) - sum(vh.skip)
@@ -736,7 +733,7 @@ if __name__ == '__main__':
     vhelix_counter = 0
     if not side:
         side = cadsys.bbox()
-        base.Logger.log("Using default box size, a factor %s larger than size of cadnano system" % str(BOX_FACTOR), base.Logger.INFO)
+        base.Logger.log("Using default box size, a factor %s larger than the size of the cadnano system" % str(BOX_FACTOR), base.Logger.INFO)
     vhelix_direction_initial = np.array([0., 0., 1.])
     vhelix_perp_initial = np.array([1., 0., 0.])
     if origami_sq:
@@ -935,7 +932,7 @@ if __name__ == '__main__':
             backbone_backbone_dist = strand1._nucleotides[-1].distance(strand2._nucleotides[0], PBC=False)
             absolute_bb_dist = np.sqrt(np.dot(backbone_backbone_dist, backbone_backbone_dist))
             if absolute_bb_dist > 1.0018 or absolute_bb_dist < 0.5525:
-                base.Logger.log("backbone-backbone distance across join the wrong length: %f" % absolute_bb_dist, base.Logger.WARNING)
+                base.Logger.log("the backbone-backbone distance across joints is %f: it will have to be relaxed with preliminary simulations" % absolute_bb_dist, base.Logger.WARNING)
 
         # match up all the pairs of joins that involve the same strand
         circular = []
