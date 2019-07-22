@@ -109,6 +109,7 @@ The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes mes
 
 * if the PDB file contains more than one MODEL, only the first one will be converted
 * if the PDB file contains alternate locations for some (or all) of the atoms, only those marked with either "1" or "A" will be considered. If the PDB file uses a different notation, the script may fail or crash
+* sometimes, sugar atoms are marked with asterisks (\*) instead of single quotes ('). In these cases the converter replaces the former with the latter and moves on
 
 ### Mandatory arguments
 * The input PDB file
