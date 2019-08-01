@@ -315,7 +315,7 @@ def print_usage():
         print >> sys.stderr, "\t[-t\--tiamat-version=1|2]"
         print >> sys.stderr, "\t[-t\--default-base=A|C|G|T|R|i (R = random, i = any integer)]"
         print >> sys.stderr, "\t[-f\--print-force-file]\n"
-        print >> sys.stderr, "\tThe defaults options are --molecule=DNA, --tiamat-version=1, --default-base=R"
+        print >> sys.stderr, "\tThe defaults options are --molecule=DNA, --tiamat-version=2, --default-base=R"
         exit(1)
 
 
@@ -332,7 +332,7 @@ def parse_options():
         "print_force_file" : False
     }
     
-    tiamat_version = 1
+    tiamat_version = 2
     try:
         import getopt
         args, positional_args = getopt.gnu_getopt(sys.argv[1:], shortArgs, longArgs)

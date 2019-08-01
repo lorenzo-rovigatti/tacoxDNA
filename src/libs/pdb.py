@@ -47,15 +47,20 @@ class Nucleotide(object):
         return self.base_atoms + self.phosphate_atoms + self.sugar_atoms
 
     def add_atom(self, a):
-        if 'P' in a.name or a.name == "HO5'": self.phosphate_atoms.append(a)
-        elif "'" in a.name: self.sugar_atoms.append(a)
-        else: self.base_atoms.append(a)
+        if 'P' in a.name or a.name == "HO5'": 
+            self.phosphate_atoms.append(a)
+        elif "'" in a.name: 
+            self.sugar_atoms.append(a)
+        else: 
+            self.base_atoms.append(a)
         
         self.named_atoms[a.name] = a
-        if self.chain_id == None: self.chain_id = a.chain_id
+        if self.chain_id == None: 
+            self.chain_id = a.chain_id
 
     def get_com(self, atoms=None):
-        if atoms == None: atoms = self.atoms
+        if atoms == None: 
+            atoms = self.atoms
         com = np.array([0., 0., 0.])
         for a in atoms:
             com += a.pos
@@ -186,6 +191,10 @@ class Atom(object):
         object.__init__(self)
         # http://cupnet.net/pdb-format/
         self.name = pdb_line[12:16].strip()
+        # some PDB files have * in place of '
+        if "*" in self.name:
+            self.name = self.name.replace("*", "'")
+        
         self.alternate = pdb_line[16]
         self.residue = pdb_line[17:20].strip()
         self.chain_id = pdb_line[21:22].strip()

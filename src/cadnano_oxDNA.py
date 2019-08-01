@@ -1030,7 +1030,7 @@ if __name__ == '__main__':
     topology_file = basename + ".top"
     configuration_file = basename + ".oxdna"
     
-    rev_sys.print_lorenzo_output(configuration, topology_file)
+    rev_sys.print_lorenzo_output(configuration_file, topology_file)
     
     print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
     print >> sys.stderr, "## DONE"
