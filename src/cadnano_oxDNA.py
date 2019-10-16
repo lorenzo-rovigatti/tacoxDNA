@@ -7,7 +7,6 @@ from libs import utils
 import libs.cadnano_utils as cu
 import re
 import os
-from numpy.compat.setup import configuration
 
 DEBUG = 0
 DIST_HEXAGONAL = 2.55  # distance between centres of virtual helices (hexagonal array)

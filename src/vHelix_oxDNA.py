@@ -1,5 +1,5 @@
 import numpy as np
-import sys, os, subprocess, math, re
+import sys, os, math, re
 from collections import OrderedDict
 
 
@@ -32,10 +32,9 @@ def GetMatrix(gamma, beta, alpha):
     return R
 
 
-def export_oxDNA(ma_file,box_size):
+def export_oxDNA(ma_file, box_size):
     base_parents = OrderedDict()
     base_names = []
-    base_types = []
     vHelix_names = []
     first_base_parents = OrderedDict()
     dups = []
@@ -53,9 +52,6 @@ def export_oxDNA(ma_file,box_size):
     base_translation = np.array([1, 1, 1])
     base_type = 5
     base_number = 0
-
-
-    first_last_base = np.zeros((5,), dtype=np.int)  # ERIK
 
     vHelixFile = open(ma_file, "r").readlines()
     for line in vHelixFile:
@@ -226,7 +222,6 @@ def export_oxDNA(ma_file,box_size):
             strand_list.append([base1, base2])
         counter += 1
 
-
     moves = 1
     while moves != 0:
         moves = 0
@@ -286,7 +281,6 @@ def export_oxDNA(ma_file,box_size):
             own_base_type = base_types[name_line]
 
             own_parent = base_parents[name_line]
-            own_parent_index = vHelix_names.index(own_parent)
             own_parent_translation = helix_trans[own_parent]
             own_parent_rotation = helix_rot[own_parent]
             try:
@@ -357,7 +351,6 @@ def export_oxDNA(ma_file,box_size):
                         new_backw_pos[0] == 0 and new_backw_pos[1] == 0 and new_backw_pos[2] == 0):
                 print("total_is_zero", name_line, partner_base)
 
-
     i = -1
     for line in base_names:
         i += 1
@@ -366,7 +359,6 @@ def export_oxDNA(ma_file,box_size):
             base_pos = base_trans[line]
             base_CoMs[line] = base_pos
             parent = base_parents[line]
-            parent_index = vHelix_names.index(parent)
             parent_translation = helix_trans[parent]
             parent_rotation = helix_rot[parent]
             rot_mat = GetMatrix(parent_rotation[0], parent_rotation[1], parent_rotation[2])
@@ -462,7 +454,6 @@ def export_oxDNA(ma_file,box_size):
         i = 0
         for base in strand:
             i += 1
-            base_index = base_names.index(base)
             base_numbers.append(base_types[base])
             a1.append(base_a1s[base])
             pos.append(new_base_trans[base])
@@ -479,26 +470,10 @@ def export_oxDNA(ma_file,box_size):
             topology.append("%s %s %s %s" % (strand_number, base, low, up))
             # print len (base_letters), len(lower_neighbour_list), len(upper_neighbour_list), len (strand_a3)
 
-    # Set condition to true if you want to keep the .ma file's name for the .conf and .top files.
-    if True:
-        if ma_file.endswith('.ma'):
-            ma_file = ma_file[:-3]
-            conf_file = ma_file + '.conf'
-            top_file = ma_file + '.top'
-            end_base_file = ma_file + 'end_bases.txt'
-    else:
-        conf_file = ma_file + 'prova.conf'
-        top_file = ma_file + 'prova.top'
-        end_base_file = ma_file + 'end_bases.txt'
+    basename = os.path.basename(sys.argv[1])
+    top_file = basename + ".top"
+    conf_file = basename + ".oxdna"
 
-    if os.path.isfile(conf_file):
-        os.remove(conf_file)
-
-    if os.path.isfile(top_file):
-        os.remove(top_file)
-
-    if os.path.isfile(end_base_file):
-        os.remove(end_base_file)
     topology_file = open(top_file, "w")
     topology_file.close()
 
@@ -525,17 +500,16 @@ def export_oxDNA(ma_file,box_size):
             string = "%s %s %s 0 0 0 0 0 0" % (pos, versora, a3_versor)
             conf.write("%s \n" % string)
 
-    print("written conf_file and top_file")
+    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (conf_file, top_file)
+    print >> sys.stderr, "## DONE"
 
 
 def parse_options():
     shortArgs = 'b:'
     longArgs = ['box=']
 
-
     opts = {
         "box": 100.,
-
     }
 
     try:
@@ -549,12 +523,14 @@ def parse_options():
                 except ValueError:
                     print >> sys.stderr, "The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1])
                     exit(1)
-
+                    
+        opts['vHelix_file'] = positional_args[0]
 
     except Exception:
         print_usage()
 
     return opts
+
 
 def print_usage():
     print >> sys.stderr, "USAGE:"
@@ -563,23 +539,13 @@ def print_usage():
     exit(1)
 
 
-
 if __name__ == '__main__':
-
-
-
-
     if len(sys.argv) < 1:
         print_usage()
 
-
-    source_file = sys.argv[1]
-
-
-
-
-
     opts = parse_options()
-
+    
+    source_file = opts['vHelix_file']
     box_size = opts['box']
-    export_oxDNA(source_file,box_size)
+    
+    export_oxDNA(source_file, box_size)
