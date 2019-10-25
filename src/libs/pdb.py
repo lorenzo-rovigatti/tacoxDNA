@@ -29,7 +29,7 @@ class Nucleotide(object):
             self.base = NAME_TO_BASE[self.name]
         elif self.name in BASES:
             if self.name == "U" and not Nucleotide.RNA_warning_printed:
-                print >> sys.stderr, "WARNING: uracil detected: Use at your own risk"
+                print >> sys.stderr, "WARNING: unsupported uracil detected: use at your own risk"
                 Nucleotide.RNA_warning_printed = True
                 
             self.base = self.name
