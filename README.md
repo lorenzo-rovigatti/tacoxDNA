@@ -2,7 +2,7 @@
 
 tacoxDNA (Tools and Converters for oxDNA) is a collection of tools initially developed to help [oxDNA](http://dna.physics.ox.ac.uk/) users. However, it will soon be expanded so as to support additional models. If you use tacoxDNA, please consider citing the following article:
 
-A. Suma, E. Poppleton, M. Matthies, P. Šulc, F. Romano, A. A. Louis, J. P. K. Doye, C. Micheletti and L. Rovigatti, ["TacoxDNA: A user‐friendly web server for simulations of complex DNA structures, from single strands to origami"](https://doi.org/10.1002/jcc.26029), *J. Comput. Chem.* (2019)
+A. Suma, E. Poppleton, M. Matthies, P. Šulc, F. Romano, A. A. Louis, J. P. K. Doye, C. Micheletti and L. Rovigatti, ["TacoxDNA: A user‐friendly web server for simulations of complex DNA structures, from single strands to origami"](https://doi.org/10.1002/jcc.26029), *J. Comput. Chem.* **40**, 2586 (2019)
 
 The sections that follow introduce the tools and their usage.
 
@@ -14,6 +14,7 @@ The sections that follow introduce the tools and their usage.
 * [cadnano-to-oxDNA converter](#cadnano-to-oxdna-converter)
 * [CanDo-to-oxDNA converter](#cando-to-oxdna-converter)
 * [Tiamat-to-oxDNA converter](#tiamat-to-oxdna-converter)
+* [vHelix-to-oxDNA converter](#vhelix-to-oxdna-converter)
 
 ---
 
@@ -182,6 +183,23 @@ also print a file containing the specifics for a oxDNA-compatible set of externa
 ### Output
 * An oxDNA topology file (named by suffixing the Tiamat file with ".top")
 * An oxDNA configuration file (named by suffixing the Tiamat file with ".oxdna")
+
+---
+
+## vHelix-to-oxDNA converter
+
+The `vHelix_oxDNA.py` script converts [vHelix](http://www.vhelix.net/) files into oxDNA configurations. It takes one mandatory argument.
+
+### Mandatory arguments
+* The input vHelix file
+
+### Optional arguments
+* `-b\--box=VALUE`
+the length of the box side (in oxDNA simulation units) where the system will be placed (defaults to 100)
+
+### Output
+* An oxDNA topology file (named by suffixing the vHelix file with ".top")
+* An oxDNA configuration file (named by suffixing the vHelix file with ".oxdna")
 
 ---
 
