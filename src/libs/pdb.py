@@ -14,6 +14,7 @@ NAME_TO_BASE = {
         "CYT" : "C",
         "GUA" : "G",
         "THY" : "T",
+        "URA" : "U",
     }
 
 BASES = ["A", "T", "G", "C", "U"]
@@ -28,8 +29,7 @@ class Nucleotide(object):
             self.base = NAME_TO_BASE[self.name]
         elif self.name in BASES:
             if self.name == "U" and not Nucleotide.RNA_warning_printed:
-                print >> sys.stderr, "WARNING: uracil detected: since RNA is not supported, U will be treated as a T"
-                self.name = "T"
+                print >> sys.stderr, "WARNING: unsupported uracil detected: use at your own risk"
                 Nucleotide.RNA_warning_printed = True
                 
             self.base = self.name
@@ -91,7 +91,7 @@ class Nucleotide(object):
         self.a3 /= sqrt(np.dot(self.a3, self.a3))
 
     def compute_a1(self):
-        if "C" in self.name or "T" in self.name:
+        if "C" in self.name or "T" in self.name or "U" in self.name:
             pairs = [ ["N3", "C6"], ["C2", "N1"], ["C4", "C5"] ]
         else:
             pairs = [ ["N1", "C4"], ["C2", "N3"], ["C6", "C5"] ]
