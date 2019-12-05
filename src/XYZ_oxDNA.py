@@ -102,8 +102,7 @@ if __name__ == '__main__':
 	boxx = max(coordxyz[:nbases, 0]) - min(coordxyz[:nbases, 0])
 	boxy = max(coordxyz[:nbases, 1]) - min(coordxyz[:nbases, 1])
 	boxz = max(coordxyz[:nbases, 2]) - min(coordxyz[:nbases, 2])
-	boxmax = max(boxx, boxy, boxz) + 2.*BASE_BASE
-	
+	boxmax = 1.5 * max(boxx, boxy, boxz)
 	
 	# centerline base_to_base vectors
 	for c in range(0, nbases): 

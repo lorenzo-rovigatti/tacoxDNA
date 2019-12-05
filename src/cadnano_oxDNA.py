@@ -7,6 +7,7 @@ from libs import utils
 import libs.cadnano_utils as cu
 import re
 import os
+import pickle
 
 DEBUG = 0
 DIST_HEXAGONAL = 2.55  # distance between centres of virtual helices (hexagonal array)
@@ -650,17 +651,18 @@ if __name__ == '__main__':
     def print_usage():
         print >> sys.stderr, "USAGE:"
         print >> sys.stderr, "\t%s cadnano_file lattice_type" % sys.argv[0]
-        print >> sys.stderr, "\t[-s\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE]" 
+        print >> sys.stderr, "\t[-s\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc]" 
         exit(1)
         
     if len(sys.argv) < 3:
         print_usage()
         
-    shortArgs = 's:b:e:'
-    longArgs = ['sequence=', 'box=', 'seed=']
+    shortArgs = 's:b:e:p'
+    longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc']
     
     side = False
     sequence_filename = False
+    print_virt2nuc = False
     source_file = sys.argv[1]
     
     origami_sq = False
@@ -677,11 +679,16 @@ if __name__ == '__main__':
         import getopt
         args, files = getopt.gnu_getopt(sys.argv[3:], shortArgs, longArgs)
         for k in args:
-            if k[0] == '-q' or k[0] == "--sequence": sequence_filename = k[1]
-            if k[0] == '-b' or k[0] == "--box": 
+            if k[0] == '-q' or k[0] == "--sequence": 
+                sequence_filename = k[1]
+            elif k[0] == '-b' or k[0] == "--box": 
                 side = float(k[1])
                 base.Logger.log("The system will be put in a box of side %s (in oxDNA simulation units)" % str(side), base.Logger.INFO)
-            if k[0] == '-e' or k[0] == "--seed": np.random.seed(int(k[1]))
+            elif k[0] == '-e' or k[0] == "--seed": 
+                np.random.seed(int(k[1]))
+            elif k[0] == '-p' or k[0] == "--print-virt2nuc":
+                print_virt2nuc = True
+            
             
     except Exception:
         print_usage()
@@ -1024,6 +1031,16 @@ if __name__ == '__main__':
         for nucii in nuciis:
             rev_nuciis.append(len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii])
         vh_vb2nuc_rev.add_stap(vh, vb, strandii, rev_nuciis)
+        
+    # dump the spatial arrangement of the vhelices to a file
+    vhelix_pattern = {}
+    for i in range(len(cadsys.vhelices)):
+        vhelix_pattern[cadsys.vhelices[i].num] = (cadsys.vhelices[i].row,cadsys.vhelices[i].col)
+
+    if print_virt2nuc:
+        with open("virt2nuc", "w") as fout:
+            pickle.dump((vh_vb2nuc_rev, vhelix_pattern), fout)
+            print >> sys.stderr, "## Wrote nucleotides' index conversion data to virt2nuc"
 
     basename = os.path.basename(sys.argv[1])
     topology_file = basename + ".top"

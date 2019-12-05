@@ -306,7 +306,6 @@ class StrandGenerator (object):
         else:
             s2 = s2.get_slice (bp - offset - len(seqb), len(seqb))
 
-        # print >> sys.stderr, len(seqa), len(seqb), len(s1._nucleotides), len(s2._nucleotides)
         s1.set_sequence (seqa)
         s2.set_sequence (seqb)
 
@@ -337,7 +336,6 @@ class StrandGenerator (object):
                         overlap = True
             pos = trypos
             rw.append (pos)
-            # print >> sys.stderr, "# nucleotide", i + 1, "inserted"
         
         # we get the a1 vectors in a smart way
         a1s = []
@@ -355,8 +353,7 @@ class StrandGenerator (object):
         s = base.Strand()
         for i, r in enumerate(rw):
             a1, _, a3 = utils.get_orthonormalized_base (a1s[i], utils.get_random_vector(), utils.get_random_vector()) 
-            # print np.dot(a1, a1), np.dot(a2, a2), np.dot(a3, a3), np.dot(a1, a2), np.dot(a1, a3), np.dot(a2, a3)
-            # # POS_BACK is negative!
+            # we use abs since POS_BACK is negative
             cm = r + a1s[i] * abs(base.POS_BACK)
             s.add_nucleotide (base.Nucleotide (cm, a1, a3, sequence[i]))
         
@@ -409,7 +406,6 @@ class vhelix_vbase_to_nucleotide(object):
 
     def add_strand(self, add_strand, reference, continue_join = False):
         if self.add_scaf_strand(add_strand, reference, continue_join) and self.add_stap_strand(add_strand, reference, continue_join):
-            #base.Logger.log("while adding strand %s to vhelix_vbase_to_nucleotide object; either strand already present or strand not found in reference object" % add_strand, base.Logger.WARNING)
             return 1
         else:
             return 0
