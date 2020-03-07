@@ -329,7 +329,7 @@ class Strand():
         return ret
 
     def set_sequence(self, seq):
-        if isinstance (seq, str):
+        if isinstance(seq, str):
             seq = [base_to_number[x] for x in seq]
         if len(seq) != len(self._nucleotides):
             Logger.log ("Cannot change sequence: lengths don't match", Logger.WARNING)

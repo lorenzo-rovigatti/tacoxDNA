@@ -135,7 +135,7 @@ The `cadnano_oxDNA.py` script converts [cadnano](https://cadnano.org/) files int
 random seed for DNA sequence (defaults to a random value)
 * `-b\--box=VALUE`
 the length of the box side (in oxDNA simulation units) where the system will be placed
-* `-q\--sequence=SEQUENCE`
+* `-s\--sequence=SEQUENCE`
 text file containing a valid DNA sequence (*e.g.* ATCTGA). If not specified, the sequence will be chosen randomly
 * `-p\--print-virt2-nuc`
 print the `virt2nuc` file that can be used by the oxDNA's `origami_utils.py` script to convert between cadnano and oxDNA nucleotide indexes
