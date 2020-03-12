@@ -5,8 +5,8 @@ Created on Nov 11, 2018
 '''
 
 import numpy as np
-import base
-import utils
+from . import base
+from . import utils
 import math
 
 BP = "bp"
@@ -166,7 +166,7 @@ class StrandGenerator (object):
                 ns1.add_nucleotide(base.Nucleotide(rb - base.CM_CENTER_DS * a1, a1, a3, sequence[i]))
             ns1.make_circular(check_join_len=True)
         elif circular == True and not option_use_helicity:
-            for i in xrange(bp):
+            for i in range(bp):
                 rbx = math.cos (i * angle) * radius + 0.34 * math.cos(i * angle)
                 rby = math.sin (i * angle) * radius + 0.34 * math.sin(i * angle)
                 rbz = 0.
@@ -188,7 +188,7 @@ class StrandGenerator (object):
         # Fill in complement strand
         if double == True:
             ns2 = base.Strand()
-            for i in reversed(range(ds_start, ds_end)):
+            for i in reversed(list(range(ds_start, ds_end))):
                 # Note that the complement strand is built in reverse order
                 nt = ns1._nucleotides[i]
                 a1 = -nt._a1
@@ -377,7 +377,7 @@ class vhelix_vbase_to_nucleotide(object):
     def add_scaf_strand(self, add_strand, reference, continue_join = False):
         count = 0
         size = len(self._scaf)
-        for (vh, vb), [strand_ind, nuc] in reference._scaf.iteritems():
+        for (vh, vb), [strand_ind, nuc] in reference._scaf.items():
             if strand_ind == add_strand:
                 self.add_scaf(vh, vb, self.strand_count, [x + self.nuc_count for x in nuc])
                 count += len(nuc)
@@ -392,7 +392,7 @@ class vhelix_vbase_to_nucleotide(object):
     def add_stap_strand(self, add_strand, reference, continue_join = False):
         count = 0
         size = len(self._stap)
-        for (vh, vb), [strand_ind, nuc] in reference._stap.iteritems():
+        for (vh, vb), [strand_ind, nuc] in reference._stap.items():
             if strand_ind == add_strand:
                 self.add_stap(vh, vb, self.strand_count, [x + self.nuc_count for x in nuc])
                 count += len(nuc)

@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # This script converts cando format to oxDNA2 files
 import sys
 import numpy as np
-
 
 from libs.readers import LorenzoReader
 
@@ -43,9 +42,9 @@ class Base:
 
     def pos_str(self):
         if self.cm_pos is None:
-            print >> sys.stderr, "Warning, base ", self.id, self.oxid, 'was not assigned cm'
+            print("Warning, base ", self.id, self.oxid, 'was not assigned cm', file=sys.stderr)
         if self.cm_pos[0] == 0 and self.cm_pos[1] == 0 and self.cm_pos[2] == 0:
-            print >> sys.stderr, "Warning, cm of base ", self.id, self.oxid, 'was set to 0 0 0'
+            print("Warning, cm of base ", self.id, self.oxid, 'was set to 0 0 0', file=sys.stderr)
 
         cm = self.cm_pos
         a1 = self.a1
@@ -152,7 +151,7 @@ def reconstruct_strands(three_ends, bases):
     
     if(len(bases) != len(added)):  # maybe circular strands?
         s = None
-        for b_id, b in bases.items():
+        for b_id, b in list(bases.items()):
             if b_id not in added:  # maybe new strand:
                 s = Strand(strand_id)
                 start = b_id
@@ -166,7 +165,7 @@ def reconstruct_strands(three_ends, bases):
                     added.append(b_next)
                     b_next = nb.get_5prime()
                     
-                    if len(added) > len(bases.keys()):
+                    if len(added) > len(list(bases.keys())):
                         raise Exception("error while processing circular strand")
                 strands.append(s)
 
@@ -177,7 +176,7 @@ def write_topology(strands, outfile):
     handle = open(outfile, 'w')
     total_p = int(np.sum([len(s) for s in strands]))
     total_s = len(strands)
-    print >> handle, total_p, total_s
+    print(total_p, total_s, file=handle)
     for s in strands:
         for i, b in enumerate(s.bases):
             if i == 0:
@@ -188,16 +187,16 @@ def write_topology(strands, outfile):
                 five = -1
             else:
                 five = s.bases[i + 1].oxid
-            print >> handle, s.id + 1, b.seq, three, five
+            print(s.id + 1, b.seq, three, five, file=handle)
 
 
 def write_conf(bases, fname, box):
     handle = open(fname, 'w')
-    print >> handle, "t = 0"
-    print >> handle, "b = %f %f %f" % (box, box, box)
-    print >> handle, "E = 0 0 0"
+    print("t = 0", file=handle)
+    print("b = %f %f %f" % (box, box, box), file=handle)
+    print("E = 0 0 0", file=handle)
     ox_bases = {}
-    for i, b in bases.items():
+    for i, b in list(bases.items()):
         ox_bases[b.oxid] = b
 
     # print 'mame', len(bases.keys()), len(ox_bases.keys())
@@ -209,7 +208,7 @@ def write_conf(bases, fname, box):
 def write_force(bases, pairs, fname):
     handle = open(fname, 'w')
     forces = ""
-    for p in pairs.values():
+    for p in list(pairs.values()):
         a = bases[p[0]].oxid
         b = bases[p[1]].oxid
         forces = forces + get_mutual_force(a, b)   
@@ -218,7 +217,7 @@ def write_force(bases, pairs, fname):
 
 
 def assign_base_positions(bases, cm_pos, triads, pair_ids):
-    for pid, pair in pair_ids.items():
+    for pid, pair in list(pair_ids.items()):
         aid = pair[0]
         bid = pair[1]
         cm = cm_pos[pid]
@@ -347,17 +346,17 @@ def load_and_convert(opts, invert_preference=False):
 
     if opts['print_force_file']:
         force_file = cando_file + '.forces.txt'
-        print >> sys.stderr, "## Printing forces to the '%s' file" % force_file
+        print("## Printing forces to the '%s' file" % force_file, file=sys.stderr)
         write_force(bases, pair_ids, force_file)
         
     return strands
 
 
 def print_usage():
-        print >> sys.stderr, "USAGE:"
-        print >> sys.stderr, "\t%s CanDo_file" % sys.argv[0]
-        print >> sys.stderr, "\t[-b\--box=100]"
-        print >> sys.stderr, "\t[-f\--print-force-file]\n"
+        print("USAGE:", file=sys.stderr)
+        print("\t%s CanDo_file" % sys.argv[0], file=sys.stderr)
+        print("\t[-b\--box=100]", file=sys.stderr)
+        print("\t[-f\--print-force-file]\n", file=sys.stderr)
         exit(1)
 
 
@@ -380,9 +379,9 @@ def parse_options():
             if k[0] == '-b' or k[0] == '--box':
                 try:
                     opts['box'] = float(k[1])
-                    print >> sys.stderr, "## Setting the box size to %f" % opts['box']
+                    print("## Setting the box size to %f" % opts['box'], file=sys.stderr)
                 except ValueError:
-                    print >> sys.stderr, "The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1])
+                    print("The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
                     exit(1)
             elif k[0] == '-f' or k[0] == '--print-force-file':
                 opts['print_force_file'] = True
@@ -409,5 +408,5 @@ if __name__ == '__main__':
         Strand.base_counter = 0
         s = load_and_convert(opts, invert_preference=True)
 
-    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (opts['cando_file'] + '.oxdna', opts['cando_file'] + '.top')
-    print >> sys.stderr, "## DONE"
+    print("## Wrote data to '%s' / '%s'" % (opts['cando_file'] + '.oxdna', opts['cando_file'] + '.top'), file=sys.stderr)
+    print("## DONE", file=sys.stderr)

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import sys, os, math, re
 from collections import OrderedDict
@@ -115,7 +117,7 @@ def export_oxDNA(ma_file, box_size):
             try:
                 base_type = int(line.split(" ")[2].rstrip(";\n"))
             except:
-                print(line.split(" ")[2].rstrip(";\n"))
+                print((line.split(" ")[2].rstrip(";\n")))
                 sys.exit()
 
         if "createNode" in line and "lightLinker" in line:
@@ -130,7 +132,7 @@ def export_oxDNA(ma_file, box_size):
             base_type = 5
             break
 
-    keys = first_base_parents.keys()
+    keys = list(first_base_parents.keys())
 
     x = []
     for line in keys:
@@ -147,7 +149,7 @@ def export_oxDNA(ma_file, box_size):
         else:
             base_parents[key.split("|")[2].strip("'").rstrip("'")] = first_base_parents[key]
             base_names.append(key.split("|")[2].strip("'").rstrip("'"))
-    keys = first_base_trans.keys()
+    keys = list(first_base_trans.keys())
 
     x = []
     for line in keys:
@@ -162,7 +164,7 @@ def export_oxDNA(ma_file, box_size):
             base_trans[key] = first_base_trans[key]
         else:
             base_trans[key.split("|")[2].strip("'").rstrip("'")] = first_base_trans[key]
-    keys = first_base_types.keys()
+    keys = list(first_base_types.keys())
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -324,7 +326,7 @@ def export_oxDNA(ma_file, box_size):
             if (correct_forw_pos[0] == correct_backw_pos[0]) and (correct_forw_pos[1] == correct_backw_pos[1]) and (
                 correct_forw_pos[2] == correct_backw_pos[2]):
                 print("error in translation")
-                print(partner_base, name_line, correct_forw_pos)
+                print((partner_base, name_line, correct_forw_pos))
                 sys.exit()
             a1 = (correct_backw_pos - correct_forw_pos) / np.linalg.norm(correct_backw_pos - correct_forw_pos)
             back_a1 = -a1
@@ -336,7 +338,7 @@ def export_oxDNA(ma_file, box_size):
                 new_base_trans[name_line][1] == new_base_trans[partner_base][1]) and (
                 new_base_trans[name_line][2] == new_base_trans[partner_base][2]):
                 print("error in storing translation")
-                print(partner_base, name_line, correct_forw_pos)
+                print((partner_base, name_line, correct_forw_pos))
                 sys.exit()
             if partner_base_type == 5 and own_base_type == 5:
                 base_types[name_line] = 0
@@ -349,12 +351,12 @@ def export_oxDNA(ma_file, box_size):
                 base_types[name_line] = comp_base_type
             if (new_forw_pos[0] == 0 and new_forw_pos[1] == 0 and new_forw_pos[2] == 0) or (
                         new_backw_pos[0] == 0 and new_backw_pos[1] == 0 and new_backw_pos[2] == 0):
-                print("total_is_zero", name_line, partner_base)
+                print(("total_is_zero", name_line, partner_base))
 
     i = -1
     for line in base_names:
         i += 1
-        if line not in base_a1s.keys():
+        if line not in list(base_a1s.keys()):
             base_a1s[line] = [0, 1, 0]
             base_pos = base_trans[line]
             base_CoMs[line] = base_pos
@@ -420,7 +422,7 @@ def export_oxDNA(ma_file, box_size):
         base_letters = []
         strand_a3 = []
         first_CoM = base_CoMs[strand[0]]
-        if strand[1] not in base_a3s.keys():
+        if strand[1] not in list(base_a3s.keys()):
             strand_a3.append((first_comp_pos - first_CoM) / np.linalg.norm(first_comp_pos - first_CoM))
         else:
             strand_a3.append(base_a3s[strand[1]])
@@ -431,7 +433,7 @@ def export_oxDNA(ma_file, box_size):
             sys.exit()
         i = 1
         for base in strand[1:]:
-            if base not in base_a3s.keys():
+            if base not in list(base_a3s.keys()):
 
                 current_pos = base_CoMs[base]
                 previous_pos = base_CoMs[strand[i - 1]]
@@ -448,7 +450,7 @@ def export_oxDNA(ma_file, box_size):
                 current_pos[2] == previous_pos[2]):
                 print("a1 incalculable")
                 print(base)
-                print(strand[i - 1])
+                print((strand[i - 1]))
                 # sys.exit()
             i += 1
         i = 0
@@ -500,8 +502,8 @@ def export_oxDNA(ma_file, box_size):
             string = "%s %s %s 0 0 0 0 0 0" % (pos, versora, a3_versor)
             conf.write("%s \n" % string)
 
-    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (conf_file, top_file)
-    print >> sys.stderr, "## DONE"
+    print("## Wrote data to '%s' / '%s'" % (conf_file, top_file), file=sys.stderr)
+    print("## DONE", file=sys.stderr)
 
 
 def parse_options():
@@ -519,9 +521,9 @@ def parse_options():
             if k[0] == '-b' or k[0] == '--box':
                 try:
                     opts['box'] = float(k[1])
-                    print >> sys.stderr, "## Setting the box size to %f" % opts['box']
+                    print("## Setting the box size to %f" % opts['box'], file=sys.stderr)
                 except ValueError:
-                    print >> sys.stderr, "The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1])
+                    print("The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
                     exit(1)
                     
         opts['vHelix_file'] = positional_args[0]
@@ -533,9 +535,9 @@ def parse_options():
 
 
 def print_usage():
-    print >> sys.stderr, "USAGE:"
-    print >> sys.stderr, "\t%s vHelix file in Maya .Ma format" % sys.argv[0]
-    print >> sys.stderr, "\t[-b\--box=100]"
+    print("USAGE:", file=sys.stderr)
+    print("\t%s vHelix file in Maya .Ma format" % sys.argv[0], file=sys.stderr)
+    print("\t[-b\--box=100]", file=sys.stderr)
     exit(1)
 
 

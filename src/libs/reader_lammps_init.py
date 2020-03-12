@@ -53,15 +53,15 @@ class Lammps_parser(object):
             if next_bond!=-1:
                 #check the consecutive bond is on the same strand
                 if self.strand[i]!=self.strand[next_bond]:
-                    print >> sys.stderr, "Wrong bond arising between two different strands"
+                    print("Wrong bond arising between two different strands", file=sys.stderr)
                 #check the right bond is an higher index (except from the circular closure)
                 if next_bond==i-1:
-                    print >> sys.stderr, "The bonds should be in incremental order (i i+1) except for strand circularization N 0"
+                    print("The bonds should be in incremental order (i i+1) except for strand circularization N 0", file=sys.stderr)
                 if next_bond>i+1:
-                    print >> sys.stderr, "The bonds should be in incremental order (i i+1) except for strand circularization N 0"
+                    print("The bonds should be in incremental order (i i+1) except for strand circularization N 0", file=sys.stderr)
                 if next_bond<i+1:
                     if self.bonds[next_bond][1]!=next_bond+1:
-                        print >> sys.stderr, "The bonds should be in incremental order (i i+1) except for strand circularization N 0"
+                        print("The bonds should be in incremental order (i i+1) except for strand circularization N 0", file=sys.stderr)
 
                 #more check to insert about completely random ordering
    

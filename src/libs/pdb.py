@@ -25,11 +25,11 @@ class Nucleotide(object):
     def __init__(self, name, idx):
         object.__init__(self)
         self.name = name.strip()
-        if self.name in NAME_TO_BASE.keys():
+        if self.name in list(NAME_TO_BASE.keys()):
             self.base = NAME_TO_BASE[self.name]
         elif self.name in BASES:
             if self.name == "U" and not Nucleotide.RNA_warning_printed:
-                print >> sys.stderr, "WARNING: unsupported uracil detected: use at your own risk"
+                print("WARNING: unsupported uracil detected: use at your own risk", file=sys.stderr)
                 Nucleotide.RNA_warning_printed = True
                 
             self.base = self.name
@@ -112,7 +112,8 @@ class Nucleotide(object):
         self.check = abs(np.dot(self.a1, self.a3))
         
     def correct_for_large_boxes(self, box):
-        map(lambda x: x.shift(-np.rint(x.pos / box ) * box), self.atoms)
+        for atom in self.atoms:
+            atom.shift(-np.rint(x.pos / box ) * box)
 
     def to_pdb(self, chain_identifier, print_H, residue_serial, residue_suffix, residue_type):
         res = []
@@ -174,7 +175,7 @@ class Nucleotide(object):
             a.pos += new_com - com - COM_SHIFT * self.a1
 
     def set_base(self, new_base_com):
-        atoms = [v for k, v in self.named_atoms.iteritems() if k in self.ring_names]
+        atoms = [v for k, v in self.named_atoms.items() if k in self.ring_names]
         ring_com = self.get_com(atoms)
         for a in self.atoms:
             a.pos += new_base_com - ring_com - BASE_SHIFT * self.a1

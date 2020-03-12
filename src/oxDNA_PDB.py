@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -7,16 +7,16 @@ import copy
 from math import sqrt, sin
 
 from libs.pdb import Atom, Nucleotide, FROM_OXDNA_TO_ANGSTROM
-import libs.base as base
-import libs.utils as utils
+from libs import base
+from libs import utils
 from libs.readers import LorenzoReader
 
 DD12_PDB_PATH = "dd12_na.pdb"
 
 def print_usage():
-        print >> sys.stderr, "USAGE:"
-        print >> sys.stderr, "\t%s topology configuration direction" % sys.argv[0]
-        print >> sys.stderr, "\t[-H\--hydrogens=True] [-u\--uniform-residue-names]"
+        print("USAGE:", file=sys.stderr)
+        print("\t%s topology configuration direction" % sys.argv[0], file=sys.stderr)
+        print("\t[-H\--hydrogens=True] [-u\--uniform-residue-names]", file=sys.stderr)
         exit(1)
 
 def parse_options():
@@ -41,10 +41,10 @@ def parse_options():
                 if k_arg.lower() == "true":
                     opts["print_hydrogens"] = True
                 elif k_arg == "false":
-                    print >> sys.stderr, "## Hydrogen atoms will *not* be printed"
+                    print("## Hydrogen atoms will *not* be printed", file=sys.stderr)
                     opts["print_hydrogens"] = False
                 else:
-                    print >> sys.stderr, "The argument of '%s' should be either 'true' or 'false' (got '%s' instead)" % (k[0], k[1])
+                    print("The argument of '%s' should be either 'true' or 'false' (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
                     exit(1)
             elif k[0] == '-u' or k[0] == '--uniform-residue-names':
                     opts["uniform_residue_names"] = True
@@ -60,7 +60,7 @@ def parse_options():
         elif direction == "53":
             opts["oxDNA_direction"] = False
         else:
-            print >> sys.stderr, "The 'direction' argument should be either 35 or 53"
+            print("The 'direction' argument should be either 35 or 53", file=sys.stderr)
             exit(1)
     except Exception:
         print_usage()
@@ -113,7 +113,7 @@ if __name__ == '__main__':
         lr = LorenzoReader(opts['topology'], opts['configuration'])
         s = lr.get_system()
     except Exception as e:
-        print >> sys.stderr, "Parser error: %s" % e
+        print("Parser error: %s" % e, file=sys.stderr)
         exit(1)
     
     ox_nucleotides = []
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     box_angstrom = s._box * FROM_OXDNA_TO_ANGSTROM
     correct_for_large_boxes = False
     if np.any(box_angstrom[box_angstrom > 999]):
-        print >> sys.stderr, "At least one of the box sizes is larger than 999: all the atoms which are outside of the box will be brought back through periodic boundary conditions"
+        print("At least one of the box sizes is larger than 999: all the atoms which are outside of the box will be brought back through periodic boundary conditions", file=sys.stderr)
         correct_for_large_boxes = True
     
     if opts['one_file_per_strand']:
@@ -172,12 +172,12 @@ if __name__ == '__main__':
             strand_pdb.append(nucleotide_pdb)
             
                 
-        print >> out, "\n".join(x for x in strand_pdb)
-        print >> out, "TER"
+        print("\n".join(x for x in strand_pdb), file=out)
+        print("TER", file=out)
         
         if opts['one_file_per_strand']:
             out.close()
-            print >> sys.stderr, "## Wrote strand %d's data to '%s'" % (s_id + 1, out_name)
+            print("## Wrote strand %d's data to '%s'" % (s_id + 1, out_name), file=sys.stderr)
             # open a new file if needed
             if strand != s._strands[-1]:
                 out_name = opts['configuration'] + "_%d.pdb" % (s_id + 2, )
@@ -191,6 +191,6 @@ if __name__ == '__main__':
     
     if not opts['one_file_per_strand']:
         out.close()
-        print >> sys.stderr, "## Wrote data to '%s'" % out_name
+        print("## Wrote data to '%s'" % out_name, file=sys.stderr)
         
-    print >> sys.stderr, "## DONE"
+    print("## DONE", file=sys.stderr)

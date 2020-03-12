@@ -12,7 +12,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python ../../src/LAMMPS_oxDNA.py init_lammps.dat
+python3 ../../src/LAMMPS_oxDNA.py init_lammps.dat
 (diff $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

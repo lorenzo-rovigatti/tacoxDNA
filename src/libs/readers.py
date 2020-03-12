@@ -1,4 +1,4 @@
-import base
+from . import base
 import numpy as np
 import os.path
 

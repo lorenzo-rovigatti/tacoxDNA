@@ -9,7 +9,6 @@ import sys
 import numpy as np
 import os
 
-
 def partition(s, d):
     if d in s:
         sp = s.split(d, 1)
@@ -37,13 +36,10 @@ CM_CENTER_DS = POS_BASE + 0.2
 FENE_R0_OXDNA = 0.7525
 FENE_EPS = 2.0
 
-OUT_LORENZO = 1
-
 LENGTH_FACT = 8.518
 BASE_BASE = 0.3897628551303122
 
 CREPY_COLOR_TABLE = ['red', 'blue', '0,0.502,0', '1,0.8,0', '0.2,0.8,1']
-VMD_ELEMENT_TABLE = ['C', 'S', 'N', 'P', 'K', 'F', 'Si']
 
 # INT_POT_TOTAL = 0
 INT_HYDR = 4
@@ -65,22 +61,25 @@ else:
 
 # static class
 class Logger(object):
-    debug_level = None
     DEBUG = 0
     INFO = 1
     WARNING = 2
     CRITICAL = 3
+    debug_level = INFO
 
     messages = ("DEBUG", "INFO", "WARNING", "CRITICAL")
 
     @staticmethod
     def log(msg, level=None, additional=None):
-        if level == None: level = Logger.INFO
-        if level < Logger.debug_level: return
+        if level == None: 
+            level = Logger.INFO
+        if level < Logger.debug_level: 
+            return
 
         if additional != None and Logger.debug_level == Logger.DEBUG:
-            print >> sys.stderr, "%s: %s (additional info: '%s')" % (Logger.messages[level], msg, additional)
-        else: print >> sys.stderr, "%s: %s" % (Logger.messages[level], msg)
+            print("%s: %s (additional info: '%s')" % (Logger.messages[level], msg, additional), file=sys.stderr)
+        else: 
+            print("%s: %s" % (Logger.messages[level], msg), file=sys.stderr)
 
     @staticmethod
     def die(msg):
@@ -126,7 +125,7 @@ class Nucleotide():
         self._a1 = np.array(a1)
         self._a3 = np.array(a3)
         # base should be an integer
-        if isinstance(base, int):
+        if isinstance(base, int) or isinstance(base, np.integer):
             pass
         else:
             try:
@@ -288,7 +287,7 @@ class Strand():
         return copy
 
     def get_cm_pos(self):
-        return sum(map(lambda x: x.cm_pos, self._nucleotides)) / self.N
+        return sum([x.cm_pos for x in self._nucleotides]) / self.N
 
     def set_cm_pos(self, new_pos):
         diff = new_pos - self.cm_pos
@@ -309,7 +308,7 @@ class Strand():
 
         dr = self._nucleotides[-1].distance (other._nucleotides[0], PBC=False)
         if np.sqrt(np.dot (dr, dr)) > (0.7525 + 0.25):
-            print >> sys.stderr, "WARNING: Strand.append(): strands seem too far apart. Assuming you know what you are doing."
+            print("WARNING: Strand.append(): strands seem too far apart. Assuming you know what you are doing.", file=sys.stderr)
 
         ret = Strand()
 
@@ -572,7 +571,7 @@ class System(object):
                         visibility_list = [False, ] * self._N_strands
                 else:
                     # filter removes all the empty strings
-                    arr = [a.strip() for a in filter(None, tre.split(','))]
+                    arr = [a.strip() for a in [_f for _f in tre.split(',') if _f]]
                     for a in arr:
                         try:
                             ind = int(a)
@@ -666,7 +665,7 @@ class System(object):
     def get_unique_seq(self):
         # we need only the unique sequences of the system
         # see http://stackoverflow.com/questions/1143379/removing-duplicates-from-list-of-lists-in-python
-        unique_seq = dict((str(x), x) for x in self._sequences).values()
+        unique_seq = list(dict((str(x), x) for x in self._sequences).values())
         return unique_seq
 
     def rotate (self, amount, origin=None):

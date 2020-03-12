@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 import sys
@@ -50,14 +50,14 @@ def exyz_to_quat (mya1, mya3):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print >> sys.stderr, "Usage is %s topology configuration" % sys.argv[0]
+        print("Usage is %s topology configuration" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
     try:
         lr = LorenzoReader(sys.argv[1], sys.argv[2])
         s = lr.get_system()
     except Exception as e:
-        print >> sys.stderr, "Parser error: %s" % e
+        print("Parser error: %s" % e, file=sys.stderr)
         exit(1)
     
     s.map_nucleotides_to_strands()
@@ -139,6 +139,6 @@ if __name__ == '__main__':
 
     out.close()
 
-    print >> sys.stderr, "## Wrote data to '%s'" % out_name
-    print >> sys.stderr, "## DONE"
+    print("## Wrote data to '%s'" % out_name, file=sys.stderr)
+    print("## DONE", file=sys.stderr)
     

@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from base import FLT_EPSILON
+from .base import FLT_EPSILON
 
 
 def get_angle(a, b):

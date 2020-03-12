@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 from json import load
@@ -6,7 +6,6 @@ import numpy as np
 import random
 
 DNA_BASES = ['A', 'C', 'G', 'T']
-
 
 # TODO: use the stuff in base.py
 class Base(object):
@@ -27,7 +26,7 @@ class Base(object):
                 self.val = random.choice(DNA_BASES)
             else:
                 self.val = Base.default_val
-            print >> sys.stderr, "WARNING: base n.%s has no associated type, setting it to '%s'" % (self.global_id, self.val)
+            print("WARNING: base n.%s has no associated type, setting it to '%s'" % (self.global_id, self.val), file=sys.stderr)
         self.pos = np.array(base_info['position'])
 
     def __get_connected_id(self, neighbor):
@@ -82,7 +81,7 @@ def normalize(v):
 
 def get_5primes(bases):
     """  5' ends don't have bases downstream """
-    return filter(lambda b: b['down'] is None, bases)
+    return [b for b in bases if b['down'] is None]
 
 
 def get_circular_strands(bases, already_included, start_id, loc):
@@ -309,13 +308,13 @@ def write_configuration_file(strands, configuration_file, opts):
     
 
 def print_usage():
-        print >> sys.stderr, "USAGE:"
-        print >> sys.stderr, "\t%s Tiamat_json_file" % sys.argv[0]
-        print >> sys.stderr, "\t[-m\--molecule=DNA|RNA]"
-        print >> sys.stderr, "\t[-t\--tiamat-version=1|2]"
-        print >> sys.stderr, "\t[-t\--default-base=A|C|G|T|R|i (R = random, i = any integer)]"
-        print >> sys.stderr, "\t[-f\--print-force-file]\n"
-        print >> sys.stderr, "\tThe defaults options are --molecule=DNA, --tiamat-version=2, --default-base=R"
+        print("USAGE:", file=sys.stderr)
+        print("\t%s Tiamat_json_file" % sys.argv[0], file=sys.stderr)
+        print("\t[-m\--molecule=DNA|RNA]", file=sys.stderr)
+        print("\t[-t\--tiamat-version=1|2]", file=sys.stderr)
+        print("\t[-t\--default-base=A|C|G|T|R|i (R = random, i = any integer)]", file=sys.stderr)
+        print("\t[-f\--print-force-file]\n", file=sys.stderr)
+        print("\tThe defaults options are --molecule=DNA, --tiamat-version=2, --default-base=R", file=sys.stderr)
         exit(1)
 
 
@@ -340,13 +339,13 @@ def parse_options():
             if k[0] == '-m' or k[0] == '--molecule':
                 k_arg = k[1].upper()
                 if k_arg == "DNA":
-                    print >> sys.stderr, "## Assuming DNA"
+                    print("## Assuming DNA", file=sys.stderr)
                     opts["isDNA"] = True
                 elif k_arg == "RNA":
-                    print >> sys.stderr, "## Assuming RNA"
+                    print("## Assuming RNA", file=sys.stderr)
                     opts["isDNA"] = False
                 else:
-                    print >> sys.stderr, "The argument of '%s' should be either 'DNA' or 'RNA' (got '%s' instead)" % (k[0], k[1])
+                    print("The argument of '%s' should be either 'DNA' or 'RNA' (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
                     exit(1)
             elif k[0] == '-t' or k[0] == '--tiamat-version':
                 tiamat_version = int(k[1])
@@ -356,7 +355,7 @@ def parse_options():
                     try:
                         int(k[1])
                     except Exception:
-                        print >> sys.stderr, "Invalid default base value '%s'. The only accepted values are %s, R or an integer)" % (k[1], ", ".join(DNA_BASES))
+                        print("Invalid default base value '%s'. The only accepted values are %s, R or an integer)" % (k[1], ", ".join(DNA_BASES)), file=sys.stderr)
                         exit(1)
                         
                 Base.default_val = db
@@ -371,12 +370,12 @@ def parse_options():
         elif tiamat_version == 2:
             opts['tiamat_version_fudge'] = 1
         else:
-            print >> sys.stderr, "The argument of '%s' should be either '1' or '2' (got '%s' instead)" % (k[0], k[1])
+            print("The argument of '%s' should be either '1' or '2' (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
             exit(1)
 
         opts['tiamat_file'] = positional_args[0]
             
-        print >> sys.stderr, "## Assuming Tiamat version %d" % tiamat_version
+        print("## Assuming Tiamat version %d" % tiamat_version, file=sys.stderr)
         
     except Exception:
         print_usage()
@@ -412,5 +411,5 @@ if __name__ == '__main__':
     # work on the configuration file 
     write_configuration_file(strands, configuration_file, opts)
     
-    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
-    print >> sys.stderr, "## DONE"
+    print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
+    print("## DONE", file=sys.stderr)

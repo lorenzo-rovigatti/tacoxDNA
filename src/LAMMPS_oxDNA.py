@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 import sys, os
@@ -88,7 +88,7 @@ def quat_to_exyz (myquat):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print >> sys.stderr, "Usage is %s lammps_init_file" % sys.argv[0]
+        print("Usage is %s lammps_init_file" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
     conf=reader_lammps_init.Lammps_parser(sys.argv[1])
@@ -121,7 +121,7 @@ if __name__ == '__main__':
             next_bond=conf.bonds[i][1]
             if next_bond!=-1 and next_bond!=i+1:
                 if conf.strand[i]!=conf.strand[next_bond]:
-                    print >> sys.stderr, "Wrong bond arising between two different strands"
+                    print("Wrong bond arising between two different strands", file=sys.stderr)
                 else:
                     strands[conf.strand[i]-1].make_circular()
 
@@ -134,5 +134,5 @@ if __name__ == '__main__':
     configuration_file = basename + ".oxdna"
     system.print_lorenzo_output(configuration_file, topology_file)
 
-    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
-    print >> sys.stderr, "## DONE"
+    print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
+    print("## DONE", file=sys.stderr)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # TODO: how do we choose the simulation box?
 
 import numpy as np
@@ -25,14 +25,14 @@ class Options(object):
 		
 	def check(self):
 		if self.nicked and not self.double:
-			print >> sys.stderr, "The --nicked and --ssDNA options are incompatible"
+			print("The --nicked and --ssDNA options are incompatible", file=sys.stderr)
 			exit(1)
 		
 		
 def print_usage():
-	print >> sys.stderr, "USAGE:"
-	print >> sys.stderr, "\t%s centerline_file" % sys.argv[0]
-	print >> sys.stderr, "\t[-c\--closed] [-o\--open] [-h\--help] [-d\--dsDNA] [-s\--ssDNA] [-n\--nicked] [-p\--supercoiling VALUE] [-w\--writhe VALUE] [-e\--seed VALUE] [-q\--sequence FILE]"
+	print("USAGE:", file=sys.stderr)
+	print("\t%s centerline_file" % sys.argv[0], file=sys.stderr)
+	print("\t[-c\--closed] [-o\--open] [-h\--help] [-d\--dsDNA] [-s\--ssDNA] [-n\--nicked] [-p\--supercoiling VALUE] [-w\--writhe VALUE] [-e\--seed VALUE] [-q\--sequence FILE]", file=sys.stderr)
 	exit(1)
 		
 		
@@ -156,11 +156,11 @@ if __name__ == '__main__':
 
 	#recap
 	if opts.closed:
-		print >> sys.stderr, "Total Linking Number (LK) %f, composed of:" % ((nbases / pitch) * (opts.supercoiling + 1) + opts.writhe)
-		print  >> sys.stderr, "1) Equilibrium number of DNA turns %f" % (nbases / pitch)
-		print  >> sys.stderr, "2) Target writhe %f = Topological writhe %f + Turns imposed by supercoiling  %f " % (opts.writhe+(nbases / pitch) *opts.supercoiling,opts.writhe,(nbases / pitch) *opts.supercoiling)
-		print >> sys.stderr, "LK has been rounded to %f" % LK
-		print >> sys.stderr, "Initial chain writhe %f" % WR
+		print("Total Linking Number (LK) %f, composed of:" % ((nbases / pitch) * (opts.supercoiling + 1) + opts.writhe), file=sys.stderr)
+		print("1) Equilibrium number of DNA turns %f" % (nbases / pitch), file=sys.stderr)
+		print("2) Target writhe %f = Topological writhe %f + Turns imposed by supercoiling  %f " % (opts.writhe+(nbases / pitch) *opts.supercoiling,opts.writhe,(nbases / pitch) *opts.supercoiling), file=sys.stderr)
+		print("LK has been rounded to %f" % LK, file=sys.stderr)
+		print("Initial chain writhe %f" % WR, file=sys.stderr)
 
 
 	####################################
@@ -204,17 +204,17 @@ if __name__ == '__main__':
 		try:
 			seq_file = open(opts.sequence_file)
 		except Exception:
-			print >> sys.stderr, "The sequence file '%s' is unreadable" % opts.sequence_file
+			print("The sequence file '%s' is unreadable" % opts.sequence_file, file=sys.stderr)
 			exit(1)
 			
 		contents = seq_file.read()
 		# remove all whitespace from the file's contents
 		sequence = ''.join(contents.split())
 		if len(sequence) != nbases:
-			print >> sys.stderr, "The length of the given sequence (%d) should be equal to the number of coordinates in the centerline file (%d)" % (len(sequence), nbases)
+			print("The length of the given sequence (%d) should be equal to the number of coordinates in the centerline file (%d)" % (len(sequence), nbases), file=sys.stderr)
 			exit(1)
 			
-		ssdna1_base = map(lambda x: base.base_to_number[x], sequence)		
+		ssdna1_base = [base.base_to_number[x] for x in sequence]		
 			
 		seq_file.close()
 
@@ -241,5 +241,5 @@ if __name__ == '__main__':
 	configuration_file = basename + ".oxdna"
 	system.print_lorenzo_output(configuration_file, topology_file)
 	
-	print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
-	print >> sys.stderr, "## DONE"
+	print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
+	print("## DONE", file=sys.stderr)

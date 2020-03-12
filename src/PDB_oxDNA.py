@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -10,7 +10,7 @@ from libs import base
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print >> sys.stderr, "Usage is %s PDB_file direction [use 35 or 53 if the PDB file has the nucleotides listed in the 3' -> 5' or 5' -> 3' direction, respectively]" % sys.argv[0]
+        print("Usage is %s PDB_file direction [use 35 or 53 if the PDB file has the nucleotides listed in the 3' -> 5' or 5' -> 3' direction, respectively]" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
         
     pdb_file = sys.argv[1]
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     elif sys.argv[2] == "53":
         oxDNA_direction = False
     else:
-        print >> sys.stderr, "The second argument should be either 35 or 53"
+        print("The second argument should be either 35 or 53", file=sys.stderr)
         exit(1)
         
     pdb_strands = []
@@ -33,15 +33,15 @@ if __name__ == '__main__':
                 na = Atom(line)
                 if old_chain != "":
                     if na.chain_id != old_chain and len(strand) != 0:
-                        print >> sys.stderr, "WARNING: a TER statement separating different strands is missing"
+                        print("WARNING: a TER statement separating different strands is missing", file=sys.stderr)
                         pdb_strands.append(strand)
                         strand = []
                     elif na.chain_id == old_chain and len(strand) == 0:
-                        print >> sys.stderr, "WARNING: a TER statement separates strand having the same chain id"
+                        print("WARNING: a TER statement separates strand having the same chain id", file=sys.stderr)
                         
                 if na.alternate != "":
                     if na.alternate == "A" or na.alternate == "1":
-                        print >> sys.stderr, "Alternate location for atom '%s' of residue '%s' encountered, using the line marked with the '%s' character." % (na.name, na.residue, na.alternate)
+                        print("Alternate location for atom '%s' of residue '%s' encountered, using the line marked with the '%s' character." % (na.name, na.residue, na.alternate), file=sys.stderr)
                 if na.residue_idx != old_residue:
                     nn = Nucleotide(na.residue, na.residue_idx)
                     if oxDNA_direction:
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 old_chain = na.chain_id
             elif line.startswith("MODEL"):
                 N_model = line.split()[1]
-                print >> sys.stderr, "MODEL line detected: using the first MODEL encountered (%s)" % (N_model)
+                print("MODEL line detected: using the first MODEL encountered (%s)" % (N_model), file=sys.stderr)
             elif line.startswith("ENDMDL"):
                 # we treat ENDMDL as the end of the file 
                 break;
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     L = 2 * np.max(box_high - box_low) * FROM_ANGSTROM_TO_OXDNA
     box = np.array([L, L, L])
     
-    print >> sys.stderr, "Using a box of size %g in oxDNA units (twice as big as the PDB bounding box size)" % (L)
+    print("Using a box of size %g in oxDNA units (twice as big as the PDB bounding box size)" % (L), file=sys.stderr)
     
     system = base.System(box)
     strand = base.Strand()
@@ -104,6 +104,6 @@ if __name__ == '__main__':
     configuration_file = basename + ".oxdna"
     system.print_lorenzo_output(configuration_file, topology_file)
     
-    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
-    print >> sys.stderr, "## DONE"
+    print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
+    print("## DONE", file=sys.stderr)
     

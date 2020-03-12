@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import numpy as np
 from libs import base
 from libs import utils
-import libs.cadnano_utils as cu
+from libs import cadnano_utils as cu
 import re
 import os
 import pickle
@@ -16,7 +16,6 @@ BOX_FACTOR = 2  # factor by which to expand the box (linear dimension)
 
 
 class vh_nodes(object):
-
     def __init__(self):
         self.begin = []
         self.end = []
@@ -501,7 +500,7 @@ class vhelix (object):
         elif which == 'scaf':
             self.scaf.append (toadd)
         else:
-            print >> sys.stderr, "cannot add square that is not scaf or stap. Dying now"
+            print("cannot add square that is not scaf or stap. Dying now", file=sys.stderr)
             sys.exit (-1)
     
     def __str__(self):
@@ -624,7 +623,7 @@ def parse_cadnano(path):
             cadnano = json.load(json_data)
             for vstrand in cadnano["vstrands"]:
                 vh = vhelix()
-                for key, val in vstrand.items():
+                for key, val in list(vstrand.items()):
                     if key == "skip":
                         vh.skip = [abs(int(x)) for x in val]
                     else:
@@ -634,13 +633,13 @@ def parse_cadnano(path):
                 vh.skiploop_bases = len(vh.skip) + sum(vh.loop) - sum(vh.skip)
                 cadsys.add_vhelix(vh)
     except IOError:
-        print >> sys.stderr, "File '" + path + "' not found, aborting"
+        print("File '" + path + "' not found, aborting", file=sys.stderr)
         sys.exit(1)
     except ValueError:
-        print >> sys.stderr, "Invalid json file '" + path + "', aborting"
+        print("Invalid json file '" + path + "', aborting", file=sys.stderr)
         sys.exit(1)
     except:
-        print >> sys.stderr, "Caught an error while parsing '" + path + "', aborting"
+        print("Caught an error while parsing '" + path + "', aborting", file=sys.stderr)
         sys.exit(1)
         
     return cadsys
@@ -649,9 +648,9 @@ def parse_cadnano(path):
 if __name__ == '__main__':
     
     def print_usage():
-        print >> sys.stderr, "USAGE:"
-        print >> sys.stderr, "\t%s cadnano_file lattice_type" % sys.argv[0]
-        print >> sys.stderr, "\t[-s\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc]" 
+        print("USAGE:", file=sys.stderr)
+        print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
+        print("\t[-s\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc]", file=sys.stderr) 
         exit(1)
         
     if len(sys.argv) < 3:
@@ -672,7 +671,7 @@ if __name__ == '__main__':
     elif sys.argv[2] == "he":
         origami_he = True
     else:
-        print >> sys.stderr, "Lattice_type should be either 'sq' or 'he'"
+        print("Lattice_type should be either 'sq' or 'he'", file=sys.stderr)
         exit(1)
     
     try:
@@ -980,9 +979,9 @@ if __name__ == '__main__':
             # for a circular strand we need to terminate the strand one element early (so reduce the length
             # of the range by 1), since the final element is just a repeat of the first one.
             if joined_strand._circular:
-                joining_range = range(len(join) - 2)
+                joining_range = list(range(len(join) - 2))
             else:
-                joining_range = range(len(join) - 1)
+                joining_range = list(range(len(join) - 1))
             # add joined strands to v2n index
             for k in joining_range:
                 vh_vb2nuc_final.add_strand(join[k], vh_vb2nuc, continue_join=True)
@@ -996,9 +995,9 @@ if __name__ == '__main__':
             base.Logger.log("more than one strand detected - sequence file will not be read", base.Logger.WARNING)
             final_sys._strands[0].set_sequence(np.random.randint(0, 4, len(final_sys._strands[0]._nucleotides)))  # this line does not work
 
-    # # Fix to reverse the direction of every strand so that the 3' to 5' direction is the same
-    # # as in Cadnano. In cadnano the strands point in the 5' to 3' direction, whereas in oxDNA
-    # # they point in the 3' to 5' direction. Ben 29/11/13
+    # Fix to reverse the direction of every strand so that the 3' to 5' direction is the same
+    # as in Cadnano. In cadnano the strands point in the 5' to 3' direction, whereas in oxDNA
+    # they point in the 3' to 5' direction. Ben 29/11/13
     rev_sys = base.System(final_sys._box)
     for strand in final_sys._strands:
         reverse_nucs = [nuc for nuc in strand._nucleotides]
@@ -1009,23 +1008,23 @@ if __name__ == '__main__':
         if strand._circular:
             rev_strand.make_circular(check_join_len=True)
         rev_sys.add_strand(rev_strand, check_overlap=False)
-    # # also reverse the vhelix_vbase_to_nucleotide order so it corresponds to the reversed system
+    # also reverse the vhelix_vbase_to_nucleotide order so it corresponds to the reversed system
     vh_vb2nuc_rev = cu.vhelix_vbase_to_nucleotide()
     # count the number of nucleotides up to but not including the nucleotides in strand ii
-    nnucs_to_here = range(rev_sys._N_strands)
+    nnucs_to_here = list(range(rev_sys._N_strands))
     nuc_total = 0
     for strandii, strand in enumerate(rev_sys._strands):
         nnucs_to_here[strandii] = nuc_total
         nuc_total += len(strand._nucleotides)
 
     # fill in the _scaf and _stap dicts for the reverse vhelix_vbase_to_nucleotide object
-    for vh, vb in vh_vb2nuc_final._scaf.keys():
+    for vh, vb in list(vh_vb2nuc_final._scaf.keys()):
         strandii, nuciis = vh_vb2nuc_final._scaf[(vh, vb)]
         rev_nuciis = []
         for nucii in nuciis:
             rev_nuciis.append(len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii])
         vh_vb2nuc_rev.add_scaf(vh, vb, strandii, rev_nuciis)
-    for vh, vb in vh_vb2nuc_final._stap.keys():
+    for vh, vb in list(vh_vb2nuc_final._stap.keys()):
         strandii, nuciis = vh_vb2nuc_final._stap[(vh, vb)]
         rev_nuciis = []
         for nucii in nuciis:
@@ -1040,7 +1039,7 @@ if __name__ == '__main__':
     if print_virt2nuc:
         with open("virt2nuc", "w") as fout:
             pickle.dump((vh_vb2nuc_rev, vhelix_pattern), fout)
-            print >> sys.stderr, "## Wrote nucleotides' index conversion data to virt2nuc"
+            print("## Wrote nucleotides' index conversion data to virt2nuc", file=sys.stderr)
 
     basename = os.path.basename(sys.argv[1])
     topology_file = basename + ".top"
@@ -1048,6 +1047,6 @@ if __name__ == '__main__':
     
     rev_sys.print_lorenzo_output(configuration_file, topology_file)
     
-    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
-    print >> sys.stderr, "## DONE"
+    print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
+    print("## DONE", file=sys.stderr)
     
