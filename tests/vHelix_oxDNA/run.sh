@@ -12,7 +12,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python ../../src/vHelix_oxDNA.py input.ma
+python3 ../../src/vHelix_oxDNA.py input.ma
 (diff $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

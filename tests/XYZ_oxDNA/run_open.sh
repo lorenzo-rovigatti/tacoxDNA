@@ -12,7 +12,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python ../../src/XYZ_oxDNA.py centerline_open.dat -p 0.1 --dsDNA --open --seed=1000
+python3 ../../src/XYZ_oxDNA.py centerline_open.dat -p 0.1 --dsDNA --open --seed=1000
 (diff $CORRECT_OUTPUT_CONF $OUTPUT_CONF > /dev/null) && (diff $CORRECT_OUTPUT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]
