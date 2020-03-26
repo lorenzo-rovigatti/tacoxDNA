@@ -156,7 +156,7 @@ class StrandGenerator (object):
 
                 # a3 is tangent to the torus
                 a3 = v_torus / np.linalg.norm(v_torus)
-                R = utils.get_rotation_matrix(a3, [i * (round(bp / BP_PER_TURN) + DELTA_LK) / float(bp) * 360, DEGREES])
+                R = utils.get_rotation_matrix(a3, [i * (round(bp // BP_PER_TURN) + DELTA_LK) / float(bp) * 360, DEGREES])
 
                 # a1 is orthogonal to a3 and the torus normal
                 a1 = np.cross (a3, torus_perp)

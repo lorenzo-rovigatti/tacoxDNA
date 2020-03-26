@@ -329,7 +329,7 @@ def generate_vhelices_origami_sq(vhelix_direction, vhelix_perp, h, sequence_file
         elif modi == 11:
             helix_angles[i] = 54.5 * np.pi / 180
         elif modi in (12, 13):
-            helix_angles[i] = (28.91666666666 * np.pi / 180)  # + 0.25) * np.pi/180
+            helix_angles[i] = (28.91666666666 * np.pi / 180)
         elif modi in (14, 15, 16, 17):
             helix_angles[i] = 31.16666666666 * np.pi / 180
         elif modi == 18:
