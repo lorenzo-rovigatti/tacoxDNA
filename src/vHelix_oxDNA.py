@@ -372,7 +372,7 @@ def export_oxDNA(ma_file, box_size):
     pos = []
     a3 = []
     base_letters = []
-    base_letter_array = ["A", "T", "C", "G"]
+    base_letter_array = ["A", "T", "G", "C"]
     strand_number = 0
     strand_length = 0
     nucs_to_current_strand = 0
