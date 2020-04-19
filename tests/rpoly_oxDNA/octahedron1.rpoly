@@ -1,0 +1,42 @@
+# Relaxation of original E:\Erik\Dropbox\exjobb\ideas\autoDNA\octahedron\octahedron1.ply file. 12 helices.
+# Total separation: Initial: min: 0.352769, max: 8.32776, average: 2.97041, total: 71.2899 nm, final: min: 0.137649, max: 0.802955, average: 0.351587, total: 8.43808 nm
+hb helix_1 27 4.2265 0.0254484 3.97966 0.0726497 -0.376816 -0.204382 0.900533
+hb helix_2 27 -0.00271292 -4.05862 4.0645 0.504493 0.780986 -0.34012 0.140946
+hb helix_3 26 -4.16121 -3.96619 0.0447757 -0.509213 0.509474 0.690222 -0.0687898
+hb helix_4 31 -3.96959 0.068022 -4.03136 0.878931 0.228342 0.404694 0.107535
+hb helix_5 26 0.0933089 -4.02111 -3.97957 0.345332 -0.153046 0.27172 0.885151
+hb helix_6 32 3.89305 -4.04125 -0.047638 -0.675471 0.181485 -0.380193 0.60519
+hb helix_7 26 4.2053 -0.011796 -4.01464 0.924188 0.0577255 -0.377524 -0.00451721
+hb helix_8 26 -0.0665507 4.03438 -4.04144 -0.153518 -0.331358 -0.754888 0.544774
+hb helix_9 26 -4.17436 3.99043 -0.0844567 -0.124858 -0.699686 0.555741 0.431279
+hb helix_10 32 -4.03016 -0.0609232 4.05971 -0.126003 0.370949 -0.254682 0.884114
+hb helix_11 26 0.00836778 4.0668 4.03965 -0.738569 0.567279 0.257221 0.257971
+hb helix_12 32 3.95165 3.95239 0.0276942 0.561361 0.446606 0.128742 0.684721
+
+c helix_1 f3' helix_2 f5'
+c helix_11 b3' helix_1 b5'
+c helix_2 f3' helix_3 f5'
+c helix_6 b3' helix_2 b5'
+c helix_3 f3' helix_4 f5'
+c helix_10 b3' helix_3 b5'
+c helix_4 f3' helix_5 f5'
+c helix_8 b3' helix_4 b5'
+c helix_5 f3' helix_6 f5'
+c helix_3 b3' helix_5 b5'
+c helix_6 f3' helix_7 f5'
+c helix_1 b3' helix_6 b5'
+c helix_7 f3' helix_8 f5'
+c helix_5 b3' helix_7 b5'
+c helix_8 f3' helix_9 f5'
+c helix_12 b3' helix_8 b5'
+c helix_9 f3' helix_10 f5'
+c helix_4 b3' helix_9 b5'
+c helix_10 f3' helix_11 f5'
+c helix_2 b3' helix_10 b5'
+c helix_11 f3' helix_12 f5'
+c helix_9 b3' helix_11 b5'
+c helix_12 f3' helix_1 f5'
+c helix_7 b3' helix_12 b5'
+
+autostaple
+ps helix_1 f3'
