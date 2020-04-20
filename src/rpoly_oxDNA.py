@@ -99,7 +99,7 @@ def rpoly_to_oxDNA():
     output_system.add_strand(scaffold_strand)
 
     file_name_out = file_name_in[:-6]
-    output_system.print_lorenzo_output(file_name_out+ '.conf', file_name_out + '.top')
+    output_system.print_lorenzo_output(file_name_out+ '.oxdna', file_name_out + '.top')
 
 
 
