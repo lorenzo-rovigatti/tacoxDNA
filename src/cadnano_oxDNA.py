@@ -650,13 +650,13 @@ if __name__ == '__main__':
     def print_usage():
         print("USAGE:", file=sys.stderr)
         print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
-        print("\t[-s\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc]", file=sys.stderr) 
+        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc]", file=sys.stderr) 
         exit(1)
         
     if len(sys.argv) < 3:
         print_usage()
         
-    shortArgs = 's:b:e:p'
+    shortArgs = 'q:b:e:p'
     longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc']
     
     side = False
