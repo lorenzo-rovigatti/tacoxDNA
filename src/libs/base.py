@@ -428,6 +428,18 @@ class Strand():
     def is_circular(self):
         return self._circular
 
+    def cut_in_two(self): # cuts a strand into two strands in the middle
+        fragment_one = Strand()
+        fragment_two = Strand()
+        counter = 0
+        for n in self._nucleotides:
+            if counter < (len(self._nucleotides)/2):
+                fragment_one.add_nucleotide(n.copy())
+            else:
+                fragment_two.add_nucleotide(n.copy())
+            counter += 1
+        return fragment_one , fragment_two
+
 
 def parse_visibility(path):
     try:

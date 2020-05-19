@@ -2,18 +2,18 @@
 
 CORRECT_OUTPUT="correct_output.dat"
 CORRECT_TOP="correct_output.top"
-OUTPUT_CONF="junction.cndo.oxdna"
-OUTPUT_TOP="junction.cndo.top"
+OUTPUT_CONF="input.rpoly.oxdna"
+OUTPUT_TOP="input.rpoly.top"
 CONF_DIFF_BIN="python3 ../conf_diff.py"
 
-if [ ! -s junction.cndo ] 
+if [ ! -s input.rpoly ] 
 then
-	echo "Can't find input file. Are you sure you are in the right folder?"
+	echo "Can't find the input file. Are you sure you are in the right folder?"
 	exit 1
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python ../../src/CanDo_oxDNA.py junction.cndo
+python ../../src/rpoly_oxDNA.py -e 123456 input.rpoly
 ($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

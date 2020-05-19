@@ -397,8 +397,7 @@ def export_oxDNA(ma_file, box_size):
         lower_neighbour_list = []
         strand_length = len(strand)
         circular = 0
-        if strand[0] == strand[
-            -1]:  # find out if the strand is circlar i.e scaffold and remove last base (duplicate with first base)
+        if strand[0] == strand[-1]:  # find out if the strand is circlar i.e scaffold and remove last base (duplicate with first base)
             circular = 1
             temp_strand = strand[:-1]
             strand = temp_strand
@@ -440,8 +439,7 @@ def export_oxDNA(ma_file, box_size):
                     complementary_base = complementary_pair_list[base]
                 else:
                     complementary_base = base
-                base_a3s[complementary_base] = (0 - (current_pos - previous_pos)) / np.linalg.norm(
-                    current_pos - previous_pos)
+                base_a3s[complementary_base] = (0 - (current_pos - previous_pos)) / np.linalg.norm(current_pos - previous_pos)
             else:
                 strand_a3.append(base_a3s[base])
             if (current_pos[0] == previous_pos[0]) and (current_pos[1] == previous_pos[1]) and (
@@ -540,7 +538,7 @@ def print_usage():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
+    if len(sys.argv) < 2:
         print_usage()
 
     opts = parse_options()

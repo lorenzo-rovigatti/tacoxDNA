@@ -4,6 +4,7 @@ CORRECT_OUTPUT="correct_output.dat"
 CORRECT_TOP="correct_output.top"
 OUTPUT_CONF="input.dnajson.oxdna"
 OUTPUT_TOP="input.dnajson.top"
+CONF_DIFF_BIN="python3 ../conf_diff.py"
 
 if [ ! -s input.dnajson ] 
 then
@@ -13,7 +14,7 @@ fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
 python ../../src/Tiamat_oxDNA.py --molecule=DNA --tiamat-version=2 input.dnajson
-(diff $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
+($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]
 then
