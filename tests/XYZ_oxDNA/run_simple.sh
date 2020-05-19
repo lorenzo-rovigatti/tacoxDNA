@@ -4,6 +4,7 @@ CORRECT_OUTPUT_CONF="correct_simple_output.oxdna"
 CORRECT_OUTPUT_TOP="correct_simple_output.top"
 OUTPUT_CONF="centerline.dat.oxdna"
 OUTPUT_TOP="centerline.dat.top"
+CONF_DIFF_BIN="python3 ../conf_diff.py"
 
 if [ ! -s centerline.dat ] || [ ! -s sequence.dat ]
 then
@@ -13,7 +14,7 @@ fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
 python ../../src/XYZ_oxDNA.py centerline.dat -p 0.05 -q sequence.dat --dsDNA --closed
-(diff $CORRECT_OUTPUT_CONF $OUTPUT_CONF > /dev/null) && (diff $CORRECT_OUTPUT_TOP $OUTPUT_TOP > /dev/null)
+($CONF_DIFF_BIN $CORRECT_OUTPUT_CONF $OUTPUT_CONF > /dev/null) && (diff $CORRECT_OUTPUT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]
 then
