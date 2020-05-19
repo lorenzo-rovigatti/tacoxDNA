@@ -540,7 +540,7 @@ def print_usage():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
+    if len(sys.argv) < 2:
         print_usage()
 
     opts = parse_options()

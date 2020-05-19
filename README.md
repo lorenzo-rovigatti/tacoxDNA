@@ -213,12 +213,15 @@ The `rpoly_oxDNA.py` script converts routed polyhedra (rpoly) files containing w
 ### Mandatory arguments
 * The input rpoly file
 
+### Optional arguments
+* `-e\--seed=RNG_SEED`
+random seed for DNA sequence (defaults to a random value)
+
 ### Output
-* An oxDNA topology file (named by suffixing the vHelix file with ".top")
-* An oxDNA configuration file (named by suffixing the vHelix file with ".oxdna")
+* An oxDNA topology file (named by suffixing the rpoly file with ".top")
+* An oxDNA configuration file (named by suffixing the rpoly file with ".oxdna")
 
 ---
-
 
 ## Testing
 
@@ -227,4 +230,5 @@ tacoxDNA contains a very simple testing suite to verify the working status of th
 ## Acknowledgements
 
 * Some of the code has been adapted from the [oxDNA](http://dna.physics.ox.ac.uk/) source
-* The vHelix-to-oxDNA converter was provided by Erik Benson 
+* The vHelix-to-oxDNA converter was provided by Erik Benson
+* The source of code of the [pyquaternion lib](https://github.com/KieranWynn/pyquaternion) is included in the source tree
