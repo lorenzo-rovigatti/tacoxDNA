@@ -4,6 +4,7 @@ CORRECT_OUTPUT="correct_output.dat"
 CORRECT_TOP="correct_output.top"
 OUTPUT_CONF="input.pdb.oxdna"
 OUTPUT_TOP="input.pdb.top"
+CONF_DIFF_BIN="python3 ../conf_diff.py"
 
 if [ ! -s input.pdb ] 
 then
@@ -13,7 +14,7 @@ fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
 python3 ../../src/PDB_oxDNA.py input.pdb 53
-(diff $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
+($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]
 then

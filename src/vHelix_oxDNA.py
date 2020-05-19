@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import numpy as np
 import sys, os, math, re
 from collections import OrderedDict
@@ -117,7 +116,7 @@ def export_oxDNA(ma_file, box_size):
             try:
                 base_type = int(line.split(" ")[2].rstrip(";\n"))
             except:
-                print((line.split(" ")[2].rstrip(";\n")))
+                print(line.split(" ")[2].rstrip(";\n"))
                 sys.exit()
 
         if "createNode" in line and "lightLinker" in line:
@@ -132,7 +131,7 @@ def export_oxDNA(ma_file, box_size):
             base_type = 5
             break
 
-    keys = list(first_base_parents.keys())
+    keys = first_base_parents.keys()
 
     x = []
     for line in keys:
@@ -149,7 +148,7 @@ def export_oxDNA(ma_file, box_size):
         else:
             base_parents[key.split("|")[2].strip("'").rstrip("'")] = first_base_parents[key]
             base_names.append(key.split("|")[2].strip("'").rstrip("'"))
-    keys = list(first_base_trans.keys())
+    keys = first_base_trans.keys()
 
     x = []
     for line in keys:
@@ -164,7 +163,7 @@ def export_oxDNA(ma_file, box_size):
             base_trans[key] = first_base_trans[key]
         else:
             base_trans[key.split("|")[2].strip("'").rstrip("'")] = first_base_trans[key]
-    keys = list(first_base_types.keys())
+    keys = first_base_types.keys()
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -326,7 +325,7 @@ def export_oxDNA(ma_file, box_size):
             if (correct_forw_pos[0] == correct_backw_pos[0]) and (correct_forw_pos[1] == correct_backw_pos[1]) and (
                 correct_forw_pos[2] == correct_backw_pos[2]):
                 print("error in translation")
-                print((partner_base, name_line, correct_forw_pos))
+                print(partner_base, name_line, correct_forw_pos)
                 sys.exit()
             a1 = (correct_backw_pos - correct_forw_pos) / np.linalg.norm(correct_backw_pos - correct_forw_pos)
             back_a1 = -a1
@@ -338,7 +337,7 @@ def export_oxDNA(ma_file, box_size):
                 new_base_trans[name_line][1] == new_base_trans[partner_base][1]) and (
                 new_base_trans[name_line][2] == new_base_trans[partner_base][2]):
                 print("error in storing translation")
-                print((partner_base, name_line, correct_forw_pos))
+                print(partner_base, name_line, correct_forw_pos)
                 sys.exit()
             if partner_base_type == 5 and own_base_type == 5:
                 base_types[name_line] = 0
@@ -351,12 +350,12 @@ def export_oxDNA(ma_file, box_size):
                 base_types[name_line] = comp_base_type
             if (new_forw_pos[0] == 0 and new_forw_pos[1] == 0 and new_forw_pos[2] == 0) or (
                         new_backw_pos[0] == 0 and new_backw_pos[1] == 0 and new_backw_pos[2] == 0):
-                print(("total_is_zero", name_line, partner_base))
+                print("total_is_zero", name_line, partner_base)
 
     i = -1
     for line in base_names:
         i += 1
-        if line not in list(base_a1s.keys()):
+        if line not in base_a1s.keys():
             base_a1s[line] = [0, 1, 0]
             base_pos = base_trans[line]
             base_CoMs[line] = base_pos
@@ -374,7 +373,7 @@ def export_oxDNA(ma_file, box_size):
     pos = []
     a3 = []
     base_letters = []
-    base_letter_array = ["A", "T", "C", "G"]
+    base_letter_array = ["A", "T", "G", "C"]
     strand_number = 0
     strand_length = 0
     nucs_to_current_strand = 0
@@ -399,8 +398,7 @@ def export_oxDNA(ma_file, box_size):
         lower_neighbour_list = []
         strand_length = len(strand)
         circular = 0
-        if strand[0] == strand[
-            -1]:  # find out if the strand is circlar i.e scaffold and remove last base (duplicate with first base)
+        if strand[0] == strand[-1]:  # find out if the strand is circlar i.e scaffold and remove last base (duplicate with first base)
             circular = 1
             temp_strand = strand[:-1]
             strand = temp_strand
@@ -422,7 +420,7 @@ def export_oxDNA(ma_file, box_size):
         base_letters = []
         strand_a3 = []
         first_CoM = base_CoMs[strand[0]]
-        if strand[1] not in list(base_a3s.keys()):
+        if strand[1] not in base_a3s.keys():
             strand_a3.append((first_comp_pos - first_CoM) / np.linalg.norm(first_comp_pos - first_CoM))
         else:
             strand_a3.append(base_a3s[strand[1]])
@@ -433,7 +431,7 @@ def export_oxDNA(ma_file, box_size):
             sys.exit()
         i = 1
         for base in strand[1:]:
-            if base not in list(base_a3s.keys()):
+            if base not in base_a3s.keys():
 
                 current_pos = base_CoMs[base]
                 previous_pos = base_CoMs[strand[i - 1]]
@@ -442,15 +440,14 @@ def export_oxDNA(ma_file, box_size):
                     complementary_base = complementary_pair_list[base]
                 else:
                     complementary_base = base
-                base_a3s[complementary_base] = (0 - (current_pos - previous_pos)) / np.linalg.norm(
-                    current_pos - previous_pos)
+                base_a3s[complementary_base] = (0 - (current_pos - previous_pos)) / np.linalg.norm(current_pos - previous_pos)
             else:
                 strand_a3.append(base_a3s[base])
             if (current_pos[0] == previous_pos[0]) and (current_pos[1] == previous_pos[1]) and (
                 current_pos[2] == previous_pos[2]):
                 print("a1 incalculable")
                 print(base)
-                print((strand[i - 1]))
+                print(strand[i - 1])
                 # sys.exit()
             i += 1
         i = 0
@@ -537,12 +534,12 @@ def parse_options():
 def print_usage():
     print("USAGE:", file=sys.stderr)
     print("\t%s vHelix file in Maya .Ma format" % sys.argv[0], file=sys.stderr)
-    print("\t[-b\--box=100]", file=sys.stderr)
+    print(sys.stderr, "\t[-b\--box=100]", file=sys.stderr)
     exit(1)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
+    if len(sys.argv) < 2:
         print_usage()
 
     opts = parse_options()

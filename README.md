@@ -15,6 +15,7 @@ The sections that follow introduce the tools and their usage.
 * [CanDo-to-oxDNA converter](#cando-to-oxdna-converter)
 * [Tiamat-to-oxDNA converter](#tiamat-to-oxdna-converter)
 * [vHelix-to-oxDNA converter](#vhelix-to-oxdna-converter)
+* [rpoly-to-oxDNA converter](#rpoly-to-oxdna-converter)
 
 ---
 
@@ -190,7 +191,7 @@ also print a file containing the specifics for a oxDNA-compatible set of externa
 
 ## vHelix-to-oxDNA converter
 
-The `vHelix_oxDNA.py` script converts [vHelix](http://www.vhelix.net/) files into oxDNA configurations. It takes one mandatory argument.
+The `vHelix_oxDNA.py` script converts [vHelix](http://www.vhelix.net/) files into oxDNA configurations. vhelix files are Maya files stored in the MA format.  It takes one mandatory argument.
 
 ### Mandatory arguments
 * The input vHelix file
@@ -205,6 +206,23 @@ the length of the box side (in oxDNA simulation units) where the system will be 
 
 ---
 
+## rpoly-to-oxDNA converter
+
+The `rpoly_oxDNA.py` script converts routed polyhedra (rpoly) files containing wireframe DNA origami structures automatically generated using the BSCOR package(http://www.vhelix.net/) into oxDNA configurations. It takes one mandatory argument.
+
+### Mandatory arguments
+* The input rpoly file
+
+### Optional arguments
+* `-e\--seed=RNG_SEED`
+random seed for DNA sequence (defaults to a random value)
+
+### Output
+* An oxDNA topology file (named by suffixing the rpoly file with ".top")
+* An oxDNA configuration file (named by suffixing the rpoly file with ".oxdna")
+
+---
+
 ## Testing
 
 tacoxDNA contains a very simple testing suite to verify the working status of the scripts. The `tests` directory contains a directory for each script. Within each directory there is a `run.sh` bash script that performs one or more tests on the specific script. Execute `run_all.sh` to run all tests and get a summary of the results. 
@@ -212,4 +230,5 @@ tacoxDNA contains a very simple testing suite to verify the working status of th
 ## Acknowledgements
 
 * Some of the code has been adapted from the [oxDNA](http://dna.physics.ox.ac.uk/) source
-* The vHelix-to-oxDNA converter was provided by Erik Benson 
+* The vHelix-to-oxDNA converter was provided by Erik Benson
+* The source of code of the [pyquaternion lib](https://github.com/KieranWynn/pyquaternion) is included in the source tree
