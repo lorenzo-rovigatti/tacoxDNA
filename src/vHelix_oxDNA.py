@@ -4,12 +4,6 @@ from collections import OrderedDict
 import libs.utils as utils
 
 
-def base_identify(X):
-    base_id = ["A", "T", "C", "G"]
-    complementary_base_id = ["T", "A", "G", "C"]
-    return base_id[X], complementary_base_id[X]
-
-
 def GetMatrix(gamma, beta, alpha):
     gamma = math.radians(gamma)
     beta = math.radians(beta)
@@ -57,6 +51,7 @@ def export_oxDNA(ma_file, box_size):
     base_parent = ""
     base_name = ""
     
+    # this array converts between the vHelix and oxDNA base name system 
     base_array = [0, 3, 2, 1]
 
     vHelixFile = open(ma_file, "r").readlines()
@@ -242,6 +237,7 @@ def export_oxDNA(ma_file, box_size):
                     del strand_list[j - 1]
                     moves += 1
 
+    # here we compute the quantities we need to rotate and translate the nucleotides
     base_a1s = {}
     base_CoMs = {}
     new_base_trans = {}
@@ -356,6 +352,7 @@ def export_oxDNA(ma_file, box_size):
             if base_types[line] == 5:
                 base_types[line] = 0
 
+    # here we apply translations and rotations to build up the oxDNA system
     base_numbers = []
     a1 = []
     pos = []
@@ -447,9 +444,7 @@ def export_oxDNA(ma_file, box_size):
         for base, low, up in zip(base_letters, lower_neighbour_list, upper_neighbour_list):
             topology.append("%s %s %s %s" % (strand_number, base, low, up))
             
-        print(" ".join(base_letters))
-
-    basename = os.path.basename(sys.argv[1])
+    basename = os.path.basename(ma_file)
     top_file = basename + ".top"
     conf_file = basename + ".oxdna"
 
@@ -484,11 +479,12 @@ def export_oxDNA(ma_file, box_size):
 
 
 def parse_options():
-    shortArgs = 'b:'
-    longArgs = ['box=']
+    shortArgs = 'b:e:'
+    longArgs = ['box=', 'seed=']
 
     opts = {
         "box": 100.,
+        "seed": None
     }
 
     try:
@@ -502,6 +498,8 @@ def parse_options():
                 except ValueError:
                     print >> sys.stderr, "The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1])
                     exit(1)
+            if k[0] == '-e' or k[0] == "--seed": 
+                opts['seed'] = int(k[1])
                     
         opts['vHelix_file'] = positional_args[0]
 
@@ -514,7 +512,7 @@ def parse_options():
 def print_usage():
     print >> sys.stderr, "USAGE:"
     print >> sys.stderr, "\t%s vHelix file in Maya .Ma format" % sys.argv[0]
-    print >> sys.stderr, "\t[-b\--box=100]"
+    print >> sys.stderr, "\t[-b\--box=100] [-e\--seed=VALUE]"
     exit(1)
 
 
@@ -526,5 +524,7 @@ if __name__ == '__main__':
     
     source_file = opts['vHelix_file']
     box_size = opts['box']
+    if opts['seed'] is not None:
+        np.random.seed(opts['seed'])
     
     export_oxDNA(source_file, box_size)

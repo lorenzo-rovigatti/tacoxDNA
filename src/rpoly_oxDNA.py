@@ -113,6 +113,7 @@ def rpoly_to_oxDNA(opts):
 def print_usage():
 	print >> sys.stderr, "USAGE:"
 	print >> sys.stderr, "\t%s rpoly_file" % sys.argv[0]
+	print >> sys.stderr, "\t[-e\--seed=VALUE]"
 	exit(1)
 	
 def parse_options():
@@ -125,7 +126,8 @@ def parse_options():
 		import getopt
 		args, files = getopt.gnu_getopt(sys.argv[1:], shortArgs, longArgs)
 		for k in args:
-			if k[0] == '-e' or k[0] == "--seed": opts.seed = int(k[1])
+			if k[0] == '-e' or k[0] == "--seed": 
+				opts.seed = int(k[1])
 			
 		opts.file_name_in = files[0]
 	except Exception:
@@ -138,5 +140,6 @@ if __name__ == '__main__':
 		print_usage()
 	
 	opts = parse_options()
-	np.random.seed(opts.seed)
+	if opts.seed is not None:
+		np.random.seed(opts.seed)
 	rpoly_to_oxDNA(opts)

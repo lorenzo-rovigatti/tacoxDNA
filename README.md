@@ -199,6 +199,8 @@ The `vHelix_oxDNA.py` script converts [vHelix](http://www.vhelix.net/) files int
 ### Optional arguments
 * `-b\--box=VALUE`
 the length of the box side (in oxDNA simulation units) where the system will be placed (defaults to 100)
+* `-e\--seed=RNG_SEED`
+random seed (defaults to a random value). Random vectors are used whenever the input configuration contains deleted nucleotides.
 
 ### Output
 * An oxDNA topology file (named by suffixing the vHelix file with ".top")

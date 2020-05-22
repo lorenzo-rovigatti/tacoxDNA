@@ -1,22 +1,22 @@
 #!/bin/bash
 
-CORRECT_OUTPUT="correct_output.dat"
-CORRECT_TOP="correct_output.top"
-OUTPUT_CONF="input.ma.oxdna"
-OUTPUT_TOP="input.ma.top"
+INPUT="input_no_deletion.ma"
+CORRECT_OUTPUT="correct_output_no_deletion.dat"
+CORRECT_TOP="correct_output_no_deletion.top"
+OUTPUT_CONF="input_no_deletion.ma.oxdna"
+OUTPUT_TOP="input_no_deletion.ma.top"
 CONF_DIFF_BIN="python3 ../conf_diff.py"
 
-if [ ! -s input.ma ] 
+if [ ! -s $INPUT ] 
 then
 	echo "Can't find the input file. Are you sure you are in the right folder?"
 	exit 1
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python ../../src/vHelix_oxDNA.py input.ma
+python ../../src/vHelix_oxDNA.py -e 12345 $INPUT
 # we don't check the topology in this case
 ($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null)
-# && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]
 then
