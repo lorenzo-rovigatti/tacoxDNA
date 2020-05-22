@@ -333,9 +333,9 @@ def export_oxDNA(ma_file, box_size):
                     print("total_is_zero", name_line, partner_base)
             else:
                 # if this fails then we set the base type to its default (0)
-                try:
+                if own_base_type != 5:
                     base_types[name_line] = own_base_type
-                except:
+                else:
                     base_types[name_line] = 0
 
     i = -1
@@ -403,8 +403,7 @@ def export_oxDNA(ma_file, box_size):
         else:
             strand_a3.append(base_a3s[strand[1]])
 
-        if first_comp_pos[0] == first_CoM[0] and first_comp_pos[1] == first_CoM[1] and first_comp_pos[2] == first_CoM[
-            2]:
+        if first_comp_pos[0] == first_CoM[0] and first_comp_pos[1] == first_CoM[1] and first_comp_pos[2] == first_CoM[2]:
             print("a1 incalculable strand_end")
             sys.exit()
         i = 1
