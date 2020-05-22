@@ -2,6 +2,7 @@ import numpy as np
 import sys, os, math, re
 from collections import OrderedDict
 import libs.utils as utils
+from __builtin__ import False
 
 
 def GetMatrix(gamma, beta, alpha):
@@ -33,13 +34,13 @@ def export_oxDNA(ma_file, box_size):
     vHelix_names = []
     first_base_parents = OrderedDict()
     dups = []
-    is_helix = 0
+    is_helix = False
     helix_number = 0
     helix_t = np.array([0, 0, 0])
     helix_r = np.array([0, 0, 0])
     helix_trans = {}
     helix_rot = {}
-    is_base = 0
+    is_base = False
     first_base_types = {}
     first_base_trans = {}
     base_types = {}
@@ -375,7 +376,7 @@ def export_oxDNA(ma_file, box_size):
         lower_neighbour_list = []
         strand_length = len(strand)
         circular = 0
-        if strand[0] == strand[-1]:  # find out if the strand is circlar i.e scaffold and remove last is_base (duplicate with first is_base)
+        if strand[0] == strand[-1]:  # find out if the strand is circlar i.e scaffold and remove last base (duplicate with first base)
             circular = 1
             temp_strand = strand[:-1]
             strand = temp_strand
@@ -407,23 +408,23 @@ def export_oxDNA(ma_file, box_size):
             print("a1 incalculable strand_end")
             sys.exit()
         i = 1
-        for is_base in strand[1:]:
-            if is_base not in base_a3s.keys():
+        for base in strand[1:]:
+            if base not in base_a3s.keys():
 
-                current_pos = base_CoMs[is_base]
+                current_pos = base_CoMs[base]
                 previous_pos = base_CoMs[strand[i - 1]]
                 strand_a3.append((current_pos - previous_pos) / np.linalg.norm(current_pos - previous_pos))
-                if is_base in complementary_pair_list:
-                    complementary_base = complementary_pair_list[is_base]
+                if base in complementary_pair_list:
+                    complementary_base = complementary_pair_list[base]
                 else:
-                    complementary_base = is_base
+                    complementary_base = base
                 base_a3s[complementary_base] = (0 - (current_pos - previous_pos)) / np.linalg.norm(current_pos - previous_pos)
             else:
-                strand_a3.append(base_a3s[is_base])
+                strand_a3.append(base_a3s[base])
             if (current_pos[0] == previous_pos[0]) and (current_pos[1] == previous_pos[1]) and (
                 current_pos[2] == previous_pos[2]):
                 print("a1 incalculable")
-                print(is_base)
+                print(base)
                 print(strand[i - 1])
             i += 1
         i = 0
