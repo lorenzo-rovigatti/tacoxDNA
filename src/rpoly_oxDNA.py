@@ -31,7 +31,8 @@ def rpoly_to_oxDNA(opts):
 	# 'data' stores helix coordinates + rotaion in quaternion
 	data = []
 	
-	rev_helix_connections = []  # staple connection information, scaffold connection is explicit from helix nr
+	rev_helix_connections = []  # staple connection information,
+	fwd_helix_connections = []  # scaffold connections
 	count = 0
 	polyFile = open(opts.file_name_in, 'r')
 	
@@ -42,15 +43,16 @@ def rpoly_to_oxDNA(opts):
 				count += 1
 			elif line.startswith('c'):
 				if 'f3' not in line:
-					rev_helix_connections.append([int(re.search('c helix_(.+?) ', line).group(1)), int(re.search('\' helix_(.+?) ', line).group(1))])  #
+					rev_helix_connections.append([int(re.search('c helix_(.+?) ', line).group(1)), int(re.search('\' helix_(.+?) ', line).group(1))])  # Extract connection information
 				else:
-					pass
+					fwd_helix_connections.append([int(re.search('c helix_(.+?) ', line).group(1)), int(re.search('\' helix_(.+?) ', line).group(1))])
 	except Exception:
 		print('Failed to read the file')
 	
 	generator = cu.StrandGenerator()
 	
 	staple_fragments = base.System([100, 100, 100])  # temporary system to store staple fragments before later connecting them
+	scaffold_fragments = base.System([100,100,100])
 	
 	# Reads orientation from the "data" and produces rotations from the Quaternian coordinates
 	largest_size = 0.0
@@ -80,13 +82,9 @@ def rpoly_to_oxDNA(opts):
 		# store the fragments in this system for later connections
 		staple_fragments.add_strand(fragment1)
 		staple_fragments.add_strand(fragment2)
-		
-		# connect up the scaffold with the new fragment
-		if n == 0:
-			scaffold_strand = new_strands[0].copy()
-		else:
-			new_segment = new_strands[0].copy()
-			scaffold_strand = scaffold_strand.append(new_segment)
+
+		scaffold_fragments.add_strand(new_strands[0])
+
 	
 	output_system = base.System([largest_size * 3.0, largest_size * 3.0, largest_size * 3.0])
 	for n in rev_helix_connections:  # iterate through staple strand connections and connect the previously generated fragments
@@ -97,7 +95,15 @@ def rpoly_to_oxDNA(opts):
 		staple_strand = staple_strand.append(staple_fragments._strands[connect_to].copy())
 	
 		output_system.add_strand(staple_strand)
-	
+
+	scaffold_strand = scaffold_fragments._strands[0].copy()
+	for n in fwd_helix_connections[:-1]:
+		next_segment_adress = n[1]-1
+		next_segment = scaffold_fragments._strands[next_segment_adress].copy()
+		scaffold_strand = scaffold_strand.append(next_segment)
+
+
+
 	scaffold_strand.make_circular()
 	output_system.add_strand(scaffold_strand)
 	
@@ -111,6 +117,7 @@ def rpoly_to_oxDNA(opts):
 def print_usage():
 	print >> sys.stderr, "USAGE:"
 	print >> sys.stderr, "\t%s rpoly_file" % sys.argv[0]
+	print >> sys.stderr, "\t[-e\--seed=VALUE]"
 	exit(1)
 
 	
@@ -124,7 +131,8 @@ def parse_options():
 		import getopt
 		args, files = getopt.gnu_getopt(sys.argv[1:], shortArgs, longArgs)
 		for k in args:
-			if k[0] == '-e' or k[0] == "--seed": opts.seed = int(k[1])
+			if k[0] == '-e' or k[0] == "--seed": 
+				opts.seed = int(k[1])
 			
 		opts.file_name_in = files[0]
 	except Exception:
@@ -138,5 +146,6 @@ if __name__ == '__main__':
 		print_usage()
 	
 	opts = parse_options()
-	np.random.seed(opts.seed)
+	if opts.seed is not None:
+		np.random.seed(opts.seed)
 	rpoly_to_oxDNA(opts)

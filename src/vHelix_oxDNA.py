@@ -2,12 +2,7 @@
 import numpy as np
 import sys, os, math, re
 from collections import OrderedDict
-
-
-def base_identify(X):
-    base_id = ["A", "T", "C", "G"]
-    complementary_base_id = ["T", "A", "G", "C"]
-    return base_id[X], complementary_base_id[X]
+import libs.utils as utils
 
 
 def GetMatrix(gamma, beta, alpha):
@@ -39,13 +34,13 @@ def export_oxDNA(ma_file, box_size):
     vHelix_names = []
     first_base_parents = OrderedDict()
     dups = []
-    helix = 0
+    is_helix = False
     helix_number = 0
     helix_t = np.array([0, 0, 0])
     helix_r = np.array([0, 0, 0])
     helix_trans = {}
     helix_rot = {}
-    base = 0
+    is_base = False
     first_base_types = {}
     first_base_trans = {}
     base_types = {}
@@ -53,6 +48,12 @@ def export_oxDNA(ma_file, box_size):
     base_translation = np.array([1, 1, 1])
     base_type = 5
     base_number = 0
+    helix_name = ""
+    base_parent = ""
+    base_name = ""
+    
+    # this array converts between the vHelix and oxDNA base name system 
+    base_array = [0, 3, 2, 1]
 
     vHelixFile = open(ma_file, "r").readlines()
     for line in vHelixFile:
@@ -60,8 +61,8 @@ def export_oxDNA(ma_file, box_size):
             if "vHelix" in line:
                 helix_number += 1
                 vHelix_names.append(line.split(" ")[3].strip('"').rstrip('";\n'))
-                base = 0  # ERIK seems to be used to keep track if the current item is a helix or a base
-                helix = 1  # ERIK seems to be used to keep track if the current item is a helix or a base
+                is_base = False
+                is_helix = True
                 if helix_number > 1:
                     helix_trans["%s" % helix_name] = helix_t
                     helix_rot["%s" % helix_name] = helix_r
@@ -70,22 +71,14 @@ def export_oxDNA(ma_file, box_size):
                 helix_name = line.split(" ")[3].strip('"').rstrip('";\n')
             if "HelixBase" in line:
                 base_number += 1
-                helix = 0  # ERIK seems to be used to keep track if the current item is a helix or a base
-                base = 1  # ERIK seems to be used to keep track if the current item is a helix or a base
-                # if '"forw_2" -p "helix_' in line:
-                #     temp_helix_nr = str(re.findall('helix_\d+',line)[0])
-                #     print 'found forward '+ str(base_number)+' '+temp_helix_nr
-                #
-                # if '"backw_2" -p "helix_' in line:
-                #     temp_helix_nr = str(re.findall('helix_\d+',line)[0])
-                #     print 'found backward ' + str(base_number)+' '+temp_helix_nr
+                is_helix = False
+                is_base = True
 
                 if base_number > 1:
                     if float(base_translation[0]) == 0. and float(base_translation[1]) == 0. and float(base_translation[2]) == 0.:
                         print("defaulting")
                     first_base_trans["|%s|%s" % (base_parent, base_name)] = base_translation
                     first_base_types["|%s|%s" % (base_parent, base_name)] = base_type
-                    # base_translation=np.array([0,0,0])
                     base_type = 5
                 try:
                     base_parent = line.split(" ")[5].strip('"').rstrip('";\n')
@@ -94,27 +87,26 @@ def export_oxDNA(ma_file, box_size):
                 except:
                     pass
 
-        if '".t"' in line and helix == 1:
+        if '".t"' in line and is_helix:
             try:
                 data = line.split(" ")[4:7]
                 helix_t = np.array([float(data[0]), float(data[1]), float(data[2])])
             except:
                 print(line)
                 sys.exit()
-        elif '".t"' in line and base == 1:
-            # print "using base"
+        elif '".t"' in line and is_base:
             data = line.split(" ")[4:7]
             base_translation = np.array([float(data[0]), float(data[1]), float(data[2])])
-        if '".r"' in line and helix == 1:
+        if '".r"' in line and is_helix:
             try:
                 data = line.split(" ")[4:7]
                 helix_r = np.array([float(data[0]), float(data[1]), float(data[2])])
             except:
                 print(line)
                 sys.exit()
-        if '".lb"' in line and base == 1:
+        if '".lb"' in line and is_base:
             try:
-                base_type = int(line.split(" ")[2].rstrip(";\n"))
+                base_type = base_array[int(line.split(" ")[2].rstrip(";\n"))]
             except:
                 print(line.split(" ")[2].rstrip(";\n"))
                 sys.exit()
@@ -127,12 +119,11 @@ def export_oxDNA(ma_file, box_size):
             helix_r = np.array([0, 0, 0])
             first_base_trans["|%s|%s" % (base_parent, base_name)] = base_translation
             first_base_types["|%s|%s" % (base_parent, base_name)] = base_type
-            # base_translation=np.array([0,0,0])
             base_type = 5
             break
 
     keys = first_base_parents.keys()
-
+    
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -149,7 +140,7 @@ def export_oxDNA(ma_file, box_size):
             base_parents[key.split("|")[2].strip("'").rstrip("'")] = first_base_parents[key]
             base_names.append(key.split("|")[2].strip("'").rstrip("'"))
     keys = first_base_trans.keys()
-
+    
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -164,6 +155,7 @@ def export_oxDNA(ma_file, box_size):
         else:
             base_trans[key.split("|")[2].strip("'").rstrip("'")] = first_base_trans[key]
     keys = first_base_types.keys()
+    
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -179,8 +171,6 @@ def export_oxDNA(ma_file, box_size):
             base_types[key.split("|")[2].strip("'").rstrip("'")] = first_base_types[key]
 
     complementary_pair_list = {}
-    # abc=(subprocess.Popen('cat %s |grep "lb"| grep "connectAttr"' % "rod3_10_10_10.ma",
-    # 	shell = True,stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()[0].split("\n")[:-1])
     new_abc = []
     new_bcd = []
     for i in vHelixFile:
@@ -188,7 +178,7 @@ def export_oxDNA(ma_file, box_size):
             new_abc.append(i[:-1])
         if re.search('connectAttr.+\.bw', i):
             new_bcd.append(i)
-
+            
     for line in new_abc:
         data = line.split(" ")
         base1 = data[1].strip('"').rstrip('.lb"')
@@ -197,29 +187,25 @@ def export_oxDNA(ma_file, box_size):
         complementary_pair_list[base2] = base1
 
     neighbour_list = []
-    # bcd=(subprocess.Popen('cat %s | grep "backw\|forw" |grep ".bw"| grep "connectAttr"| grep ".fw"' % "rod3_10_10_10.ma",
-    # 	shell = True,stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()[0].split("\n")[:-1])
     for line in new_bcd:
         data = line.split(" ")
         base1 = data[1].strip('"').rstrip('.bw"')
         base2 = data[2].strip('"').rstrip('.fw";\n')
         neighbour_list.append([base1, base2])
 
-    # print len(neighbour_list)
-    # sys.exit()
     strand_list = []
     counter = 0
 
     while counter < len(neighbour_list):
-        found = "no"
+        found = False
         base1 = neighbour_list[len(neighbour_list) - counter - 1][0]
         base2 = neighbour_list[len(neighbour_list) - counter - 1][1]
         for line in strand_list:
             check = line[-1]
             if check == base1:
-                found = "yes"
+                found = True
                 line.append(base2)
-        if found == "no":
+        if not found:
             strand_list.append([base1, base2])
         counter += 1
 
@@ -252,12 +238,13 @@ def export_oxDNA(ma_file, box_size):
                     del strand_list[j - 1]
                     moves += 1
 
+    # here we compute the quantities we need to rotate and translate the nucleotides
     base_a1s = {}
     base_CoMs = {}
     new_base_trans = {}
-    base_array = [1, 0, 3, 2]
     for name_line in base_names:
         if "forw" in name_line:
+            partner_base = None
             for key in complementary_pair_list:
                 base1 = key
                 base2 = complementary_pair_list[key]
@@ -265,46 +252,39 @@ def export_oxDNA(ma_file, box_size):
                     partner_base = base2
                 elif base2 == name_line:
                     partner_base = base1
-            # if base1!=base2:
-            try:
-                own_index = int(base_names.index(name_line))
-            except:
-                print(name_line)
-                print('error at 265')
-                sys.exit()
             try:
                 own_translation = base_trans[name_line]
             except:
-                print(own_index)
-                print("failing translation")
-                print(name_line)
+                print("failing translation for %s" % name_line)
                 sys.exit()
+                
             own_base_type = base_types[name_line]
-
             own_parent = base_parents[name_line]
             own_parent_translation = helix_trans[own_parent]
             own_parent_rotation = helix_rot[own_parent]
-            try:
-                partner_index = int(base_names.index(partner_base))
-            except:
-                print(partner_base)
-                print('error at 284')
-                sys.exit()
-            try:
-                partner_translation = base_trans[partner_base]
-            except:
-                print(partner_index)
-
-                sys.exit()
-            partner_base_type = base_types[partner_base]
-
-            partner_parent = base_parents[partner_base]
-            partner_parent_index = vHelix_names.index(partner_parent)
-            partner_parent_translation = helix_trans[partner_parent]
-            partner_parent_rotation = helix_rot[partner_parent]
-
-            link_versor = (partner_translation - own_translation) / np.linalg.norm(
-                partner_translation - own_translation)
+         
+            if partner_base is not None:       
+                try:
+                    partner_index = int(base_names.index(partner_base))
+                except:
+                    print(partner_base)
+                    sys.exit()
+                
+                try:
+                    partner_translation = base_trans[partner_base]
+                except:
+                    print(partner_index)
+                    sys.exit()
+                    
+                partner_base_type = base_types[partner_base]
+                partner_parent = base_parents[partner_base]
+                partner_parent_translation = helix_trans[partner_parent]
+                partner_parent_rotation = helix_rot[partner_parent]
+    
+                link_versor = (partner_translation - own_translation) / np.linalg.norm(partner_translation - own_translation)
+            else:
+                link_versor = utils.get_random_vector()
+                partner_parent_translation = np.array([0., 0., 0.])
 
             perp_versor = np.array([-link_versor[1], link_versor[0], 0.])
             unrotated_CoM_element = (own_translation + (0.8494 * link_versor) - (0.1883 * perp_versor))
@@ -314,43 +294,49 @@ def export_oxDNA(ma_file, box_size):
             forw_CoM_element = np.dot(rot_mat, unrotated_CoM_element) + own_parent_translation
 
             rotated_forw_pos = np.dot(rot_mat, new_forw_pos)
-            back_rot_mat = GetMatrix(partner_parent_rotation[0], partner_parent_rotation[1], partner_parent_rotation[2])
-            backw_CoM_element = np.dot(back_rot_mat, unrotated_CoM_element) + partner_parent_translation
+            if partner_base is not None:
+                back_rot_mat = GetMatrix(partner_parent_rotation[0], partner_parent_rotation[1], partner_parent_rotation[2])
+                backw_CoM_element = np.dot(back_rot_mat, unrotated_CoM_element) + partner_parent_translation
+                base_CoMs[partner_base] = backw_CoM_element
+            else:
+                back_rot_mat = GetMatrix(0, 0, 0)
+                
             rotated_backw_pos = np.dot(back_rot_mat, new_backw_pos)
-            base_CoMs[partner_base] = backw_CoM_element
             base_CoMs[name_line] = forw_CoM_element
 
             correct_forw_pos = (rotated_forw_pos + own_parent_translation) / 0.8518
             correct_backw_pos = (rotated_backw_pos + partner_parent_translation) / 0.8518
-            if (correct_forw_pos[0] == correct_backw_pos[0]) and (correct_forw_pos[1] == correct_backw_pos[1]) and (
-                correct_forw_pos[2] == correct_backw_pos[2]):
+            if (correct_forw_pos[0] == correct_backw_pos[0]) and (correct_forw_pos[1] == correct_backw_pos[1]) and (correct_forw_pos[2] == correct_backw_pos[2]):
                 print("error in translation")
                 print(partner_base, name_line, correct_forw_pos)
                 sys.exit()
             a1 = (correct_backw_pos - correct_forw_pos) / np.linalg.norm(correct_backw_pos - correct_forw_pos)
             back_a1 = -a1
-            base_a1s[partner_base] = back_a1
             base_a1s[name_line] = a1
             new_base_trans[name_line] = correct_forw_pos
-            new_base_trans[partner_base] = correct_backw_pos
-            if (new_base_trans[name_line][0] == new_base_trans[partner_base][0]) and (
-                new_base_trans[name_line][1] == new_base_trans[partner_base][1]) and (
-                new_base_trans[name_line][2] == new_base_trans[partner_base][2]):
-                print("error in storing translation")
-                print(partner_base, name_line, correct_forw_pos)
-                sys.exit()
-            if partner_base_type == 5 and own_base_type == 5:
-                base_types[name_line] = 0
-                base_types[partner_base] = 1
-            elif partner_base_type == 5:
-                comp_base_type = base_array[own_base_type]
-                base_types[partner_base] = comp_base_type
-            elif own_base_type == 5:
-                comp_base_type = base_array[partner_base_type]
-                base_types[name_line] = comp_base_type
-            if (new_forw_pos[0] == 0 and new_forw_pos[1] == 0 and new_forw_pos[2] == 0) or (
-                        new_backw_pos[0] == 0 and new_backw_pos[1] == 0 and new_backw_pos[2] == 0):
-                print("total_is_zero", name_line, partner_base)
+            if partner_base is not None:
+                base_a1s[partner_base] = back_a1
+                new_base_trans[partner_base] = correct_backw_pos
+                if (new_base_trans[name_line][0] == new_base_trans[partner_base][0]) and (new_base_trans[name_line][1] == new_base_trans[partner_base][1]) and (new_base_trans[name_line][2] == new_base_trans[partner_base][2]):
+                    print("error in storing translation")
+                    print(partner_base, name_line, correct_forw_pos)
+                    sys.exit()
+                if partner_base_type == 5 and own_base_type == 5:
+                    base_types[name_line] = 0
+                    base_types[partner_base] = 1
+                elif partner_base_type == 5:
+                    # 3 - x gives the base complementary to x
+                    base_types[partner_base] = 3 - own_base_type
+                elif own_base_type == 5:
+                    base_types[name_line] = 3 - partner_base_type
+                if (new_forw_pos[0] == 0 and new_forw_pos[1] == 0 and new_forw_pos[2] == 0) or (new_backw_pos[0] == 0 and new_backw_pos[1] == 0 and new_backw_pos[2] == 0):
+                    print("total_is_zero", name_line, partner_base)
+            else:
+                # if this fails then we set the base type to its default (0)
+                try:
+                    base_types[name_line] = own_base_type
+                except:
+                    base_types[name_line] = 0
 
     i = -1
     for line in base_names:
@@ -366,29 +352,21 @@ def export_oxDNA(ma_file, box_size):
             new_base_trans[line] = ((np.dot(rot_mat, base_pos) + parent_translation) / 0.8518)
             if base_types[line] == 5:
                 base_types[line] = 0
-                # print new_base_trans[line]
-    # sys.exit()
+
+    # here we apply translations and rotations to build up the oxDNA system
     base_numbers = []
     a1 = []
     pos = []
     a3 = []
     base_letters = []
-    base_letter_array = ["A", "T", "G", "C"]
+    base_letter_array = ["A", "C", "G", "T"]
     strand_number = 0
     strand_length = 0
     nucs_to_current_strand = 0
     topology = []
     temp_strand = []
     base_a3s = {}
-    # print strand_list[0]
-    # print strand_list[0]
     for strand in strand_list:
-        # print strand
-        '''for element in reversed(strand):
-            temp_strand.append(element)
-        strand=temp_strand
-        temp_strand=[]'''
-
         nucs_to_current_strand += strand_length
         # print nucs_to_current_strand, strand_number+1
         strand_number += 1
@@ -448,7 +426,6 @@ def export_oxDNA(ma_file, box_size):
                 print("a1 incalculable")
                 print(base)
                 print(strand[i - 1])
-                # sys.exit()
             i += 1
         i = 0
         for base in strand:
@@ -456,7 +433,7 @@ def export_oxDNA(ma_file, box_size):
             base_numbers.append(base_types[base])
             a1.append(base_a1s[base])
             pos.append(new_base_trans[base])
-        # print len(strand), len(strand_a3)
+
         for line in strand_a3:
             a3.append(line)
         for line in base_numbers:
@@ -467,9 +444,8 @@ def export_oxDNA(ma_file, box_size):
                 print(index)
         for base, low, up in zip(base_letters, lower_neighbour_list, upper_neighbour_list):
             topology.append("%s %s %s %s" % (strand_number, base, low, up))
-            # print len (base_letters), len(lower_neighbour_list), len(upper_neighbour_list), len (strand_a3)
-
-    basename = os.path.basename(sys.argv[1])
+            
+    basename = os.path.basename(ma_file)
     top_file = basename + ".top"
     conf_file = basename + ".oxdna"
 
@@ -481,12 +457,12 @@ def export_oxDNA(ma_file, box_size):
     total_nucs = len(base_names)
     total_strands = (strand_number)
 
-    string = "%s %s \n" % (total_nucs, total_strands)
+    string = "%s %s\n" % (total_nucs, total_strands)
 
     with open(top_file, "a+") as top:
         top.write("%s" % string)
         for line in topology:
-            top.write("%s \n" % line)
+            top.write("%s\n" % line)
 
     with open(conf_file, "a+") as conf:
         conf.write("t = 0 \nb = %s %s %s \nE = 0 0 0 \n" % (box_size, box_size, box_size))
@@ -504,11 +480,12 @@ def export_oxDNA(ma_file, box_size):
 
 
 def parse_options():
-    shortArgs = 'b:'
-    longArgs = ['box=']
+    shortArgs = 'b:e:'
+    longArgs = ['box=', 'seed=']
 
     opts = {
         "box": 100.,
+        "seed": None
     }
 
     try:
@@ -518,10 +495,12 @@ def parse_options():
             if k[0] == '-b' or k[0] == '--box':
                 try:
                     opts['box'] = float(k[1])
-                    print("## Setting the box size to %f" % opts['box'], file=sys.stderr)
+                    print >> sys.stderr, "## Setting the box size to %f" % opts['box']
                 except ValueError:
-                    print("The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
+                    print >> sys.stderr, "The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1])
                     exit(1)
+            if k[0] == '-e' or k[0] == "--seed": 
+                opts['seed'] = int(k[1])
                     
         opts['vHelix_file'] = positional_args[0]
 
@@ -534,7 +513,7 @@ def parse_options():
 def print_usage():
     print("USAGE:", file=sys.stderr)
     print("\t%s vHelix file in Maya .Ma format" % sys.argv[0], file=sys.stderr)
-    print(sys.stderr, "\t[-b\--box=100]", file=sys.stderr)
+    print(sys.stderr, "\t[-b\--box=100] [-e\--seed=VALUE]", file=sys.stderr)
     exit(1)
 
 
@@ -546,5 +525,7 @@ if __name__ == '__main__':
     
     source_file = opts['vHelix_file']
     box_size = opts['box']
+    if opts['seed'] is not None:
+        np.random.seed(opts['seed'])
     
     export_oxDNA(source_file, box_size)
