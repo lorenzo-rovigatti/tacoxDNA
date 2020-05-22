@@ -2,7 +2,6 @@ import numpy as np
 import sys, os, math, re
 from collections import OrderedDict
 import libs.utils as utils
-from __builtin__ import False
 
 
 def GetMatrix(gamma, beta, alpha):
@@ -323,7 +322,7 @@ def export_oxDNA(ma_file, box_size):
                     sys.exit()
                 if partner_base_type == 5 and own_base_type == 5:
                     base_types[name_line] = 0
-                    base_types[partner_base] = 1
+                    base_types[partner_base] = 3
                 elif partner_base_type == 5:
                     # 3 - x gives the base complementary to x
                     base_types[partner_base] = 3 - own_base_type
