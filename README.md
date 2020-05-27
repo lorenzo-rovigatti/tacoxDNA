@@ -125,7 +125,7 @@ The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes mes
 
 ## cadnano-to-oxDNA converter
 
-The `cadnano_oxDNA.py` script converts [cadnano](https://cadnano.org/) files into oxDNA configurations. It takes two mandatory arguments.
+The `cadnano_oxDNA.py` script converts [cadnano](https://cadnano.org/) files into oxDNA configurations. Note that the script **does not** support scaffold-less input files. It takes two mandatory arguments.
 
 ### Mandatory arguments
 * The input cadnano file (in json format)

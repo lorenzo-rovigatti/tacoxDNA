@@ -152,7 +152,7 @@ def add_slice(current_system, vhelix, begin, end, nodes, strands, pos, direction
     length_change_begin = 0
     length_change_end = 0
     
-    if (vhelix.num % 2 + strand_type) % 2 == 0 :  # strand and even num or staple and odd num
+    if (vhelix.num % 2 + strand_type) % 2 == 0:  # strand and even num or staple and odd num
         for i in vhelix.skip[:begin]:
             length_change_begin -= int(i)
         for i in vhelix.skip[:end + 1]:
@@ -501,8 +501,8 @@ class vhelix (object):
         elif which == 'scaf':
             self.scaf.append (toadd)
         else:
-            print >> sys.stderr, "cannot add square that is not scaf or stap. Dying now"
-            sys.exit (-1)
+            base.Logger.log("Cannot add square that is not scaf or stap. Dying now", base.Logger.CRITICAL)
+            sys.exit(-1)
     
     def __str__(self):
         a = '{\n'
@@ -838,6 +838,10 @@ if __name__ == '__main__':
                 else:
                     base.Logger.log("unexpected square array", base.Logger.WARNING)                
             i += 1
+            
+        if slice_sys.N_strands == 0:
+            base.Logger.log("No scaffold strand found in the cadnano file, exiting", base.Logger.CRITICAL)
+            exit(1)
 
         # read the staple squares and add strands to slice_sys
         i = 0
