@@ -298,9 +298,11 @@ class Strand():
         self.set_cm_pos(new_pos)
 
     def rotate(self, R, origin=None):
-        if origin == None: origin = self.cm_pos
+        if origin == None: 
+            origin = self.cm_pos
 
-        for n in self._nucleotides: n.rotate(R, origin)
+        for n in self._nucleotides: 
+            n.rotate(R, origin)
 
     def append (self, other):
         if not isinstance (other, Strand):
@@ -321,7 +323,13 @@ class Strand():
         return ret
 
     def get_slice(self, start=0, end=None):
-        if end is None: end = len(self._nucleotides)
+        if end is None: 
+            end = self.get_length()
+            
+        if end > self.get_length():
+            print >> sys.stderr, "The given end parameter is larger than the number of nucleotides of the strand (%d > %d)" % (end, self.get_length())
+            raise ValueError
+            
         ret = Strand()
         for i in range(start, end):
             ret.add_nucleotide(self._nucleotides[i].copy())
