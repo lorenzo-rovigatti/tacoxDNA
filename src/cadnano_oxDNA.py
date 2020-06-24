@@ -839,8 +839,8 @@ if __name__ == '__main__':
             i += 1
             
         if slice_sys.N_strands == 0:
-            base.Logger.log("No scaffold strand found in the cadnano file, exiting", base.Logger.CRITICAL)
-            exit(1)
+            base.Logger.log("No scaffold strand found in virtual helix n. %d: staples-only virtual helices are not supported" % h.num, base.Logger.WARNING)
+            continue
 
         # read the staple squares and add strands to slice_sys
         i = 0
@@ -1039,6 +1039,10 @@ if __name__ == '__main__':
     vhelix_pattern = {}
     for i in range(len(cadsys.vhelices)):
         vhelix_pattern[cadsys.vhelices[i].num] = (cadsys.vhelices[i].row,cadsys.vhelices[i].col)
+        
+    if rev_sys.N == 0:
+        base.Logger.log("The generated configuration is empty: this might be due to this conversion module not supporting virtual helices containing no scaffold strands.", base.Logger.CRITICAL)
+        exit(1)
 
     if print_virt2nuc:
         with open("virt2nuc", "w") as fout:
