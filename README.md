@@ -1,5 +1,7 @@
 # tacox<img src="logo.png" width="35">NA
 
+**This is the Python2 version of the code. Checkout the `python3` branch for the Python3 version.**
+
 tacoxDNA (Tools and Converters for oxDNA) is a collection of tools initially developed to help [oxDNA](http://dna.physics.ox.ac.uk/) users. However, it will soon be expanded so as to support additional models. If you use tacoxDNA, please consider citing the following article:
 
 A. Suma, E. Poppleton, M. Matthies, P. Šulc, F. Romano, A. A. Louis, J. P. K. Doye, C. Micheletti and L. Rovigatti, ["TacoxDNA: A user‐friendly web server for simulations of complex DNA structures, from single strands to origami"](https://doi.org/10.1002/jcc.26029), *J. Comput. Chem.* **40**, 2586 (2019)
@@ -109,13 +111,17 @@ print one PDB file for each strand
 
 The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes messy nature of PDB files, the script makes some choices during the parsing of the input file. In particular, note the following points:
 
-* if the PDB file contains more than one MODEL, only the first one will be converted
+* if the PDB file contains more than one MODEL, only the first one will be converted unless the `-m/--models-as-strands` option is given
 * if the PDB file contains alternate locations for some (or all) of the atoms, only those marked with either "1" or "A" will be considered. If the PDB file uses a different notation, the script may fail or crash
 * sometimes, sugar atoms are marked with asterisks (\*) instead of single quotes ('). In these cases the converter replaces the former with the latter and moves on
 
 ### Mandatory arguments
 * The input PDB file
 * The direction according to which the nucleotides are listed in the PDB file. It should be either 35 (for 3' -> 5') or 53 (for 5' -> 3').
+
+### Optional arguments
+* `-m, --models-as-strands` 
+Treat different models as different strands
 
 ### Output
 * An oxDNA topology file (named by suffixing the PDB file with ".top")

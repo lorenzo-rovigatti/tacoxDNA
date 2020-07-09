@@ -8,19 +8,54 @@ import numpy as np
 from libs.pdb import Atom, Nucleotide, FROM_ANGSTROM_TO_OXDNA
 from libs import base
 
+def print_usage():
+    print >> sys.stderr, "USAGE:"
+    print >> sys.stderr, "\t%s PDB_file direction [use 35 or 53 if the PDB file has the nucleotides listed in the 3' -> 5' or 5' -> 3' direction, respectively]" % sys.argv[0]
+    print >> sys.stderr, "\t[-m/--models-as-strands]"
+    exit(1)
+    
+def parse_options():
+    shortArgs = 'm'
+    longArgs = ['models-as-strands',]
+    
+    opts = {
+        "PDB_file" : "",
+        "oxDNA_direction" : True,
+        "models_as_strands" : False,
+    }
+    
+    try:
+        import getopt
+        args, positional_args = getopt.gnu_getopt(sys.argv[1:], shortArgs, longArgs)
+        for k in args:
+            if k[0] == '-m' or k[0] == '--models-as-strands':
+                print >> sys.stderr, "## Different models will be interpreted as different strands"
+                opts["models_as_strands"] = True
+            
+        opts['PDB_file'] = positional_args[0]
+        direction = positional_args[1]
+        
+        if direction == "35":
+            opts["oxDNA_direction"] = True
+        elif direction == "53":
+            opts["oxDNA_direction"] = False
+        else:
+            print >> sys.stderr, "The 'direction' argument should be either 35 or 53"
+            exit(1)
+    except Exception:
+        print_usage()
+        
+    return opts
+
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print >> sys.stderr, "Usage is %s PDB_file direction [use 35 or 53 if the PDB file has the nucleotides listed in the 3' -> 5' or 5' -> 3' direction, respectively]" % sys.argv[0]
-        sys.exit(1)
+        print_usage()
         
-    pdb_file = sys.argv[1]
-    if sys.argv[2] == "35":
-        oxDNA_direction = True
-    elif sys.argv[2] == "53":
-        oxDNA_direction = False
-    else:
-        print >> sys.stderr, "The second argument should be either 35 or 53"
-        exit(1)
+    opts = parse_options()
+        
+    pdb_file = opts['PDB_file']
+    oxDNA_direction = opts['oxDNA_direction']
+    models_as_strands = opts['models_as_strands']
         
     pdb_strands = []
     with open(pdb_file) as f:
@@ -33,11 +68,11 @@ if __name__ == '__main__':
                 na = Atom(line)
                 if old_chain != "":
                     if na.chain_id != old_chain and len(strand) != 0:
-                        print >> sys.stderr, "WARNING: a TER statement separating different strands is missing"
+                        print >> sys.stderr, "WARNING: a TER statement separating different strands (%s and %s) is missing" % (na.chain_id, old_chain)
                         pdb_strands.append(strand)
                         strand = []
                     elif na.chain_id == old_chain and len(strand) == 0:
-                        print >> sys.stderr, "WARNING: a TER statement separates strand having the same chain id"
+                        print >> sys.stderr, "WARNING: a TER statement separates strands having the same chain id (%s)" % na.chain_id
                         
                 if na.alternate != "":
                     if na.alternate == "A" or na.alternate == "1":
@@ -52,11 +87,18 @@ if __name__ == '__main__':
                 nn.add_atom(na)
                 old_chain = na.chain_id
             elif line.startswith("MODEL"):
-                N_model = line.split()[1]
-                print >> sys.stderr, "MODEL line detected: using the first MODEL encountered (%s)" % (N_model)
+                if not models_as_strands:
+                    N_model = line.split()[1]
+                    print >> sys.stderr, "MODEL line detected: using the first MODEL encountered (%s)" % (N_model)
             elif line.startswith("ENDMDL"):
-                # we treat ENDMDL as the end of the file 
-                break;
+                if not models_as_strands:
+                    # by default we treat ENDMDL as the end of the file 
+                    break;
+                else:
+                    # otherwise we treat it as the end of the strand
+                    if len(strand) > 0:
+                        pdb_strands.append(strand)
+                        strand = []
             elif line.startswith("TER"):
                 pdb_strands.append(strand)
                 strand = []
