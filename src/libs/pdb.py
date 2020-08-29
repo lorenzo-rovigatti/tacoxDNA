@@ -113,7 +113,7 @@ class Nucleotide(object):
         
     def correct_for_large_boxes(self, box):
         for atom in self.atoms:
-            atom.shift(-np.rint(x.pos / box ) * box)
+            atom.shift(-np.rint(atom.pos / box ) * box)
 
     def to_pdb(self, chain_identifier, print_H, residue_serial, residue_suffix, residue_type):
         res = []
