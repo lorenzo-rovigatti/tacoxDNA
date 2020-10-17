@@ -732,9 +732,8 @@ class System(object):
             f.write(out)
         f.close()
 
-    def print_lorenzo_output(self, conf_name, top_name, visibility=None):
+    def print_lorenzo_output(self, conf_name, top_name, visibility=None, append_to_traj=False):
         self._prepare(visibility)
-        # print self._time, self._box[0], self._box[1], self._box[2], self.E_tot, self.E_pot, self.E_kin
         conf = "t = %lu\nb = %f %f %f\nE = %lf %lf %lf\n" % (int(self._time), self._box[0], self._box[1], self._box[2], self.E_tot, self.E_pot, self.E_kin)
 
         visible_strands = 0
@@ -749,14 +748,16 @@ class System(object):
             sc, st = s._get_lorenzo_output()
             topology += st
             conf += sc
+            
+        if append_to_traj:
+            with open(conf_name, "a") as f:
+                f.write(conf)
+        else:
+            with open(conf_name, "w") as f:
+                f.write(conf)
 
-        f = open(conf_name, "w")
-        f.write(conf)
-        f.close()
-
-        f = open(top_name, "w")
-        f.write(topology)
-        f.close()
+        with open(top_name, "w") as f:
+            f.write(topology)
 
     N = property(get_N_Nucleotides)
     N_strands = property (get_N_strands)

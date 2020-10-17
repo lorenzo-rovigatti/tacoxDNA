@@ -6,56 +6,7 @@ from libs import base
 from libs import reader_lammps_init 
 from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
-#rules to convert from a1 a3 vectors to quaternions based on
-# http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
-# http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/transforms/index.htm
-
-def exyz_to_quat (mya1, mya3):
-
-    mya2 = np.cross(mya3, mya1)
-    myquat = [1, 0, 0, 0]
-
-    q0sq = 0.25 * (mya1[0] + mya2[1] + mya3[2] + 1.0)
-    q1sq = q0sq - 0.5 * (mya2[1] + mya3[2])
-    q2sq = q0sq - 0.5 * (mya1[0] + mya3[2])
-    q3sq = q0sq - 0.5 * (mya1[0] + mya2[1])
-
-    # some component must be greater than 1/4 since they sum to 1
-    # compute other components from it
-
-    if q0sq >= 0.25:
-        myquat[0] = np.sqrt(q0sq)
-        myquat[1] = (mya2[2] - mya3[1]) / (4.0 * myquat[0])
-        myquat[2] = (mya3[0] - mya1[2]) / (4.0 * myquat[0])
-        myquat[3] = (mya1[1] - mya2[0]) / (4.0 * myquat[0])
-    elif q1sq >= 0.25:
-        myquat[1] = np.sqrt(q1sq)
-        myquat[0] = (mya2[2] - mya3[1]) / (4.0 * myquat[1])
-        myquat[2] = (mya2[0] + mya1[1]) / (4.0 * myquat[1])
-        myquat[3] = (mya1[2] + mya3[0]) / (4.0 * myquat[1])
-    elif q2sq >= 0.25:
-        myquat[2] = np.sqrt(q2sq)
-        myquat[0] = (mya3[0] - mya1[2]) / (4.0 * myquat[2])
-        myquat[1] = (mya2[0] + mya1[1]) / (4.0 * myquat[2])
-        myquat[3] = (mya3[1] + mya2[2]) / (4.0 * myquat[2])
-    elif q3sq >= 0.25:
-        myquat[3] = np.sqrt(q3sq)
-        myquat[0] = (mya1[1] - mya2[0]) / (4.0 * myquat[3])
-        myquat[1] = (mya3[0] + mya1[2]) / (4.0 * myquat[3])
-        myquat[2] = (mya3[1] + mya2[2]) / (4.0 * myquat[3])
-
-    norm = 1.0 / np.sqrt(myquat[0] * myquat[0] + myquat[1] * myquat[1] + \
-			  myquat[2] * myquat[2] + myquat[3] * myquat[3])
-    myquat[0] *= norm
-    myquat[1] *= norm
-    myquat[2] *= norm
-    myquat[3] *= norm
-
-    return np.array([myquat[0], myquat[1], myquat[2], myquat[3]])
-
-
-# the three commented lines would define quantities that are not necessary
-def quat_to_exyz (myquat):
+def quat_to_exyz(myquat):
     sqw = myquat[0] * myquat[0];
     sqx = myquat[1] * myquat[1];
     sqy = myquat[2] * myquat[2];
@@ -63,13 +14,11 @@ def quat_to_exyz (myquat):
 
     invs = 1 / (sqx + sqy + sqz + sqw)
     m00 = (sqx - sqy - sqz + sqw) * invs ;
-    #m11 = (-sqx + sqy - sqz + sqw) * invs ;
     m22 = (-sqx - sqy + sqz + sqw) * invs ;
     
     tmp1 = myquat[1] * myquat[2];
     tmp2 = myquat[3] * myquat[0];
     m10 = 2.0 * (tmp1 + tmp2) * invs ;
-    #m01 = 2.0 * (tmp1 - tmp2) * invs ;
 
     tmp1 = myquat[1] * myquat[3];
     tmp2 = myquat[2] * myquat[0];
@@ -77,7 +26,6 @@ def quat_to_exyz (myquat):
     m02 = 2.0 * (tmp1 + tmp2) * invs ;
     tmp1 = myquat[2] * myquat[3];
     tmp2 = myquat[1] * myquat[0];
-    #m21 = 2.0 * (tmp1 + tmp2) * invs ;
     m12 = 2.0 * (tmp1 - tmp2) * invs ; 
 
     mya1 = np.array([m00, m10, m20])
@@ -91,20 +39,18 @@ if __name__ == '__main__':
         print("Usage is %s lammps_init_file" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
-    conf=reader_lammps_init.Lammps_parser(sys.argv[1])
+    conf = reader_lammps_init.Lammps_parser(sys.argv[1])
     N = conf.natoms 
     box = np.array([0, 0., 0.])
-    box[0]=conf.Lx
-    box[1]=conf.Ly
-    box[2]=conf.Lz
+    box[0] = conf.Lx
+    box[1] = conf.Ly
+    box[2] = conf.Lz
 
     system = base.System(box)
 
-
-    strands=[]
+    strands = []
     for i in range(conf.nstrands):
             strands.append(base.Strand())
-
 
     for i in range(N):
             cm = conf.xyz[i,:]
