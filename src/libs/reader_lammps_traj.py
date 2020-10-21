@@ -10,7 +10,7 @@ class Lammps_parser(object):
     def __init__(self, filename):
         self.filename = filename
 
-        sects = self.grab_datafile()
+        sects = self.grab_trajfile()
         print(sects)
         self.parse_Atoms(sects['ITEM'])
 
@@ -59,7 +59,7 @@ class Lammps_parser(object):
                 if line:
                     yield line
 
-    def grab_datafile(self):
+    def grab_trajfile(self):
         f = list(self.iterdata())
         print(f)
         starts = [i for i, line in enumerate(f)
