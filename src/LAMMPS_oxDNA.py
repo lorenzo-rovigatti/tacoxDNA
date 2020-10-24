@@ -4,7 +4,7 @@ import numpy as np
 import sys, os
 from libs import base
 from libs import reader_lammps_init 
-from libs import reader_lammps_traj 
+from libs import read_write_lammps_traj 
 from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
 def quat_to_exyz(myquat):
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     system.print_lorenzo_output(configuration_file, topology_file)
 
     if len(sys.argv) == 3:
-      conf = reader_lammps_traj.Lammps_parser(sys.argv[2])
+      conf = read_write_lammps_traj.Lammps_parser(sys.argv[2])
 
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
