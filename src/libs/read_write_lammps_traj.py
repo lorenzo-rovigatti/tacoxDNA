@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 
-class Lammps_parser(object):	
+class Lammps_parser(object):    
 
     def __init__(self, filename):
 
@@ -35,14 +35,32 @@ class Lammps_parser(object):
 
             if line.startswith('ITEM: ATOMS'):
                 print(line)
+                line = f.readline()
+                N = self.natoms
+
+                #self.xyz = np.zeros((N, 3), dtype=float)
                 for n in range(self.natoms):
+
+                    position = np.float32(line.split()[3:6])
+                    self.xyz = position
+                    velocity = np.float32(line.split()[6:9])
+                    self.velocity = velocity
+
+                    print(position,velocity)
                     line = f.readline()
-                    print(t, line)
+              
+                    #print(line)
+
+
+
+
+
+
 
             line = f.readline()
+            #print(line)
 
-
+          
 
 
         sys.exit(0)
-
