@@ -756,8 +756,8 @@ class System(object):
             with open(conf_name, "w") as f:
                 f.write(conf)
 
-        with open(top_name, "w") as f:
-            f.write(topology)
+            with open(top_name, "w") as f:
+                f.write(topology)
 
     N = property(get_N_Nucleotides)
     N_strands = property (get_N_strands)
