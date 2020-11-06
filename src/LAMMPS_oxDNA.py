@@ -122,8 +122,11 @@ if __name__ == '__main__':
                   velocity = np.float32(line.split()[6:9])
                   conf.v = velocity
 
-                  print(conf.xyz,conf.v)
+
                   line = f.readline()
+
+              print(conf.xyz,conf.v)
+              system.print_lorenzo_output(configuration_file, topology_file, None, True)
 
           line = f.readline()
 
