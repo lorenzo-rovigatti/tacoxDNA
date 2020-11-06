@@ -4,7 +4,6 @@ import numpy as np
 import sys, os
 from libs import base
 from libs import reader_lammps_init 
-from libs import read_write_lammps_traj 
 from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
 def quat_to_exyz(myquat):
@@ -82,7 +81,52 @@ if __name__ == '__main__':
     system.print_lorenzo_output(configuration_file, topology_file)
 
     if len(sys.argv) == 3:
-      conf = read_write_lammps_traj.Lammps_parser(sys.argv[2])
+
+      f = open(sys.argv[2],'r')
+      t = []
+
+      line = f.readline()
+
+      while line:
+
+          if line.startswith('ITEM: TIMESTEP'):
+              t = int(f.readline())
+              line = f.readline()
+
+          if line.startswith('ITEM: NUMBER OF ATOMS') and t==0:
+              conf.natoms = int(f.readline())
+              line = f.readline()
+
+          if line.startswith('ITEM: BOX BOUNDS') and t==0:
+              line = f.readline()
+              xlo, xhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+              conf.Lx = xhi - xlo
+              line = f.readline()
+              ylo, yhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+              conf.Ly = yhi - ylo
+              line = f.readline()
+              zlo, zhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+              conf.Lz = zhi - zlo
+
+          if line.startswith('ITEM: ATOMS'):
+              line = f.readline()
+              N = conf.natoms
+
+              conf.xyz = np.zeros((N, 3), dtype=float)
+              conf.v   = np.zeros((N, 3), dtype=float)
+
+              for n in range(conf.natoms):
+
+                  position = np.float32(line.split()[3:6])
+                  conf.xyz = position
+                  velocity = np.float32(line.split()[6:9])
+                  conf.v = velocity
+
+                  print(conf.xyz,conf.v)
+                  line = f.readline()
+
+          line = f.readline()
+
 
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
