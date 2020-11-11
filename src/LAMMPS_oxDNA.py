@@ -112,20 +112,18 @@ if __name__ == '__main__':
               line = f.readline()
               N = conf.natoms
 
-              conf.xyz = np.zeros((N, 3), dtype=float)
-              conf.v   = np.zeros((N, 3), dtype=float)
-
               for n in range(conf.natoms):
 
-                  position = np.float32(line.split()[3:6])
-                  conf.xyz = position
-                  velocity = np.float32(line.split()[6:9])
-                  conf.v = velocity
+                  index = int(line.split()[0])-1
 
+                  position = np.float32(line.split()[3:6])
+                  conf.xyz[index,:] = position
+                  velocity = np.float32(line.split()[6:9])
+                  conf.v[index,:] = velocity
 
                   line = f.readline()
 
-              print(conf.xyz,conf.v)
+              print(conf.xyz, conf.v)
               system.print_lorenzo_output(configuration_file, topology_file, None, True)
 
           line = f.readline()
