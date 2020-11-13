@@ -752,15 +752,18 @@ class System(object):
         if append_to_traj:
             with open(conf_name, "a") as f:
                 f.write(conf)
+                f.close()
         else:
             with open(conf_name, "w") as f:
                 f.write(conf)
-
+                f.close()
             with open(top_name, "w") as f:
                 f.write(topology)
+                f.close()
 
     N = property(get_N_Nucleotides)
     N_strands = property (get_N_strands)
+
 
     def get_nucleotide_list (self):
         ret = []
