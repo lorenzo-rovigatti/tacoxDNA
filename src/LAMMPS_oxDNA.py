@@ -83,7 +83,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 3:
 
         f = open(sys.argv[2],'r')
-        t = []
+        cf = open(configuration_file,'w')
 
         line = f.readline()
 
@@ -91,11 +91,9 @@ if __name__ == '__main__':
 
             if line.startswith('ITEM: TIMESTEP'):
                 t = int(f.readline())
-                line = f.readline()
 
             if line.startswith('ITEM: NUMBER OF ATOMS') and t==0:
                 conf.natoms = int(f.readline())
-                line = f.readline()
 
             if line.startswith('ITEM: BOX BOUNDS') and t==0:
                 line = f.readline()
@@ -109,35 +107,35 @@ if __name__ == '__main__':
                 conf.Lz = zhi - zlo
 
             if line.startswith('ITEM: ATOMS'):
-                line = f.readline()
+
+                aux = line.split()
+                print(aux)
+
                 N = conf.natoms
 
                 # converting LAMMPS data into native oxDNA data format
                 for n in range(N):
-
+                    line = f.readline()
                     index = int(line.split()[0])-1
-                    # Position
+                    # read position
                     cm = np.float32(line.split()[3:6])
                     conf.xyz[index,:] = cm
-                    # Velocity 
-                    velocity = np.float32(line.split()[13:16])
+                    # read velocity 
+                    velocity = np.float32(line.split()[9:12])
                     conf.v[index,:] = velocity
-                    # Quaternions 
-                    dquat = np.float32(line.split()[9:13])
+                    # read quaternions 
+                    dquat = np.float32(line.split()[12:16])
                     conf.ellipsoids[index,:] = dquat
-                    # Angular momentum 
+                    # read angular momentum 
                     angmom = np.float32(line.split()[16:19]) 
                     conf.Lv[index,:] = angmom
 
-                    line = f.readline()
-
                 # write oxDNA data to file
-
-                cf = open(configuration_file,'a')
                 
-                # header goes here
-                #Head = "t = %lu\nb = %f %f %f\n" % (t, box[0], box[1], box[2])
-                #header = set(['TIMESTEP','BOX','ENERGIES'])
+                # header
+                cf.write('t = %d\n' % t)
+                cf.write('b = %f %f %f\n' % (conf.Lx, conf.Ly, conf.Lz))
+                cf.write('E = 0.000000 0.000000 0.000000\n')
 
                 for n in range(N):
 
@@ -147,10 +145,7 @@ if __name__ == '__main__':
                     v = np.array(conf.v[n,:]) * np.sqrt(mass_in_lammps)
                     Lv = np.array(conf.Lv[n,:]) / np.sqrt(inertia_in_lammps)
 
-                    print(cm, quaternions, a1,a3,v,Lv)
-
-                    cf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % (cm[0],cm[1],cm[2],dquat[0],dquat[1],dquat[2],dquat[3],a1[0],a3[0],v[0],v[1],v[2], Lv[0], Lv[1], Lv[2]))
-
+                    cf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % (cm[0],cm[1],cm[2],a1[0],a1[1],a1[2],a3[0],a3[1],a3[2],v[0],v[1],v[2],Lv[0],Lv[1],Lv[2]))
 
             line = f.readline()
 
