@@ -123,8 +123,8 @@ if __name__ == '__main__':
                     velocity = np.float32(line.split()[13:16])
                     conf.v[index,:] = velocity
                     # Quaternions 
-                    quaternions = np.float32(line.split()[9:13])
-                    conf.ellipsoids[index,:] = quaternions
+                    dquat = np.float32(line.split()[9:13])
+                    conf.ellipsoids[index,:] = dquat
                     # Angular momentum 
                     angmom = np.float32(line.split()[16:19]) 
                     conf.Lv[index,:] = angmom
@@ -134,7 +134,11 @@ if __name__ == '__main__':
                 # write oxDNA data to file
 
                 cf = open(configuration_file,'a')
+                
                 # header goes here
+                #Head = "t = %lu\nb = %f %f %f\n" % (t, box[0], box[1], box[2])
+                #header = set(['TIMESTEP','BOX','ENERGIES'])
+
                 for n in range(N):
 
                     cm = conf.xyz[n,:]
@@ -145,7 +149,8 @@ if __name__ == '__main__':
 
                     print(cm, quaternions, a1,a3,v,Lv)
 
-                    cf.write('%le %le %le\n' % (cm[0],cm[1],cm[2]))
+                    cf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % (cm[0],cm[1],cm[2],dquat[0],dquat[1],dquat[2],dquat[3],a1[0],a3[0],v[0],v[1],v[2], Lv[0], Lv[1], Lv[2]))
+
 
             line = f.readline()
 
