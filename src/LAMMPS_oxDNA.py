@@ -80,5 +80,93 @@ if __name__ == '__main__':
     configuration_file = basename + ".oxdna"
     system.print_lorenzo_output(configuration_file, topology_file)
 
-    print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
-    print >> sys.stderr, "## DONE"
+
+if len(sys.argv) == 3:
+
+        f = open(sys.argv[2],'r')
+        cf = open(configuration_file,'w')
+
+        line = f.readline()
+
+        while line:
+
+            if line.startswith('ITEM: TIMESTEP'):
+                t = int(f.readline())
+
+            if line.startswith('ITEM: NUMBER OF ATOMS') and t==0:
+                conf.natoms = int(f.readline())
+
+            if line.startswith('ITEM: BOX BOUNDS') and t==0:
+                line = f.readline()
+                xlo, xhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+                conf.Lx = xhi - xlo
+                line = f.readline()
+                ylo, yhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+                conf.Ly = yhi - ylo
+                line = f.readline()
+                zlo, zhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+                conf.Lz = zhi - zlo
+
+            if line.startswith('ITEM: ATOMS'):
+
+                aux = line.split()
+
+                # find column number in trajectory file
+
+                keyx = aux.index('x') - 2 # x
+                keyz = aux.index('z') - 1 # z (exclusive)
+
+                keyvx = aux.index('vx') - 2 # vx
+                keyvz = aux.index('vz') - 1 # vz (exclusive)
+
+                keylx = aux.index('angmomx') - 2 # angular momentum x
+                keylz = aux.index('angmomz') - 1 # angular momentum z (exclusive)
+
+                keyq0 = aux.index('c_quat[1]') - 2 # quat0
+                keyq3 = aux.index('c_quat[4]') - 1 # quat3 (exclusive)
+
+                N = conf.natoms
+                # converting LAMMPS data into native oxDNA data format
+                for n in range(N):
+                    line = f.readline()
+                    index = int(line.split()[0])-1
+                    # read position
+                    cm = np.float32(line.split()[keyx:keyz])
+                    conf.xyz[index,:] = cm
+                    # read velocity 
+                    velocity = np.float32(line.split()[keyvx:keyvz])
+                    conf.v[index,:] = velocity
+                    # read quaternions 
+                    dquat = np.float32(line.split()[keyq0:keyq3])
+                    conf.ellipsoids[index,:] = dquat
+                    # read angular momentum 
+                    angmom = np.float32(line.split()[keylx:keylz]) 
+                    conf.Lv[index,:] = angmom
+
+                # write oxDNA data to file
+                
+                # header
+                cf.write('t = %d\n' % t)
+                cf.write('b = %f %f %f\n' % (conf.Lx, conf.Ly, conf.Lz))
+                cf.write('E = 0.000000 0.000000 0.000000\n')
+
+                for n in range(N):
+
+                    cm = conf.xyz[n,:]
+                    quaternions = conf.ellipsoids[n,:]
+                    a1, a3 = quat_to_exyz(quaternions)
+                    v = np.array(conf.v[n,:]) * np.sqrt(mass_in_lammps)
+                    Lv = np.array(conf.Lv[n,:]) / np.sqrt(inertia_in_lammps)
+
+                    cf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % 
+                        (cm[0],cm[1],cm[2],a1[0],a1[1],a1[2],a3[0],a3[1],a3[2],v[0],v[1],v[2],Lv[0],Lv[1],Lv[2]))
+
+            line = f.readline()
+
+        f.close()
+        cf.close()
+
+
+
+print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file)
+print >> sys.stderr, "## DONE"
