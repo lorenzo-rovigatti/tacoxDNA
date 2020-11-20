@@ -109,40 +109,20 @@ if __name__ == '__main__':
             if line.startswith('ITEM: ATOMS'):
 
                 aux = line.split()
-                print(aux)
-#finds the position of element in ITEM: ATOMS list
-            #position locations
-                keyx = [i for i, key1 in enumerate(aux) if key1=="x"]
-                print(keyx)
-                keyy = [i for i, key2 in enumerate(aux) if key2=="y"]
-                print(keyy)
-                keyz = [i for i, key3 in enumerate(aux) if key3=="z"]
-                print(keyz)
-            #velocity locations
-                keyvx = [i for i, key4 in enumerate(aux) if key4=="vx"]
-                print(keyvx)
-                keyvy = [i for i, key4 in enumerate(aux) if key4=="vy"]
-                print(keyvy)
-                keyvz = [i for i, key4 in enumerate(aux) if key4=="vz"]
-                print(keyvz)
-            # quaternions locations
 
+                # find column number in trajectory file
 
+                keyx = aux.index('x') - 2 # x
+                keyz = aux.index('z') - 1 # z (exclusive)
 
-# loop that looks through the list and assigns the collumns 
-                '''
-                i = 0
-                for i in range < len(aux)-1
-                    if key[i] == "x"
-                        x_pos.append(i)
-                        print(x_pos)
-                    elif key[i] = "y"
-                        #y_pos = i - 2
-                    elif key[i] = "z"
-                        z_pos.append(i)
-                    elif key[i] = "vx"
-                        x_v.append(i)
-                '''
+                keyvx = aux.index('vx') - 2 # vx
+                keyvz = aux.index('vz') - 1 # vz (exclusive)
+
+                keylx = aux.index('angmomx') - 2 # angular momentum x
+                keylz = aux.index('angmomz') - 1 # angular momentum z (exclusive)
+
+                keyq0 = aux.index('c_quat[1]') - 2 # quat0
+                keyq3 = aux.index('c_quat[4]') - 1 # quat3 (exclusive)
 
                 N = conf.natoms
                 # converting LAMMPS data into native oxDNA data format
@@ -150,16 +130,16 @@ if __name__ == '__main__':
                     line = f.readline()
                     index = int(line.split()[0])-1
                     # read position
-                    cm = np.float32(line.split()[3:6])
+                    cm = np.float32(line.split()[keyx:keyz])
                     conf.xyz[index,:] = cm
                     # read velocity 
-                    velocity = np.float32(line.split()[9:12])
+                    velocity = np.float32(line.split()[keyvx:keyvz])
                     conf.v[index,:] = velocity
                     # read quaternions 
-                    dquat = np.float32(line.split()[12:16])
+                    dquat = np.float32(line.split()[keyq0:keyq3])
                     conf.ellipsoids[index,:] = dquat
                     # read angular momentum 
-                    angmom = np.float32(line.split()[16:19]) 
+                    angmom = np.float32(line.split()[keylx:keylz]) 
                     conf.Lv[index,:] = angmom
 
                 # write oxDNA data to file
@@ -177,7 +157,8 @@ if __name__ == '__main__':
                     v = np.array(conf.v[n,:]) * np.sqrt(mass_in_lammps)
                     Lv = np.array(conf.Lv[n,:]) / np.sqrt(inertia_in_lammps)
 
-                    cf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % (cm[0],cm[1],cm[2],a1[0],a1[1],a1[2],a3[0],a3[1],a3[2],v[0],v[1],v[2],Lv[0],Lv[1],Lv[2]))
+                    cf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % 
+                        (cm[0],cm[1],cm[2],a1[0],a1[1],a1[2],a3[0],a3[1],a3[2],v[0],v[1],v[2],Lv[0],Lv[1],Lv[2]))
 
             line = f.readline()
 
