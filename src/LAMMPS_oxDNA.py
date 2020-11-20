@@ -110,9 +110,41 @@ if __name__ == '__main__':
 
                 aux = line.split()
                 print(aux)
+#finds the position of element in ITEM: ATOMS list
+            #position locations
+                keyx = [i for i, key1 in enumerate(aux) if key1=="x"]
+                print(keyx)
+                keyy = [i for i, key2 in enumerate(aux) if key2=="y"]
+                print(keyy)
+                keyz = [i for i, key3 in enumerate(aux) if key3=="z"]
+                print(keyz)
+            #velocity locations
+                keyvx = [i for i, key4 in enumerate(aux) if key4=="vx"]
+                print(keyvx)
+                keyvy = [i for i, key4 in enumerate(aux) if key4=="vy"]
+                print(keyvy)
+                keyvz = [i for i, key4 in enumerate(aux) if key4=="vz"]
+                print(keyvz)
+            # quaternions locations
+
+
+
+# loop that looks through the list and assigns the collumns 
+                '''
+                i = 0
+                for i in range < len(aux)-1
+                    if key[i] == "x"
+                        x_pos.append(i)
+                        print(x_pos)
+                    elif key[i] = "y"
+                        #y_pos = i - 2
+                    elif key[i] = "z"
+                        z_pos.append(i)
+                    elif key[i] = "vx"
+                        x_v.append(i)
+                '''
 
                 N = conf.natoms
-
                 # converting LAMMPS data into native oxDNA data format
                 for n in range(N):
                     line = f.readline()
