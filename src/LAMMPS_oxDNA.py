@@ -173,5 +173,8 @@ if __name__ == '__main__':
 
               line = lmptrj.readline()
 
+        lmptrj.close()
+        oxconf.close()
+
         print("## Wrote trajectory data to '%s'" % oxdna_configuration_file, file=sys.stderr)
         print("## DONE", file=sys.stderr)
