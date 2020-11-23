@@ -36,7 +36,7 @@ def quat_to_exyz(myquat):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print >> sys.stderr, "Usage is %s lammps_init_file" % sys.argv[0]
+        print >> sys.stderr, "Usage is 'python2", sys.argv[0], "lammps_data_file' OR 'python2", sys.argv[0], "lammps_data_file lammps_trajectory_file'"
         sys.exit(1)
 
     conf = reader_lammps_init.Lammps_parser(sys.argv[1])
