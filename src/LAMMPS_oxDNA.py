@@ -40,59 +40,52 @@ if __name__ == '__main__':
             (sys.argv[0], sys.argv[0]), file=sys.stderr)
         sys.exit(1)
 
-    if len(sys.argv) == 2:
+    conf = reader_lammps_init.Lammps_parser(sys.argv[1])
+    N = conf.natoms 
+    box = np.array([0, 0., 0.])
+    box[0] = conf.Lx
+    box[1] = conf.Ly
+    box[2] = conf.Lz
 
-      conf = reader_lammps_init.Lammps_parser(sys.argv[1])
-      N = conf.natoms 
-      box = np.array([0, 0., 0.])
-      box[0] = conf.Lx
-      box[1] = conf.Ly
-      box[2] = conf.Lz
+    system = base.System(box)
 
-      system = base.System(box)
+    strands = []
+    for i in range(conf.nstrands):
+            strands.append(base.Strand())
 
-      strands = []
-      for i in range(conf.nstrands):
-              strands.append(base.Strand())
+    for i in range(N):
+            cm = conf.xyz[i,:]
+            quaternions = conf.ellipsoids[i,:]
+            a1, a3 = quat_to_exyz(quaternions)
+            b = number_oxdna_to_lammps[conf.bases[i]-1] 
 
-      for i in range(N):
-              cm = conf.xyz[i,:]
-              quaternions = conf.ellipsoids[i,:]
-              a1, a3 = quat_to_exyz(quaternions)
-              b = number_oxdna_to_lammps[conf.bases[i]-1] 
+            v = np.array(conf.v[i,:]) * np.sqrt(mass_in_lammps)
+            Lv = np.array(conf.Lv[i,:]) / np.sqrt(inertia_in_lammps)
 
-              v = np.array(conf.v[i,:]) * np.sqrt(mass_in_lammps)
-              Lv = np.array(conf.Lv[i,:]) / np.sqrt(inertia_in_lammps)
+            strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b, v, Lv))
 
-              strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b, v, Lv))
-
-              # close strand 
-              next_bond=conf.bonds[i][1]
-              if next_bond!=-1 and next_bond!=i+1:
-                  if conf.strand[i]!=conf.strand[next_bond]:
-                      print("Wrong bond arising between two different strands", file=sys.stderr)
-                  else:
-                      strands[conf.strand[i]-1].make_circular()
+            # close strand 
+            next_bond=conf.bonds[i][1]
+            if next_bond!=-1 and next_bond!=i+1:
+                if conf.strand[i]!=conf.strand[next_bond]:
+                    print("Wrong bond arising between two different strands", file=sys.stderr)
+                else:
+                    strands[conf.strand[i]-1].make_circular()
 
 
-      for i in range(conf.nstrands):
-          system.add_strand(strands[i])
+    for i in range(conf.nstrands):
+        system.add_strand(strands[i])
 
-      basename = os.path.basename(sys.argv[1])
-      topology_file = basename + ".top"
-      configuration_file = basename + ".oxdna"
-      system.print_lorenzo_output(configuration_file, topology_file)
+    basename = os.path.basename(sys.argv[1])
+    topology_file = basename + ".top"
+    configuration_file = basename + ".oxdna"
+    system.print_lorenzo_output(configuration_file, topology_file)
 
-      print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
-      print("## DONE", file=sys.stderr)
+    # optional conversion of LAMMPS trajectory into native oxDNA format
 
-    # converting LAMMPS trajectory data into native oxDNA configuration
+    if len(sys.argv) == 3:
 
-    if len(sys.argv) > 2:
-
-        oxdna_configuration_file = sys.argv[2] + ".oxdna"
-
-        with open(sys.argv[2],'r') as lmptrj, open(oxdna_configuration_file,'w') as oxconf:
+        with open(sys.argv[2],'r') as lmptrj, open(configuration_file,'w') as oxconf:
 
           line = lmptrj.readline()
 
@@ -176,5 +169,5 @@ if __name__ == '__main__':
         lmptrj.close()
         oxconf.close()
 
-        print("## Wrote trajectory data to '%s'" % oxdna_configuration_file, file=sys.stderr)
-        print("## DONE", file=sys.stderr)
+    print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
+    print("## DONE", file=sys.stderr)
