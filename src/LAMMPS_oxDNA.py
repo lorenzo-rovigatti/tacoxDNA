@@ -6,6 +6,7 @@ from libs import base
 from libs import reader_lammps_init 
 from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
+
 def quat_to_exyz(myquat):
     sqw = myquat[0] * myquat[0];
     sqx = myquat[1] * myquat[1];
@@ -36,8 +37,8 @@ def quat_to_exyz(myquat):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage is %s lammps_data_file OR %s lammps_data_file lammps_trajectory_file" % 
-            (sys.argv[0], sys.argv[0]), file=sys.stderr)
+        print("USAGE:", file=sys.stderr)
+        print("\t%s lammps_data_file [lammps_trajectory_file]" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
     conf = reader_lammps_init.Lammps_parser(sys.argv[1])
@@ -51,27 +52,26 @@ if __name__ == '__main__':
 
     strands = []
     for i in range(conf.nstrands):
-            strands.append(base.Strand())
+        strands.append(base.Strand())
 
     for i in range(N):
-            cm = conf.xyz[i,:]
-            quaternions = conf.ellipsoids[i,:]
-            a1, a3 = quat_to_exyz(quaternions)
-            b = number_oxdna_to_lammps[conf.bases[i]-1] 
+        cm = conf.xyz[i,:]
+        quaternions = conf.ellipsoids[i,:]
+        a1, a3 = quat_to_exyz(quaternions)
+        b = number_oxdna_to_lammps[conf.bases[i] - 1] 
 
-            v = np.array(conf.v[i,:]) * np.sqrt(mass_in_lammps)
-            Lv = np.array(conf.Lv[i,:]) / np.sqrt(inertia_in_lammps)
+        v = np.array(conf.v[i,:]) * np.sqrt(mass_in_lammps)
+        Lv = np.array(conf.Lv[i,:]) / np.sqrt(inertia_in_lammps)
 
-            strands[conf.strand[i]-1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b, v, Lv))
+        strands[conf.strand[i] - 1].add_nucleotide(base.Nucleotide(cm, a1, a3, b, b, v, Lv))
 
-            # close strand 
-            next_bond=conf.bonds[i][1]
-            if next_bond!=-1 and next_bond!=i+1:
-                if conf.strand[i]!=conf.strand[next_bond]:
-                    print("Wrong bond arising between two different strands", file=sys.stderr)
-                else:
-                    strands[conf.strand[i]-1].make_circular()
-
+        # close strand 
+        next_bond = conf.bonds[i][1]
+        if next_bond != -1 and next_bond != i + 1:
+            if conf.strand[i] != conf.strand[next_bond]:
+                print("Wrong bond arising between two different strands", file=sys.stderr)
+            else:
+                strands[conf.strand[i] - 1].make_circular()
 
     for i in range(conf.nstrands):
         system.add_strand(strands[i])
@@ -82,6 +82,7 @@ if __name__ == '__main__':
     system.print_lorenzo_output(configuration_file, topology_file)
 
     # optional conversion of LAMMPS trajectory into native oxDNA format
+<<<<<<< HEAD
 
     if len(sys.argv) == 3:
 
@@ -168,6 +169,83 @@ if __name__ == '__main__':
 
         lmptrj.close()
         oxconf.close()
+=======
+    if len(sys.argv) == 3:
+        with open(sys.argv[2], 'r') as lmptrj, open(configuration_file, 'w') as oxconf:
+            line = lmptrj.readline()
+            
+            while line:
+                if line.startswith('ITEM: TIMESTEP'):
+                    t = int(lmptrj.readline())
+            
+                if line.startswith('ITEM: NUMBER OF ATOMS') and t == 0:
+                    natoms = int(lmptrj.readline())
+            
+                if line.startswith('ITEM: BOX BOUNDS') and t == 0:
+                    line = lmptrj.readline()
+                    xlo, xhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+                    Lx = xhi - xlo
+                    line = lmptrj.readline()
+                    ylo, yhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+                    Ly = yhi - ylo
+                    line = lmptrj.readline()
+                    zlo, zhi = np.float32(line.split()[0]), np.float32(line.split()[1])
+                    Lz = zhi - zlo
+            
+                if line.startswith('ITEM: ATOMS'):
+                    aux = line.split()
+            
+                    # find column number in trajectory file
+            
+                    keyx = aux.index('x') - 2  # x
+                    keyz = aux.index('z') - 1  # z (exclusive)
+            
+                    keyvx = aux.index('vx') - 2  # vx
+                    keyvz = aux.index('vz') - 1  # vz (exclusive)
+            
+                    keylx = aux.index('angmomx') - 2  # angular momentum x
+                    keylz = aux.index('angmomz') - 1  # angular momentum z (exclusive)
+            
+                    keyq0 = aux.index('c_quat[1]') - 2  # quat0
+                    keyq3 = aux.index('c_quat[4]') - 1  # quat3 (exclusive)
+            
+                    N = natoms
+            
+                    # read position, velocity, quaternions, angular momentum
+            
+                    xyz = np.zeros((N, 3), dtype=float)
+                    vel = np.zeros((N, 3), dtype=float)
+                    quat = np.zeros((N, 4), dtype=float)
+                    angmom = np.zeros((N, 3), dtype=float)
+            
+                    for n in range(N):
+                        line = lmptrj.readline()
+                        index = int(line.split()[0]) - 1
+                        
+                        xyz[index,:] = np.float32(line.split()[keyx:keyz])
+                        vel[index,:] = np.float32(line.split()[keyvx:keyvz])
+                        quat[index,:] = np.float32(line.split()[keyq0:keyq3])
+                        angmom[index,:] = np.float32(line.split()[keylx:keylz]) 
+            
+                    # write oxDNA data to file
+            
+                    # header
+                    oxconf.write('t = %d\n' % t)
+                    oxconf.write('b = %f %f %f\n' % (Lx, Ly, Lz))
+                    oxconf.write('E = 0.000000 0.000000 0.000000\n')
+            
+                    # atom data
+                    for n in range(N):
+                        cm = xyz[n,:]
+                        quaternions = quat[n,:]
+                        a1, a3 = quat_to_exyz(quaternions)
+                        v = np.array(vel[n,:]) * np.sqrt(mass_in_lammps)
+                        Lv = np.array(angmom[n,:]) / np.sqrt(inertia_in_lammps)
+            
+                        oxconf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % (cm[0], cm[1], cm[2], a1[0], a1[1], a1[2], a3[0], a3[1], a3[2], v[0], v[1], v[2], Lv[0], Lv[1], Lv[2]))
+            
+                line = lmptrj.readline()
+>>>>>>> python3
 
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
