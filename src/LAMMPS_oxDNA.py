@@ -58,7 +58,7 @@ if __name__ == '__main__':
         cm = conf.xyz[i,:]
         quaternions = conf.ellipsoids[i,:]
         a1, a3 = quat_to_exyz(quaternions)
-        b = number_oxdna_to_lammps[conf.bases[i] - 1] 
+        b = number_oxdna_to_lammps[(conf.bases[i]+3)%4] 
 
         v = np.array(conf.v[i,:]) * np.sqrt(mass_in_lammps)
         Lv = np.array(conf.Lv[i,:]) / np.sqrt(inertia_in_lammps)
