@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import numpy as np
 import sys, os
@@ -37,8 +37,7 @@ def quat_to_exyz(myquat):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("USAGE:", file==sys.stderr)
-        print("\t%s lammps_data_file [lammps_trajectory_file]" % sys.argv[0], file==sys.stderr)
+        print >> sys.stderr, "USAGE: %s lammps_data_file [lammps_trajectory_file]" % sys.argv[0]
         sys.exit(1)
 
     conf = reader_lammps_init.Lammps_parser(sys.argv[1])
@@ -69,7 +68,7 @@ if __name__ == '__main__':
         next_bond = conf.bonds[i][1]
         if next_bond != -1 and next_bond != i + 1:
             if conf.strand[i] != conf.strand[next_bond]:
-                print("Wrong bond arising between two different strands", file==sys.stderr)
+                print >> sys.stderr, "Wrong bond arising between two different strands"
             else:
                 strands[conf.strand[i] - 1].make_circular()
 
@@ -160,4 +159,3 @@ if __name__ == '__main__':
 
     print >> sys.stderr, "## Wrote data to '%s' / '%s'" % (configuration_file, topology_file) 
     print >> sys.stderr, "## DONE" 
-
