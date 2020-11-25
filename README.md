@@ -69,7 +69,7 @@ The `oxDNA_LAMMPS.py` script takes two mandatory arguments and outputs a single 
 
 ## LAMMPS-to-oxDNA converter
 
-The `LAMMPS_oxDNA.py` script takes one mandatory argument and outputs two files.
+The `LAMMPS_oxDNA.py` script takes one mandatory argument, one optional argument and outputs two files.
 
 ### Arguments
 * A LAMMPS data file, containing the nucleotide positions, quaternions, velocities, angular momenta and the bond list
@@ -77,8 +77,7 @@ The `LAMMPS_oxDNA.py` script takes one mandatory argument and outputs two files.
 
 ### Output
 * An oxDNA topology file (named by suffixing the LAMMPS output file with ".top")
-* An oxDNA configuration file (named by suffixing the LAMMPS output file with ".oxdna")
-* If a trajectory file is also processed, the configuration file will contain the full trajectory data in native oxDNA format.
+* An oxDNA configuration file (named by suffixing the LAMMPS output file with ".oxdna"). If a trajectory file is also processed, the configuration file will contain the full trajectory data in native oxDNA format.
 
 ---
 
