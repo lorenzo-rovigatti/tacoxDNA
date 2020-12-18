@@ -10,7 +10,7 @@ def line_differ(line1, line2):
         a1 = np.array([float(x) for x in line1.split()])
         a2 = np.array([float(x) for x in line2.split()])
     except ValueError:
-        return False
+        return line1 != line2
     return np.any(np.abs(a1 - a2) > EPS)
 
 if len(sys.argv) < 3:
