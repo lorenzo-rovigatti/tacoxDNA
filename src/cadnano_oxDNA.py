@@ -91,6 +91,9 @@ def insert_loop_skip(strands, start_pos, direction, perp, rot, helix_angles, vhe
         else:
             length_change.append(0)
             new_angle.append(sum(helix_angles) / len(helix_angles))  # append an average angle
+            # adjust beginning/end indices according to length change
+            begin_gs += length_change_total
+            end_gs += length_change_total + length_change[i]
             new_nodes.add_begin(begin_gs)
             new_nodes.add_end(end_gs)
         length_change_total += length_change[i]
