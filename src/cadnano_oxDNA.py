@@ -653,18 +653,19 @@ if __name__ == '__main__':
     def print_usage():
         print("USAGE:", file=sys.stderr)
         print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
-        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc]", file=sys.stderr) 
+        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-v\--print-oxview]", file=sys.stderr) 
         exit(1)
         
     if len(sys.argv) < 3:
         print_usage()
         
-    shortArgs = 'q:b:e:p'
-    longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc']
+    shortArgs = 'q:b:e:p:v'
+    longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc', 'print-oxview']
     
     side = False
     sequence_filename = False
     print_virt2nuc = False
+    print_oxview = False
     source_file = sys.argv[1]
     
     origami_sq = False
@@ -690,6 +691,8 @@ if __name__ == '__main__':
                 np.random.seed(int(k[1]))
             elif k[0] == '-p' or k[0] == "--print-virt2nuc":
                 print_virt2nuc = True
+            elif k[0] == '-v' or k[0] == "--print-oxview":
+                print_oxview = True
             
             
     except Exception:
@@ -1024,18 +1027,24 @@ if __name__ == '__main__':
         nnucs_to_here[strandii] = nuc_total
         nuc_total += len(strand._nucleotides)
 
+    id_to_helix = {}
     # fill in the _scaf and _stap dicts for the reverse vhelix_vbase_to_nucleotide object
     for vh, vb in list(vh_vb2nuc_final._scaf.keys()):
         strandii, nuciis = vh_vb2nuc_final._scaf[(vh, vb)]
         rev_nuciis = []
         for nucii in nuciis:
-            rev_nuciis.append(len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii])
+            nuc = len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii]
+            rev_nuciis.append(nuc)
+            id_to_helix[nuc] = (vh, vb)
         vh_vb2nuc_rev.add_scaf(vh, vb, strandii, rev_nuciis)
     for vh, vb in list(vh_vb2nuc_final._stap.keys()):
         strandii, nuciis = vh_vb2nuc_final._stap[(vh, vb)]
         rev_nuciis = []
         for nucii in nuciis:
-            rev_nuciis.append(len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii])
+            nuc = len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii]
+            rev_nuciis.append(nuc)
+            id_to_helix[nuc] = (vh, vb)
+
         vh_vb2nuc_rev.add_stap(vh, vb, strandii, rev_nuciis)
         
     # dump the spatial arrangement of the vhelices to a file
@@ -1055,6 +1064,9 @@ if __name__ == '__main__':
     basename = os.path.basename(sys.argv[1])
     topology_file = basename + ".top"
     configuration_file = basename + ".oxdna"
+
+    if print_oxview:
+        rev_sys.print_oxview_output(basename+'.oxview', id_to_helix)
     
     rev_sys.print_lorenzo_output(configuration_file, topology_file)
     

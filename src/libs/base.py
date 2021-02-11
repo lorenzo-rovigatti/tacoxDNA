@@ -756,6 +756,73 @@ class System(object):
             f.write(topology)
             f.close()
 
+    def print_oxview_output(self, name, id_to_helix):
+        import json
+
+        # Create inverse mapping to find pairs
+        helix_to_id = {}
+        for bid, helix in id_to_helix.items():
+            helix_to_id.setdefault(helix, []).append(bid)
+
+        id_to_nucleotide = {n.index: n for s in self._strands for n in s._nucleotides}
+
+        # Make one cluster per domain
+        cluster_ids = {}
+
+        out = {
+            'box': self._box.tolist(),
+            'systems': [{'id':0, 'strands': []}]
+        }
+
+        for s in self._strands:
+            strand = {
+                'id': s.index, 'end3': s._nucleotides[-1].index, 'end5': s._nucleotides[0].index,
+                'class': 'NucleicAcidStrand', 'monomers': []
+            }
+            for i, n in enumerate(s._nucleotides):
+                if s._circular:
+                    if i == 0:
+                        n5 = s._nucleotides[-1].index
+                    else:
+                        n5 = s._nucleotides[i-1].index
+                    if i == len(s._nucleotides)-1:
+                        n3 = s._nucleotides[0].index
+                    else:
+                        n3 = s._nucleotides[i+1].index
+                else:
+                    if i == 0:
+                        n5 = -1
+                    else:
+                        n5 = s._nucleotides[i-1].index
+                    if i == len(s._nucleotides)-1:
+                        n3 = -1
+                    else:
+                        n3 = s._nucleotides[i+1].index
+                nucleotide = {
+                    'id': n.index,
+                    'type': n.get_base(),
+                    'class': 'DNA',
+                    'p': n.cm_pos.tolist(),
+                    'a1': n._a1.tolist(),
+                    'a3': n._a3.tolist()
+                }
+                if id_to_helix and n.index in id_to_helix:
+                    vh, vb = id_to_helix[n.index]
+                    nucleotide['bp'] = [id for id in helix_to_id[(vh,vb)] if id != n.index][0]
+
+                    staple_nuc = id_to_nucleotide[[n for n in helix_to_id[(vh,vb)] if id_to_nucleotide[n].strand != 0][0]]
+                    nucleotide['cluster'] = cluster_ids.setdefault((vh, staple_nuc.strand), len(cluster_ids)+1)
+
+                if n3 >= 0:
+                    nucleotide['n3'] = n3
+                if n5 >= 0:
+                    nucleotide['n5'] = n5
+                strand['monomers'].append(nucleotide)
+            out['systems'][0]['strands'].append(strand)
+
+        with open(name, "w") as f:
+            f.write(json.dumps(out))
+
     N = property(get_N_Nucleotides)
     N_strands = property (get_N_strands)
 
