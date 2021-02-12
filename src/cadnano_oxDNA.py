@@ -1027,7 +1027,7 @@ if __name__ == '__main__':
         nnucs_to_here[strandii] = nuc_total
         nuc_total += len(strand._nucleotides)
 
-    id_to_helix = {}
+    id_to_pos = {}
     # fill in the _scaf and _stap dicts for the reverse vhelix_vbase_to_nucleotide object
     for vh, vb in list(vh_vb2nuc_final._scaf.keys()):
         strandii, nuciis = vh_vb2nuc_final._scaf[(vh, vb)]
@@ -1035,7 +1035,7 @@ if __name__ == '__main__':
         for nucii in nuciis:
             nuc = len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii]
             rev_nuciis.append(nuc)
-            id_to_helix[nuc] = (vh, vb)
+            id_to_pos[nuc] = (vh, vb)
         vh_vb2nuc_rev.add_scaf(vh, vb, strandii, rev_nuciis)
     for vh, vb in list(vh_vb2nuc_final._stap.keys()):
         strandii, nuciis = vh_vb2nuc_final._stap[(vh, vb)]
@@ -1043,10 +1043,10 @@ if __name__ == '__main__':
         for nucii in nuciis:
             nuc = len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii]
             rev_nuciis.append(nuc)
-            id_to_helix[nuc] = (vh, vb)
+            id_to_pos[nuc] = (vh, vb)
 
         vh_vb2nuc_rev.add_stap(vh, vb, strandii, rev_nuciis)
-        
+
     # dump the spatial arrangement of the vhelices to a file
     vhelix_pattern = {}
     for i in range(len(cadsys.vhelices)):
@@ -1066,8 +1066,61 @@ if __name__ == '__main__':
     configuration_file = basename + ".oxdna"
 
     if print_oxview:
-        rev_sys.print_oxview_output(basename+'.oxview', id_to_helix)
-    
+        # Find colors
+        pos_to_color = {}
+        for vh in cadsys.vhelices:
+            for c in vh.stap_colors:
+                vb, color = c
+                pos_to_color[(vh.num, vb)] = color
+        # Create inverse mapping to find pairs by their positions
+        pos_to_id = {}
+        for bid, helix in id_to_pos.items():
+            pos_to_id.setdefault(helix, []).append(bid)
+
+        # Create mapping to find nucleotide by its index
+        id_to_nucleotide = {n.index: n for s in rev_sys._strands for n in s._nucleotides}
+
+        # Find the index of the scaffold strand (there really should be some
+        # easier way of doing this)
+        strands = [id_to_nucleotide[j].strand for i in pos_to_id.values() for j in i]
+        scaffold_index = max(set(strands), key=strands.count)
+
+        # Make one cluster per domain
+        cluster_ids = {}
+
+        for s in rev_sys._strands:
+            for n in s._nucleotides:
+                if n.index in id_to_pos:
+                    # Find which helix and position the nucleotide had
+                    vh, vb = id_to_pos[n.index]
+                    paired = pos_to_id[(vh,vb)]
+
+                    # If double-stranded, save basepair
+                    if len(paired) > 1:
+                        n.pair = id_to_nucleotide[[idx for idx in paired if idx != n.index][0]]
+
+                    # Get the staple strand nucleotide at this position
+                    staple_ids = [n for n in pos_to_id[(vh,vb)] if id_to_nucleotide[n].strand != scaffold_index]
+                    if len(staple_ids) > 0:
+                        staple_nuc = id_to_nucleotide[staple_ids[0]]
+                        # One cluster per combination of helix and staple strand
+                        n.cluster = cluster_ids.setdefault((vh, staple_nuc.strand), len(cluster_ids)+1)
+
+                        # If this is the staple strand, check if it has a color
+                        if n is staple_nuc and (vh, vb) in pos_to_color:
+                            n.color = pos_to_color[(vh, vb)]
+                    else:
+                        n.cluster = -1
+        # If there's any colored nucleotide in a strand,
+        # use that color for the whole strand
+        for s in rev_sys._strands:
+            for n in s._nucleotides:
+                if n.color is not None:
+                    for other in s._nucleotides:
+                        other.color = n.color
+                    break
+        rev_sys.print_oxview_output(basename+'.oxview')
+
     rev_sys.print_lorenzo_output(configuration_file, topology_file)
     
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
