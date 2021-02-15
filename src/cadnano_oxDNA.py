@@ -1072,6 +1072,7 @@ if __name__ == '__main__':
             for c in vh.stap_colors:
                 vb, color = c
                 pos_to_color[(vh.num, vb)] = color
+
         # Create inverse mapping to find pairs by their positions
         pos_to_id = {}
         for bid, helix in id_to_pos.items():
@@ -1082,12 +1083,14 @@ if __name__ == '__main__':
 
         # Find the index of the scaffold strand (there really should be some
         # easier way of doing this)
-        strands = [id_to_nucleotide[j].strand for i in pos_to_id.values() for j in i]
+        strands = [id_to_nucleotide[nucId].strand for nucIds in pos_to_id.values() for nucId in nucIds]
         scaffold_index = max(set(strands), key=strands.count)
 
         # Make one cluster per domain
         cluster_ids = {}
 
+        # Go through system and add extra information
+        # (basepairs, clusters and colors)
         for s in rev_sys._strands:
             for n in s._nucleotides:
                 if n.index in id_to_pos:
@@ -1119,6 +1122,8 @@ if __name__ == '__main__':
                     for other in s._nucleotides:
                         other.color = n.color
                     break
+
+        # Print the oxview output
         rev_sys.print_oxview_output(basename+'.oxview')
 
     rev_sys.print_lorenzo_output(configuration_file, topology_file)
