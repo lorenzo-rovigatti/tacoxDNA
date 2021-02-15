@@ -115,6 +115,10 @@ class Nucleotide():
     
     btype--- Identity of base. Unused at the moment.
 
+    pair --- Base-paired Nucleotide, used in oxView output
+    cluster --- Cluster ID, Number, used in oxView output
+    color --- Custom color, Number representing hex value, used in oxView output
+
     """
     index = 0
 
@@ -141,6 +145,9 @@ class Nucleotide():
         self._v = v
         self.n3 = n3
         self.next = -1
+        self.pair = None
+        self.cluster = None
+        self.color = None
 
     def get_pos_base (self):
         """
@@ -756,9 +763,65 @@ class System(object):
             f.write(topology)
             f.close()
 
+    def print_oxview_output(self, name):
+        import json
+
+        out = {
+            'box': self._box.tolist(),
+            'systems': [{'id':0, 'strands': []}]
+        }
+
+        for s in self._strands:
+            strand = {
+                'id': s.index, 'end3': s._nucleotides[-1].index, 'end5': s._nucleotides[0].index,
+                'class': 'NucleicAcidStrand', 'monomers': []
+            }
+            for i, n in enumerate(s._nucleotides):
+                if s._circular:
+                    if i == 0:
+                        n5 = s._nucleotides[-1].index
+                    else:
+                        n5 = s._nucleotides[i-1].index
+                    if i == len(s._nucleotides)-1:
+                        n3 = s._nucleotides[0].index
+                    else:
+                        n3 = s._nucleotides[i+1].index
+                else:
+                    if i == 0:
+                        n5 = -1
+                    else:
+                        n5 = s._nucleotides[i-1].index
+                    if i == len(s._nucleotides)-1:
+                        n3 = -1
+                    else:
+                        n3 = s._nucleotides[i+1].index
+                nucleotide = {
+                    'id': n.index,
+                    'type': n.get_base(),
+                    'class': 'DNA',
+                    'p': n.cm_pos.tolist(),
+                    'a1': n._a1.tolist(),
+                    'a3': n._a3.tolist()
+                }
+                if n3 >= 0:
+                    nucleotide['n3'] = n3
+                if n5 >= 0:
+                    nucleotide['n5'] = n5
+                if n.pair is not None:
+                    nucleotide['bp'] = n.pair.index
+                if n.cluster is not None:
+                    nucleotide['cluster'] = n.cluster
+                if n.color is not None:
+                    nucleotide['color'] = n.color
+                strand['monomers'].append(nucleotide)
+            out['systems'][0]['strands'].append(strand)
+
+        with open(name, "w") as f:
+            f.write(json.dumps(out))
+
+
     N = property(get_N_Nucleotides)
     N_strands = property (get_N_strands)
-
 
     def get_nucleotide_list (self):
         ret = []
