@@ -130,7 +130,9 @@ Treat different models as different strands
 
 ## cadnano-to-oxDNA converter
 
-The `cadnano_oxDNA.py` script converts [cadnano](https://cadnano.org/) files into oxDNA configurations. Note that the script **does not** support scaffold-less input files. It takes two mandatory arguments.
+The `cadnano_oxDNA.py` script converts [cadnano](https://cadnano.org/) files into oxDNA configurations. Optionally, it can also output [.oxview files](https://sulcgroup.github.io/oxdna-viewer/) which will contain additional information about base pairing, custom colors and clustered domains.
+
+Note that the script **does not** support scaffold-less input files. It takes two mandatory arguments.
 
 ### Mandatory arguments
 * The input cadnano file (in json format)
@@ -145,6 +147,8 @@ the length of the box side (in oxDNA simulation units) where the system will be 
 text file containing a valid DNA sequence (*e.g.* ATCTGA). If not specified, the sequence will be chosen randomly
 * `-p\--print-virt2-nuc`
 print the `virt2nuc` file that can be used by the oxDNA's `origami_utils.py` script to convert between cadnano and oxDNA nucleotide indexes
+* `-o\--print-oxview`
+print a `.oxview` file that can be opened and edited in oxView [.oxview](https://sulcgroup.github.io/oxdna-viewer/). Using this option will allow you to keep additional design information not included in the oxDNA files.
 
 ### Output
 * An oxDNA topology file (named by suffixing the cadnano file with ".top")
