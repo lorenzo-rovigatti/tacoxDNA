@@ -653,13 +653,13 @@ if __name__ == '__main__':
     def print_usage():
         print("USAGE:", file=sys.stderr)
         print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
-        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-v\--print-oxview]", file=sys.stderr) 
+        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
         exit(1)
         
     if len(sys.argv) < 3:
         print_usage()
         
-    shortArgs = 'q:b:e:p:v'
+    shortArgs = 'q:b:e:p:o'
     longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc', 'print-oxview']
     
     side = False
@@ -691,7 +691,7 @@ if __name__ == '__main__':
                 np.random.seed(int(k[1]))
             elif k[0] == '-p' or k[0] == "--print-virt2nuc":
                 print_virt2nuc = True
-            elif k[0] == '-v' or k[0] == "--print-oxview":
+            elif k[0] == '-o' or k[0] == "--print-oxview":
                 print_oxview = True
             
             
