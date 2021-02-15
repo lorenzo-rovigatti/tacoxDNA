@@ -148,7 +148,7 @@ text file containing a valid DNA sequence (*e.g.* ATCTGA). If not specified, the
 * `-p\--print-virt2-nuc`
 print the `virt2nuc` file that can be used by the oxDNA's `origami_utils.py` script to convert between cadnano and oxDNA nucleotide indexes
 * `-o\--print-oxview`
-print a `.oxview` file that can be opened and edited in oxView [.oxview](https://sulcgroup.github.io/oxdna-viewer/). Using this option will allow you to keep additional design information not included in the oxDNA files.
+print a `.oxview` file that can be opened and edited in [oxView](https://sulcgroup.github.io/oxdna-viewer/). Using this option will allow you to keep additional design information not included in the oxDNA files.
 
 ### Output
 * An oxDNA topology file (named by suffixing the cadnano file with ".top")
