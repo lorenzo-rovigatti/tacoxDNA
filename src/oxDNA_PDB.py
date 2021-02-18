@@ -16,7 +16,7 @@ DD12_PDB_PATH = "dd12_na.pdb"
 def print_usage():
         print("USAGE:", file=sys.stderr)
         print("\t%s topology configuration direction" % sys.argv[0], file=sys.stderr)
-        print("\t[-H\--hydrogens=True] [-u\--uniform-residue-names]", file=sys.stderr)
+        print("\t[-H\--hydrogens=True] [-u\--uniform-residue-names] [-o\--one-file-per-strand]", file=sys.stderr)
         exit(1)
 
 def parse_options():
