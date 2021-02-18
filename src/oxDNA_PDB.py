@@ -148,12 +148,13 @@ if __name__ == '__main__':
             my_base.chain_id = s._nucleotide_to_strand[nucleotide.index]
             residue_type = ""
             
-            # 3' end
-            if nucleotide == strand._nucleotides[0] and not strand.is_circular():
-                residue_type = "3"
-            # 5' end
-            elif nucleotide == strand._nucleotides[-1]:
-                residue_type = "5" 
+            if not strand.is_circular():
+                # 3' end
+                if nucleotide == strand._nucleotides[0]:
+                    residue_type = "3"
+                # 5' end
+                elif nucleotide == strand._nucleotides[-1]:
+                    residue_type = "5" 
                 
             if opts["uniform_residue_names"] == True:
                 residue_suffix = ""

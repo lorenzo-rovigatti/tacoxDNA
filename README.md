@@ -1,6 +1,6 @@
 # tacox<img src="logo.png" width="35">NA
 
-**This is the Python2 version of the code. Checkout the `python3` branch for the Python3 version.**
+**This is the Python2 version of the code, which will receive bug fixes but no feature updates.**
 
 tacoxDNA (Tools and Converters for oxDNA) is a collection of tools initially developed to help [oxDNA](http://dna.physics.ox.ac.uk/) users. However, it will soon be expanded so as to support additional models. If you use tacoxDNA, please consider citing the following article:
 
