@@ -15,10 +15,12 @@ do
 	then
 		passed=$[passed + 1]
 	else
-		echo "$d: TEST FAILED"	
+		echo "$d: TEST FAILED"
+		exit 1
 	fi
 	
 	cd ..
 done
 
 echo "$passed/$tot TESTS PASSED"
+exit 0
