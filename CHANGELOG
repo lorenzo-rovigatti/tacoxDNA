@@ -1,0 +1,14 @@
+v 1.1 (19th February 2021)
+	- Port the code to Python 3
+	- Normalise the usage and output of all the different tools
+	- Add a vHelix -> oxDNA converter
+	- Add a rpoly -> oxDNA converter
+	- Make the LAMMPS -> oxDNA converter support the conversion of whole trajectory files
+	- Add an option to the cadnano converter to output an oxview-related file
+	- Add RNA support to the PDB reader
+	- Improve the parsing of PDB files
+	- Fix several bugs in the PDB -> oxDNA and oxDNA -> PDB converters
+	- Fix several bugs in the cadnano converter
+	
+v 1.0 (19th June 2019)
+	- First release

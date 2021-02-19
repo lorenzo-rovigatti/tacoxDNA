@@ -4,6 +4,13 @@ tacoxDNA (Tools and Converters for oxDNA) is a collection of tools initially dev
 
 A. Suma, E. Poppleton, M. Matthies, P. Šulc, F. Romano, A. A. Louis, J. P. K. Doye, C. Micheletti and L. Rovigatti, ["TacoxDNA: A user‐friendly web server for simulations of complex DNA structures, from single strands to origami"](https://doi.org/10.1002/jcc.26029), *J. Comput. Chem.* **40**, 2586 (2019)
 
+## Requirements
+
+* Python 3 (any version should work). If you want to stick to Python 2 check out the corresponding branch.
+* `numpy`
+
+## Tools
+
 The sections that follow introduce the tools and their usage.
 
 * [Generator for twisted and knotted configurations](#generator-for-twisted-and-knotted-configurations)
