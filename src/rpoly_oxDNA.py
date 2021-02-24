@@ -16,6 +16,7 @@ class Options(object):
 		
 		self.seed = None
 		self.file_name_in = None
+		self.print_oxview = None
 		
 	def check(self):
 		return True
@@ -113,17 +114,22 @@ def rpoly_to_oxDNA(opts):
 	
 	output_system.print_lorenzo_output(conf_file, top_file)
 
+	if opts.print_oxview is not None:
+		oxview_file = basename + ".oxview"
+		output_system.print_oxview_output(oxview_file)
+
 
 def print_usage():
 	print >> sys.stderr, "USAGE:"
 	print >> sys.stderr, "\t%s rpoly_file" % sys.argv[0]
 	print >> sys.stderr, "\t[-e\--seed=VALUE]"
+	print >> sys.stderr, "\t[-o\--print-oxview]"
 	exit(1)
 
 	
 def parse_options():
-	shortArgs = 'e:'
-	longArgs = ['seed=']
+	shortArgs = 'e:o'
+	longArgs = ['seed=', '--print-oxview']
 	
 	opts = Options()
 	
@@ -133,6 +139,8 @@ def parse_options():
 		for k in args:
 			if k[0] == '-e' or k[0] == "--seed": 
 				opts.seed = int(k[1])
+			if k[0] == '-o' or k[0] == "--print-oxview":
+				opts.print_oxview = True
 			
 		opts.file_name_in = files[0]
 	except Exception:
