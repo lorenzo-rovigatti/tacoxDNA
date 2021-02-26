@@ -7,6 +7,7 @@ from libs.pyquaternion import Quaternion
 import numpy as np
 from libs import cadnano_utils as cu
 from libs import base
+import random
 
 
 class Options(object):
@@ -79,19 +80,16 @@ def rpoly_to_oxDNA(opts):
 		new_strands = generator.generate_or_sq(bp=n_bp, start_pos=new_position, direction=vec, perp=vec2)
 		
 		fragment1, fragment2 = new_strands[1].cut_in_two()  # cut strand 1 into two equal lengh staple fragments for later connections
-
+		#for oxview export, cluster nucleotide by helix and paint the scaffold strand white
 		if opts.print_oxview is not None:
 			for k in fragment1._nucleotides:
-				#n.pair =
 				k.cluster = n+1
-				k.color = 255
+
 
 			for k in fragment2._nucleotides:
-				#n.pair =
 				k.cluster = n+1
-				k.color = 255
+
 			for k in new_strands[0]._nucleotides:
-				#n.pair =
 				k.cluster = n+1
 				k.color = 16777215
 		
@@ -109,6 +107,11 @@ def rpoly_to_oxDNA(opts):
 		staple_strand = staple_fragments._strands[connect_from].copy()
 	
 		staple_strand = staple_strand.append(staple_fragments._strands[connect_to].copy())
+
+		staple_color = random.choice([255,65535,16711935,16776960,16711680,65280,0,36235,9407883,9407744])
+		for i in staple_strand._nucleotides:#put the same random color on each nucleotide of the staple strands
+			i.color = staple_color
+
 	
 		output_system.add_strand(staple_strand)
 
