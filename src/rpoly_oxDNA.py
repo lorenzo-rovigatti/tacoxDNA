@@ -79,6 +79,21 @@ def rpoly_to_oxDNA(opts):
 		new_strands = generator.generate_or_sq(bp=n_bp, start_pos=new_position, direction=vec, perp=vec2)
 		
 		fragment1, fragment2 = new_strands[1].cut_in_two()  # cut strand 1 into two equal lengh staple fragments for later connections
+
+		if opts.print_oxview is not None:
+			for k in fragment1._nucleotides:
+				#n.pair =
+				k.cluster = n+1
+				k.color = 255
+
+			for k in fragment2._nucleotides:
+				#n.pair =
+				k.cluster = n+1
+				k.color = 255
+			for k in new_strands[0]._nucleotides:
+				#n.pair =
+				k.cluster = n+1
+				k.color = 16777215
 		
 		# store the fragments in this system for later connections
 		staple_fragments.add_strand(fragment1)

@@ -122,7 +122,7 @@ class Nucleotide():
     """
     index = 0
 
-    def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1):
+    def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1,cluster=None,color=None):
         self.index = Nucleotide.index
         Nucleotide.index += 1
         self.cm_pos = np.array(cm_pos)
@@ -146,8 +146,8 @@ class Nucleotide():
         self.n3 = n3
         self.next = -1
         self.pair = None
-        self.cluster = None
-        self.color = None
+        self.cluster = cluster
+        self.color = color
 
     def get_pos_base (self):
         """
@@ -185,7 +185,7 @@ class Nucleotide():
     _a2 = property (get_a2)
 
     def copy(self, disp=None, rot=None):
-        copy = Nucleotide(self.cm_pos, self._a1, self._a3, self._base, self._btype, self._L, self._v, self.n3)
+        copy = Nucleotide(self.cm_pos, self._a1, self._a3, self._base, self._btype, self._L, self._v, self.n3, self.cluster, self.color)
         if disp is not None:
             copy.translate(disp)
         if rot is not None:
