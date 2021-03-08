@@ -79,7 +79,7 @@ def rpoly_to_oxDNA(opts):
 		# strand 0 is the scaffold and strand 1 is the staple
 		new_strands = generator.generate_or_sq(bp=n_bp, start_pos=new_position, direction=vec, perp=vec2)
 		
-		fragment1, fragment2 = new_strands[1].cut_in_two()  # cut strand 1 into two equal lengh staple fragments for later connections
+		fragment1, fragment2 = new_strands[1].cut_in_two(copy=False)  # cut strand 1 into two equal lengh staple fragments for later connections
 		#for oxview export, cluster nucleotide by helix and paint the scaffold strand white
 		if opts.print_oxview is not None:
 			for k in fragment1._nucleotides:
@@ -104,9 +104,9 @@ def rpoly_to_oxDNA(opts):
 	for n in rev_helix_connections:  # iterate through staple strand connections and connect the previously generated fragments
 		connect_from = n[0] * 2 - 1
 		connect_to = n[1] * 2 - 2
-		staple_strand = staple_fragments._strands[connect_from].copy()
+		staple_strand = staple_fragments._strands[connect_from]
 	
-		staple_strand = staple_strand.append(staple_fragments._strands[connect_to].copy())
+		staple_strand = staple_strand.append(staple_fragments._strands[connect_to])
 
 		staple_color = random.choice([255,65535,16711935,16776960,16711680,65280,0,36235,9407883,9407744])
 		for i in staple_strand._nucleotides:#put the same random color on each nucleotide of the staple strands
@@ -115,10 +115,10 @@ def rpoly_to_oxDNA(opts):
 	
 		output_system.add_strand(staple_strand)
 
-	scaffold_strand = scaffold_fragments._strands[0].copy()
+	scaffold_strand = scaffold_fragments._strands[0]
 	for n in fwd_helix_connections[:-1]:
 		next_segment_adress = n[1]-1
-		next_segment = scaffold_fragments._strands[next_segment_adress].copy()
+		next_segment = scaffold_fragments._strands[next_segment_adress]
 		scaffold_strand = scaffold_strand.append(next_segment)
 
 

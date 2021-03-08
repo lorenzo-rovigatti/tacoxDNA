@@ -122,7 +122,7 @@ class Nucleotide():
     """
     index = 0
 
-    def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1,cluster=None,color=None):
+    def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1,pair=None, cluster=None,color=None):
         self.index = Nucleotide.index
         Nucleotide.index += 1
         self.cm_pos = np.array(cm_pos)
@@ -145,7 +145,7 @@ class Nucleotide():
         self._v = v
         self.n3 = n3
         self.next = -1
-        self.pair = None
+        self.pair = pair
         self.cluster = cluster
         self.color = color
 
@@ -185,7 +185,7 @@ class Nucleotide():
     _a2 = property (get_a2)
 
     def copy(self, disp=None, rot=None):
-        copy = Nucleotide(self.cm_pos, self._a1, self._a3, self._base, self._btype, self._L, self._v, self.n3, self.cluster, self.color)
+        copy = Nucleotide(self.cm_pos, self._a1, self._a3, self._base, self._btype, self._L, self._v, self.n3, self.pair, self.cluster, self.color)
         if disp is not None:
             copy.translate(disp)
         if rot is not None:
@@ -442,15 +442,15 @@ class Strand():
     def is_circular(self):
         return self._circular
 
-    def cut_in_two(self): # cuts a strand into two strands in the middle
+    def cut_in_two(self, copy=True): # cuts a strand into two strands in the middle
         fragment_one = Strand()
         fragment_two = Strand()
         counter = 0
         for n in self._nucleotides:
             if counter < (len(self._nucleotides)/2):
-                fragment_one.add_nucleotide(n.copy())
+                fragment_one.add_nucleotide(n.copy() if copy else n)
             else:
-                fragment_two.add_nucleotide(n.copy())
+                fragment_two.add_nucleotide(n.copy() if copy else n)
             counter += 1
         return fragment_one , fragment_two
 
