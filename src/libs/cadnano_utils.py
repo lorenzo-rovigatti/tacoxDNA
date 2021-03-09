@@ -270,8 +270,11 @@ class StrandGenerator (object):
             ns2 = base.Strand()
 
             for i in range(bp):
-
-                ns2.add_nucleotide(base.Nucleotide(rb - base.CM_CENTER_DS * a1, a1, a3, sequence2[i]))
+                # create new nucleotide and save basepair info on both sides
+                paired_nuc = ns1._nucleotides[bp-i-1]
+                new_nuc = base.Nucleotide(rb - base.CM_CENTER_DS * a1, a1, a3, sequence2[i], pair=paired_nuc)
+                paired_nuc.pair = new_nuc
+                ns2.add_nucleotide(new_nuc)
                 if i != bp - 1:
                     # we loop over the rotation matrices in the reverse order, and use the transpose of each matrix
                     a1 = np.dot(Rs.pop().transpose(), a1)

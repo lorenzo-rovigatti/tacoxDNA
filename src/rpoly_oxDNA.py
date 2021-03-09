@@ -16,6 +16,7 @@ class Options(object):
 		
 		self.seed = None
 		self.file_name_in = None
+		self.print_oxview = None
 		
 	def check(self):
 		return True
@@ -76,8 +77,15 @@ def rpoly_to_oxDNA(opts):
 		
 		# strand 0 is the scaffold and strand 1 is the staple
 		new_strands = generator.generate_or_sq(bp=n_bp, start_pos=new_position, direction=vec, perp=vec2)
-		
-		fragment1, fragment2 = new_strands[1].cut_in_two()  # cut strand 1 into two equal lengh staple fragments for later connections
+
+		#for oxview export, cluster nucleotide by helix
+		if opts.print_oxview is not None:
+			for i in [0,1]:
+				for nucleotide in new_strands[i]._nucleotides:
+					nucleotide.cluster = n+1
+
+		# cut strand 1 into two equal lengh staple fragments for later connections
+		fragment1, fragment2 = new_strands[1].cut_in_two(copy=False)
 		
 		# store the fragments in this system for later connections
 		staple_fragments.add_strand(fragment1)
@@ -90,16 +98,15 @@ def rpoly_to_oxDNA(opts):
 	for n in rev_helix_connections:  # iterate through staple strand connections and connect the previously generated fragments
 		connect_from = n[0] * 2 - 1
 		connect_to = n[1] * 2 - 2
-		staple_strand = staple_fragments._strands[connect_from].copy()
-	
-		staple_strand = staple_strand.append(staple_fragments._strands[connect_to].copy())
+		staple_strand = staple_fragments._strands[connect_from]
+		staple_strand = staple_strand.append(staple_fragments._strands[connect_to])
 	
 		output_system.add_strand(staple_strand)
 
-	scaffold_strand = scaffold_fragments._strands[0].copy()
+	scaffold_strand = scaffold_fragments._strands[0]
 	for n in fwd_helix_connections[:-1]:
 		next_segment_adress = n[1]-1
-		next_segment = scaffold_fragments._strands[next_segment_adress].copy()
+		next_segment = scaffold_fragments._strands[next_segment_adress]
 		scaffold_strand = scaffold_strand.append(next_segment)
 
 
@@ -113,17 +120,22 @@ def rpoly_to_oxDNA(opts):
 	
 	output_system.print_lorenzo_output(conf_file, top_file)
 
+	if opts.print_oxview is not None:
+		oxview_file = basename + ".oxview"
+		output_system.print_oxview_output(oxview_file)
+
 
 def print_usage():
 	print >> sys.stderr, "USAGE:"
 	print >> sys.stderr, "\t%s rpoly_file" % sys.argv[0]
 	print >> sys.stderr, "\t[-e\--seed=VALUE]"
+	print >> sys.stderr, "\t[-o\--print-oxview]"
 	exit(1)
 
 	
 def parse_options():
-	shortArgs = 'e:'
-	longArgs = ['seed=']
+	shortArgs = 'e:o'
+	longArgs = ['seed=', '--print-oxview']
 	
 	opts = Options()
 	
@@ -133,6 +145,8 @@ def parse_options():
 		for k in args:
 			if k[0] == '-e' or k[0] == "--seed": 
 				opts.seed = int(k[1])
+			if k[0] == '-o' or k[0] == "--print-oxview":
+				opts.print_oxview = True
 			
 		opts.file_name_in = files[0]
 	except Exception:
