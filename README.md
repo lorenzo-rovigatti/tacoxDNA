@@ -226,7 +226,7 @@ random seed (defaults to a random value). Random vectors are used whenever the i
 
 ## rpoly-to-oxDNA converter
 
-The `rpoly_oxDNA.py` script converts routed polyhedra (rpoly) files containing wireframe DNA origami structures automatically generated using the BSCOR package(http://www.vhelix.net/) into oxDNA configurations. It takes one mandatory argument.
+The `rpoly_oxDNA.py` script converts routed polyhedra (rpoly) files containing wireframe DNA origami structures automatically generated using the BSCOR package(http://www.vhelix.net/) into oxDNA configurations. It takes one mandatory argument. Optionally, it can output [.oxview files](https://sulcgroup.github.io/oxdna-viewer/) which will also contain basepairs, as well as clusters for each helix.
 
 ### Mandatory arguments
 * The input rpoly file
@@ -234,6 +234,8 @@ The `rpoly_oxDNA.py` script converts routed polyhedra (rpoly) files containing w
 ### Optional arguments
 * `-e\--seed=RNG_SEED`
 random seed for DNA sequence (defaults to a random value)
+* `-o\--print-oxview`
+print a `.oxview` file that can be opened and edited in [oxView](https://sulcgroup.github.io/oxdna-viewer/). Using this option will allow you to keep additional design information not included in the oxDNA files.
 
 ### Output
 * An oxDNA topology file (named by suffixing the rpoly file with ".top")
