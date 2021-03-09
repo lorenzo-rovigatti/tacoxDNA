@@ -7,7 +7,6 @@ from libs.pyquaternion import Quaternion
 import numpy as np
 from libs import cadnano_utils as cu
 from libs import base
-import random
 
 
 class Options(object):
