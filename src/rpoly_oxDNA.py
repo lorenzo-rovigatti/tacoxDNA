@@ -126,10 +126,10 @@ def rpoly_to_oxDNA(opts):
 
 
 def print_usage():
-	print >> sys.stderr, "USAGE:"
-	print >> sys.stderr, "\t%s rpoly_file" % sys.argv[0]
-	print >> sys.stderr, "\t[-e\--seed=VALUE]"
-	print >> sys.stderr, "\t[-o\--print-oxview]"
+	print("USAGE:", file=sys.stderr)
+	print("\t%s rpoly_file" % sys.argv[0], file=sys.stderr)
+	print("\t[-e\--seed=VALUE]", file=sys.stderr)
+	print("\t[-o\--print-oxview]", file=sys.stderr)
 	exit(1)
 
 	
