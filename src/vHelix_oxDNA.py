@@ -494,9 +494,9 @@ def parse_options():
             if k[0] == '-b' or k[0] == '--box':
                 try:
                     opts['box'] = float(k[1])
-                    print >> sys.stderr, "## Setting the box size to %f" % opts['box']
+                    print("## Setting the box size to %f" % opts['box'], file=sys.stderr)
                 except ValueError:
-                    print >> sys.stderr, "The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1])
+                    print("The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
                     exit(1)
             if k[0] == '-e' or k[0] == "--seed": 
                 opts['seed'] = int(k[1])

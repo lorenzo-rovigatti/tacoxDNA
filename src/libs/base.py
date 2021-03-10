@@ -334,7 +334,7 @@ class Strand():
             end = self.get_length()
             
         if end > self.get_length():
-            print >> sys.stderr, "The given end parameter is larger than the number of nucleotides of the strand (%d > %d)" % (end, self.get_length())
+            print("The given end parameter is larger than the number of nucleotides of the strand (%d > %d)" % (end, self.get_length()), file=sys.stderr)
             raise ValueError
             
         ret = Strand()
