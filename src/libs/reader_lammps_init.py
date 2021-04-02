@@ -68,8 +68,8 @@ class Lammps_parser(object):
         if self.natoms != len(datalines):
             raise ValueError("Number of atoms in header %d and in Atoms %d do not coincide" % (self.natoms, len(datalines)))
         # Fields per line
-        if len(datalines[1].split()) != 8:
-            raise ValueError("Atoms section should be the default one # Atom-ID, type, position, molecule-ID, ellipsoid flag, density with 8 columns and not %d" % len(datalines[1].split()))
+        if len(datalines[1].split()) < 8:
+            raise ValueError("Atoms section should be the default one # Atom-ID, type, position, molecule-ID, ellipsoid flag, density with at least 8 columns and not %d" % len(datalines[1].split()))
         N = self.natoms
         # atom ids aren't necessarily sequential
         self.bases = np.zeros(N, dtype=int)
