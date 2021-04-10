@@ -4,6 +4,7 @@ import sys
 from json import load
 import numpy as np
 import random
+import json
 
 DNA_BASES = ['A', 'C', 'G', 'T']
 
@@ -197,6 +198,54 @@ class NoBase(Base):
     def get_across(self):
         return self  # Returns itself to reduce memory consumtion 
 
+def getBaseConfig(base):
+    base_vector = base.get_pos()
+
+    pairing_base = base.get_across()
+    paring_base_vector = pairing_base.get_pos()
+
+    up_base = base.get_up()
+    up_base_vector = up_base.get_pos()
+
+    down_base = base.get_down()
+    down_base_vector = down_base.get_pos()
+
+    paring_base3 = up_base.get_across()
+    paring_base3_vector = paring_base3.get_pos()
+
+    paring_base5 = down_base.get_across()
+    paring_base5_vector = paring_base5.get_pos()
+
+    # three backbone vectors, A-base_vector, B-paring_base_vector,
+    # A5up_base_vector, A3down_base_vector
+    backbone_A_to_backbone_B = normalize(-base_vector + paring_base_vector)
+    backbone_A_to_posA5_neibor = normalize(-base_vector + up_base_vector)
+    backbone_A_to_posA3_neibor = normalize(-base_vector + down_base_vector)
+    backboneA_to_backbone_B3 = normalize(-base_vector + paring_base3_vector)
+    backboneA_to_backbone_B5 = normalize(-base_vector + paring_base5_vector)
+
+    # do we have a duplex across the 3' end
+    if not(type(paring_base5) is NoBase):
+        if opts['isDNA']:
+            a1_vector, a3_vector, cm_pos = neighbor3_cal_vector(backbone_A_to_backbone_B, backbone_A_to_posA3_neibor, backboneA_to_backbone_B5)
+        else:
+            a1_vector, a3_vector, cm_pos = neighbor3_cal_vector_RNA(backbone_A_to_backbone_B, backbone_A_to_posA3_neibor, backboneA_to_backbone_B5)
+        cm_pos = cm_pos + (base_vector * opts['tiamat_version_fudge'])
+    # do we have a duplex across the 5' end
+    elif not(type(paring_base3) is NoBase):
+        if opts['isDNA']:
+            a1_vector, a3_vector, cm_pos = neighbor5_cal_vector(backbone_A_to_backbone_B, backbone_A_to_posA5_neibor, backboneA_to_backbone_B3)
+        else:
+            a1_vector, a3_vector, cm_pos = neighbor5_cal_vector_RNA(backbone_A_to_backbone_B, backbone_A_to_posA5_neibor, backboneA_to_backbone_B3)
+        cm_pos = cm_pos + (base_vector * opts['tiamat_version_fudge'])
+    else:
+        # single stranded case, not really treated (could randomize orientations?)
+        cm_pos = base_vector
+        a3_vector = [0, 0, 1]
+        a1_vector = [0, 1, 0]
+
+    # assemble a new line in the configuration file
+    return cm_pos, a1_vector, a3_vector
 
 def write_topology_file(strands, topology_file):
     # setup the topology header 
@@ -229,6 +278,52 @@ def write_force_file(strands, force_file_name):
     with open(force_file_name, "w") as f_out:
         f_out.write("\n".join(lines))
 
+def write_oxview_file(strands,file_name):
+    box_size = 250
+    out = {
+        'systems': [{'id':0, 'strands': []}]
+    }
+
+    for s in strands:
+        strand = {
+            'id': s.strand_id, 'end3': s.bases[0].local_id, 'end5': s.bases[-1].local_id,
+            'class': 'NucleicAcidStrand',
+            'monomers': []
+        }
+        for n in s.bases:
+            cm_pos, a1_vector, a3_vector = getBaseConfig(n)
+
+            for v in cm_pos.tolist():
+                if abs(v) > box_size/2:
+                    box_size = abs(v)*2
+
+            n3 = n.get_down_id()
+            n5 = n.get_up_id()
+            pair = n.get_across_id()
+
+            nucleotide = {
+                'id': n.local_id,
+                'type': n.val,
+                'class': 'DNA' if opts['isDNA'] else 'RNA',
+                'p': cm_pos.tolist(),
+                'a1': a1_vector.tolist(),
+                'a3': a3_vector.tolist()
+            }
+            if n3 >= 0:
+                nucleotide['n3'] = n3
+            if n5 >= 0:
+                nucleotide['n5'] = n5
+            if pair >= 0:
+                nucleotide['bp'] = pair
+            strand['monomers'].append(nucleotide)
+        out['systems'][0]['strands'].append(strand)
+
+    box_size *= 1.5 # Add some margin
+    out['box'] = [box_size, box_size, box_size]
+
+    with open(file_name, "w") as f:
+        f.write(json.dumps(out))
+
 
 def write_configuration_file(strands, configuration_file, opts):
     # Decide on a box size based on strand length and number of strands - there's not a good way to do this blind
@@ -248,51 +343,7 @@ def write_configuration_file(strands, configuration_file, opts):
     
     for strand in strands:
         for base in strand.bases:
-            base_vector = base.get_pos()
-            
-            pairing_base = base.get_across()
-            paring_base_vector = pairing_base.get_pos()
-            
-            up_base = base.get_up()
-            up_base_vector = up_base.get_pos()
-            
-            down_base = base.get_down()
-            down_base_vector = down_base.get_pos()
-            
-            paring_base3 = up_base.get_across()
-            paring_base3_vector = paring_base3.get_pos()
-            
-            paring_base5 = down_base.get_across()
-            paring_base5_vector = paring_base5.get_pos()
-            
-            # three backbone vectors, A-base_vector, B-paring_base_vector,
-            # A5up_base_vector, A3down_base_vector
-            backbone_A_to_backbone_B = normalize(-base_vector + paring_base_vector)
-            backbone_A_to_posA5_neibor = normalize(-base_vector + up_base_vector)
-            backbone_A_to_posA3_neibor = normalize(-base_vector + down_base_vector)
-            backboneA_to_backbone_B3 = normalize(-base_vector + paring_base3_vector)
-            backboneA_to_backbone_B5 = normalize(-base_vector + paring_base5_vector)
-            
-            # do we have a dooplex across the 3' end
-            if not(type(paring_base5) is NoBase):
-                if opts['isDNA']:
-                    a1_vector, a3_vector, cm_pos = neighbor3_cal_vector(backbone_A_to_backbone_B, backbone_A_to_posA3_neibor, backboneA_to_backbone_B5)
-                else:
-                    a1_vector, a3_vector, cm_pos = neighbor3_cal_vector_RNA(backbone_A_to_backbone_B, backbone_A_to_posA3_neibor, backboneA_to_backbone_B5)
-                cm_pos = cm_pos + (base_vector * opts['tiamat_version_fudge'])   
-            # do we have a dooplex across the 5' end
-            elif not(type(paring_base3) is NoBase):
-                if opts['isDNA']:
-                    a1_vector, a3_vector, cm_pos = neighbor5_cal_vector(backbone_A_to_backbone_B, backbone_A_to_posA5_neibor, backboneA_to_backbone_B3)
-                else:
-                    a1_vector, a3_vector, cm_pos = neighbor5_cal_vector_RNA(backbone_A_to_backbone_B, backbone_A_to_posA5_neibor, backboneA_to_backbone_B3)
-                cm_pos = cm_pos + (base_vector * opts['tiamat_version_fudge'])
-            else:
-                # single stranded case, not really treated (could randomize orientations?) 
-                cm_pos = base_vector
-                a3_vector = [0, 0, 1]
-                a1_vector = [0, 1, 0] 
-            # assemble a new line in the configuration file
+            cm_pos, a1_vector, a3_vector = getBaseConfig(base)
             configuration_lines.append(
                 "".join([
                     "%f %f %f " % (cm_pos[0], cm_pos[1], cm_pos[2]),
@@ -313,14 +364,15 @@ def print_usage():
         print("\t[-m\--molecule=DNA|RNA]", file=sys.stderr)
         print("\t[-t\--tiamat-version=1|2]", file=sys.stderr)
         print("\t[-t\--default-base=A|C|G|T|R|i (R = random, i = any integer)]", file=sys.stderr)
-        print("\t[-f\--print-force-file]\n", file=sys.stderr)
+        print("\t[-f\--print-force-file]", file=sys.stderr)
+        print("\t[-o\--print-oxview]\n", file=sys.stderr)
         print("\tThe defaults options are --molecule=DNA, --tiamat-version=2, --default-base=R", file=sys.stderr)
         exit(1)
 
 
 def parse_options():
-    shortArgs = 'd:m:t:f'
-    longArgs = ['default-base=', 'molecule=', 'tiamat-version=', 'print-force-file']
+    shortArgs = 'd:m:t:f:o'
+    longArgs = ['default-base=', 'molecule=', 'tiamat-version=', 'print-force-file', 'print-oxview']
     
     # for some reason, files originally made in T1 have a different .json form than T2
     # it would be possible to rewrite all the parameters to fix it, but tossing a factor
@@ -328,7 +380,8 @@ def parse_options():
     opts = {
         "isDNA" : True,
         "tiamat_version_fudge" : 1,
-        "print_force_file" : False
+        "print_force_file" : False,
+        "print-oxview" : False
     }
     
     tiamat_version = 2
@@ -361,6 +414,8 @@ def parse_options():
                 Base.default_val = db
             elif k[0] == '-f' or k[0] == '--print-force-file':
                 opts['print_force_file'] = True
+            elif k[0] == '-o' or k[0] == '--print-oxview':
+                opts['print-oxview'] = True
             
         if tiamat_version == 1:
             if opts['isDNA']:
@@ -389,6 +444,7 @@ if __name__ == '__main__':
     topology_file = opts['tiamat_file'] + ".top"
     configuration_file = opts['tiamat_file'] + ".oxdna"
     force_file_name = opts['tiamat_file'] + ".forces.txt"
+    oxview_file_name = opts['tiamat_file'] + ".oxview"
     
     # read and parse json
     with open(opts['tiamat_file'], 'r') as f_out:
@@ -410,6 +466,10 @@ if __name__ == '__main__':
     
     # work on the configuration file 
     write_configuration_file(strands, configuration_file, opts)
+
+    # write oxview file
+    if opts['print-oxview']:
+        write_oxview_file(strands, oxview_file_name)
     
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
