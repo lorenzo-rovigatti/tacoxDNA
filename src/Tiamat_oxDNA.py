@@ -241,8 +241,8 @@ def getBaseConfig(base):
     else:
         # single stranded case, not really treated (could randomize orientations?)
         cm_pos = base_vector
-        a3_vector = [0, 0, 1]
-        a1_vector = [0, 1, 0]
+        a3_vector = np.array([0, 0, 1])
+        a1_vector = np.array([0, 1, 0])
 
     # assemble a new line in the configuration file
     return cm_pos, a1_vector, a3_vector
