@@ -279,7 +279,7 @@ def write_force_file(strands, force_file_name):
         f_out.write("\n".join(lines))
 
 def write_oxview_file(strands,file_name):
-    box_size = 250
+    box_size = 1
     out = {
         'systems': [{'id':0, 'strands': []}]
     }
@@ -293,6 +293,7 @@ def write_oxview_file(strands,file_name):
         for n in s.bases:
             cm_pos, a1_vector, a3_vector = getBaseConfig(n)
 
+            # Make sure box fits base
             for v in cm_pos.tolist():
                 if abs(v) > box_size/2:
                     box_size = abs(v)*2
@@ -319,6 +320,7 @@ def write_oxview_file(strands,file_name):
         out['systems'][0]['strands'].append(strand)
 
     box_size *= 1.5 # Add some margin
+    box_size = round(box_size)
     out['box'] = [box_size, box_size, box_size]
 
     with open(file_name, "w") as f:
