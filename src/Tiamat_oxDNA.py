@@ -198,7 +198,7 @@ class NoBase(Base):
     def get_across(self):
         return self  # Returns itself to reduce memory consumtion 
 
-def getBaseConfig(base):
+def get_base_config(base):
     base_vector = base.get_pos()
 
     pairing_base = base.get_across()
@@ -241,8 +241,8 @@ def getBaseConfig(base):
     else:
         # single stranded case, not really treated (could randomize orientations?)
         cm_pos = base_vector
-        a3_vector = np.array([0, 0, 1])
-        a1_vector = np.array([0, 1, 0])
+        a3_vector = np.array([0., 0., 1.])
+        a1_vector = np.array([0., 1., 0.])
 
     # assemble a new line in the configuration file
     return cm_pos, a1_vector, a3_vector
@@ -291,7 +291,7 @@ def write_oxview_file(strands,file_name):
             'monomers': []
         }
         for n in s.bases:
-            cm_pos, a1_vector, a3_vector = getBaseConfig(n)
+            cm_pos, a1_vector, a3_vector = get_base_config(n)
 
             # Make sure box fits base
             for v in cm_pos.tolist():
@@ -345,7 +345,7 @@ def write_configuration_file(strands, configuration_file, opts):
     
     for strand in strands:
         for base in strand.bases:
-            cm_pos, a1_vector, a3_vector = getBaseConfig(base)
+            cm_pos, a1_vector, a3_vector = get_base_config(base)
             configuration_lines.append(
                 "".join([
                     "%f %f %f " % (cm_pos[0], cm_pos[1], cm_pos[2]),
@@ -383,7 +383,7 @@ def parse_options():
         "isDNA" : True,
         "tiamat_version_fudge" : 1,
         "print_force_file" : False,
-        "print-oxview" : False
+        "print_oxview" : False
     }
     
     tiamat_version = 2
@@ -417,7 +417,7 @@ def parse_options():
             elif k[0] == '-f' or k[0] == '--print-force-file':
                 opts['print_force_file'] = True
             elif k[0] == '-o' or k[0] == '--print-oxview':
-                opts['print-oxview'] = True
+                opts['print_oxview'] = True
             
         if tiamat_version == 1:
             if opts['isDNA']:
@@ -470,7 +470,7 @@ if __name__ == '__main__':
     write_configuration_file(strands, configuration_file, opts)
 
     # write oxview file
-    if opts['print-oxview']:
+    if opts['print_oxview']:
         write_oxview_file(strands, oxview_file_name)
     
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
