@@ -90,10 +90,10 @@ if __name__ == '__main__':
                 if line.startswith('ITEM: TIMESTEP'):
                     t = int(lmptrj.readline())
             
-                if line.startswith('ITEM: NUMBER OF ATOMS') and t == 0:
+                if line.startswith('ITEM: NUMBER OF ATOMS'):
                     natoms = int(lmptrj.readline())
             
-                if line.startswith('ITEM: BOX BOUNDS') and t == 0:
+                if line.startswith('ITEM: BOX BOUNDS'):
                     line = lmptrj.readline()
                     xlo, xhi = np.float32(line.split()[0]), np.float32(line.split()[1])
                     Lx = xhi - xlo
