@@ -92,7 +92,9 @@ if __name__ == '__main__':
             
                 if line.startswith('ITEM: NUMBER OF ATOMS'):
                     natoms = int(lmptrj.readline())
-            
+                    if natoms != conf.natoms:
+                        print("ERROR: A configuration stored in the trajectory file contains a number of nucleotides %d that differs from the %d in the datafile" % \
+                          (natoms, conf.natoms), file=sys.stderr)            
                 if line.startswith('ITEM: BOX BOUNDS'):
                     line = lmptrj.readline()
                     xlo, xhi = np.float32(line.split()[0]), np.float32(line.split()[1])
@@ -154,7 +156,8 @@ if __name__ == '__main__':
                         v = np.array(vel[n,:]) * np.sqrt(mass_in_lammps)
                         Lv = np.array(angmom[n,:]) / np.sqrt(inertia_in_lammps)
             
-                        oxconf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % (cm[0], cm[1], cm[2], a1[0], a1[1], a1[2], a3[0], a3[1], a3[2], v[0], v[1], v[2], Lv[0], Lv[1], Lv[2]))
+                        oxconf.write('%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n' % \
+                          (cm[0], cm[1], cm[2], a1[0], a1[1], a1[2], a3[0], a3[1], a3[2], v[0], v[1], v[2], Lv[0], Lv[1], Lv[2]))
             
                 line = lmptrj.readline()
 
