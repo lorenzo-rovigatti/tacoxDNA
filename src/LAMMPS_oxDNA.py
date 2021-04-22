@@ -95,7 +95,7 @@ if __name__ == '__main__':
                     if natoms != conf.natoms:
                         print("ERROR: A configuration stored in the trajectory file contains a number of nucleotides %d that differs from the %d in the datafile" % \
                           (natoms, conf.natoms), file=sys.stderr)            
-
+                        sys.exit(1)
                 if line.startswith('ITEM: BOX BOUNDS'):
                     line = lmptrj.readline()
                     xlo, xhi = np.float32(line.split()[0]), np.float32(line.split()[1])
