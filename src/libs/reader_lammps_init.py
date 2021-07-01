@@ -43,23 +43,21 @@ class Lammps_parser(object):
 
         self.parse_velocities(sects['Velocities'])
 
-        self.nstrands = len(np.unique(self.strand))
-
         # checking the nucleotides have indexes ordered the same way as bonds and are compatible with strands
         for i in range(self.natoms):
             next_bond = self.bonds[i][1]
             
-            if next_bond!=-1:
+            if next_bond != -1:
                 #check the consecutive bond is on the same strand
-                if self.strand[i]!=self.strand[next_bond]:
+                if self.strand[i] != self.strand[next_bond]:
                     print("Wrong bond arising between two different strands", file=sys.stderr)
                 #check the right bond is an higher index (except from the circular closure)
-                if next_bond==i-1:
+                if next_bond == i-1:
                     print("The bonds should be in incremental order (i i+1) except for strand circularization N 0", file=sys.stderr)
-                if next_bond>i+1:
+                if next_bond > i+1:
                     print("The bonds should be in incremental order (i i+1) except for strand circularization N 0", file=sys.stderr)
-                if next_bond<i+1:
-                    if self.bonds[next_bond][1]!=next_bond+1:
+                if next_bond < i+1:
+                    if self.bonds[next_bond][1] != next_bond + 1:
                         print("The bonds should be in incremental order (i i+1) except for strand circularization N 0", file=sys.stderr)
 
                 # more check to insert about completely random ordering
@@ -81,6 +79,8 @@ class Lammps_parser(object):
             self.bases[index] = line[1]
             self.strand[index] = line[5]
             self.xyz[index, :] = line[2:5]
+            
+        self.nstrands = len(np.unique(self.strand))
 
     def parse_velocities(self, datalines):
         if self.natoms != len(datalines):
@@ -114,6 +114,20 @@ class Lammps_parser(object):
 
             self.bonds[p1][1] = p2
             self.bonds[p2][0] = p1
+            
+        N_ends_3p = 0
+        N_ends_5p = 0
+        for b in self.bonds:
+            if b[0] == -1:
+                N_ends_3p += 1
+            elif b[1] == -1:
+                N_ends_5p += 1
+                
+        if N_ends_3p != N_ends_5p:
+            raise ValueError("There is a mismatch between the number of 3' ends (%d) and 5' ends (%d)" % (N_ends_3p, N_ends_5p), file=sys.stderr)
+            
+        if N_ends_3p != self.nstrands:
+            raise ValueError("There is a mismatch between the number of strands as detected by the Atoms (%d) and Bonds (%d) sections" % (self.nstrands, N_ends_3p))
 
     def parse_ellipsoids(self, datalines):
         if len(datalines[1].split()) != 8:

@@ -41,7 +41,12 @@ if __name__ == '__main__':
         print("\t%s lammps_data_file [lammps_trajectory_file]" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
-    conf = reader_lammps_init.Lammps_parser(sys.argv[1])
+    try:
+        conf = reader_lammps_init.Lammps_parser(sys.argv[1])
+    except ValueError as e:
+        print(e, file=sys.stderr)
+        exit(1)
+        
     N = conf.natoms 
     box = np.array([0, 0., 0.])
     box[0] = conf.Lx
