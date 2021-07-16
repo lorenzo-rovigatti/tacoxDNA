@@ -73,7 +73,7 @@ class Lammps_parser(object):
         self.bases = np.zeros(N, dtype=int)
         self.strand = np.zeros(N, dtype=int) 
         self.xyz = np.zeros((N, 3), dtype=float) 
-        for i, line in enumerate(datalines):
+        for _, line in enumerate(datalines):
             line = line.split()
             index = int(line[0]) - 1
             self.bases[index] = line[1]
@@ -91,11 +91,30 @@ class Lammps_parser(object):
             N = self.natoms
             self.v = np.zeros((N, 3), dtype=float)
             self.Lv = np.zeros((N, 3), dtype=float)
-            for i, line in enumerate(datalines):
+            for _, line in enumerate(datalines):
                 line = line.split()
                 index = int(line[0]) - 1
                 self.v[index] = line[1:4]
                 self.Lv[index] = line[4:7]
+                
+    def _N_strands_from_bonds(self, bonds):
+        '''
+        This method partition nucleotides into strands according to their nearest neighbours and returns the number of such strands.
+        '''
+        def flip_neighs(bonds, clusters, i):
+            for neigh in bonds[i]:
+                if clusters[i] > clusters[neigh]:
+                    clusters[i] = clusters[neigh]
+                    flip_neighs(bonds, clusters, neigh)
+                    
+                    
+        N = len(bonds)
+        strands = np.arange(0, N, 1, dtype=np.int)
+        
+        for i in range(N):
+            flip_neighs(bonds, strands, i)
+        
+        return len(np.unique(strands))
 
     def parse_bonds(self, datalines):
         if len(datalines[1].split()) != 4:
@@ -107,13 +126,17 @@ class Lammps_parser(object):
         # creating a vector indicating for each particle who it is bonded too on its left and right in order of increasing index
         natoms = self.natoms
         self.bonds = np.ones((natoms, 2), dtype=int) * (-1)
-        for i, line in enumerate(datalines):
+        for _, line in enumerate(datalines):
             line = line.split()
             p1 = int(line[2]) - 1
             p2 = int(line[3]) - 1
 
             self.bonds[p1][1] = p2
             self.bonds[p2][0] = p1
+            
+        N_strands = self._N_strands_from_bonds(self.bonds)
+        if N_strands != self.nstrands:
+            raise ValueError("There is a mismatch between the number of strands as detected by the Atoms (%d) and Bonds (%d) sections" % (self.nstrands, N_strands))
             
         N_ends_3p = 0
         N_ends_5p = 0
@@ -126,9 +149,6 @@ class Lammps_parser(object):
         if N_ends_3p != N_ends_5p:
             raise ValueError("There is a mismatch between the number of 3' ends (%d) and 5' ends (%d)" % (N_ends_3p, N_ends_5p), file=sys.stderr)
             
-        if N_ends_3p != self.nstrands:
-            raise ValueError("There is a mismatch between the number of strands as detected by the Atoms (%d) and Bonds (%d) sections" % (self.nstrands, N_ends_3p))
-
     def parse_ellipsoids(self, datalines):
         if len(datalines[1].split()) != 8:
             raise ValueError("Ellipsoid section should be the default one # Atom-ID, shape, quaternion with 8 columns and not %d" % len(datalines[1].split()))
@@ -138,7 +158,7 @@ class Lammps_parser(object):
 
         nellipsoids = self.nellipsoids
         self.ellipsoids = np.zeros((nellipsoids, 4), dtype=float)
-        for i, line in enumerate(datalines):
+        for _, line in enumerate(datalines):
             line = line.split()
             index = int(line[0]) - 1
             self.ellipsoids[index, :] = line[4:8]
