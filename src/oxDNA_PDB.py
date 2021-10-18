@@ -183,7 +183,7 @@ if __name__ == '__main__':
             residue_serial = n_idx % 9999
             base_identifier = current_base_identifier
             nucleotide_pdb = my_base.to_pdb(base_identifier, opts['print_hydrogens'], residue_serial, residue_suffix,
-                                            residue_type, bfactor=rmsf_per_nucleotide[n_idx])
+                                            residue_type, bfactor=rmsf_per_nucleotide[nucleotide.index])
             strand_pdb.append(nucleotide_pdb)
 
 
