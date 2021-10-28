@@ -101,12 +101,14 @@ The `oxDNA_PDB.py` script takes three mandatory arguments and outputs a single f
 * The direction according to which the nucleotides are to be listed in the PDB file. It should be either 35 (for 3' -> 5') or 53 (for 5' -> 3'). Most of the all-atoms tools (*e.g.* GROMACS) assume the 5' -> 3' order.
 
 ### Optional arguments
-* `-H, --hydrogens=[true|false]` 
+* `-H, --hydrogens=[true|false]`
 if true, include hydrogen atoms in the PDB file (defaults to true)
 * `-u\--uniform-residue-names`
 drop the `3` and `5` suffixes from the names of residues that are placed at the strands' ends. It increases the compatibility with some tools (*e.g.* Chimera and Molecular Maya)
 * `-o\--one-file-per-strand`
 print one PDB file for each strand
+* `--rmsf-file`
+write rmsf data per residue from https://github.com/sulcgroup/oxdna_analysis_tools/compute_deviations.py to bfactor field
 
 ### Output
 * A [PDB](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) file containing the positions of all atoms composing the strand(s) contained in the oxDNA configuration file
@@ -126,7 +128,7 @@ The `PDB_oxDNA.py` script takes two mandatory arguments. Given the sometimes mes
 * The direction according to which the nucleotides are listed in the PDB file. It should be either 35 (for 3' -> 5') or 53 (for 5' -> 3').
 
 ### Optional arguments
-* `-m, --models-as-strands` 
+* `-m, --models-as-strands`
 Treat different models as different strands
 
 ### Output
@@ -174,7 +176,7 @@ The `CanDo_oxDNA.py` script converts [CanDo](https://cando-dna-origami.org/) fil
 * `-b\--box=VALUE`
 the length of the box side (in oxDNA simulation units) where the system will be placed (defaults to 100)
 * `-f\--print-force-file`
-also print a file containing the specifics for a oxDNA-compatible set of external forces that may be useful to relax the system  
+also print a file containing the specifics for a oxDNA-compatible set of external forces that may be useful to relax the system
 
 ### Output
 * An oxDNA topology file (named by suffixing the CanDo file with ".top")
@@ -247,7 +249,7 @@ print a `.oxview` file that can be opened and edited in [oxView](https://sulcgro
 
 ## Testing
 
-tacoxDNA contains a very simple testing suite to verify the working status of the scripts. The `tests` directory contains a directory for each script. Within each directory there is a `run.sh` bash script that performs one or more tests on the specific script. Execute `run_all.sh` to run all tests and get a summary of the results. 
+tacoxDNA contains a very simple testing suite to verify the working status of the scripts. The `tests` directory contains a directory for each script. Within each directory there is a `run.sh` bash script that performs one or more tests on the specific script. Execute `run_all.sh` to run all tests and get a summary of the results.
 
 ## Acknowledgements
 
