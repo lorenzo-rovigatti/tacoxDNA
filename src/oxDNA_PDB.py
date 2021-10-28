@@ -123,7 +123,12 @@ if __name__ == '__main__':
     rmsf_file = opts["rmsf_bfactor"]
     if rmsf_file:
         with open(rmsf_file) as f:
-            substrings = f.read().split("[")[1].split("]")[0].split(",")
+            try:
+                # https://github.com/sulcgroup/oxdna_analysis_tools
+                substrings = f.read().split("[")[1].split("]")[0].split(",")
+            except Exception as e:
+                print("Parsing error in RMSF file: %s" % e, file=sys.stderr)
+                exit(1)
             rmsf_per_nucleotide = {i: float(s)
                                    for i, s in enumerate(substrings)}
     else:
