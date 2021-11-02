@@ -127,10 +127,14 @@ if __name__ == '__main__':
                 # https://github.com/sulcgroup/oxdna_analysis_tools
                 substrings = f.read().split("[")[1].split("]")[0].split(",")
             except Exception as e:
-                print("Parsing error in RMSF file: %s" % e, file=sys.stderr)
+                print("Parsing error in RMSF file. Invalid Format: %s" % e, file=sys.stderr)
                 exit(1)
-            rmsf_per_nucleotide = {i: float(s)
-                                   for i, s in enumerate(substrings)}
+            try:
+                rmsf_per_nucleotide = {i: float(s)
+                                       for i, s in enumerate(substrings)}
+            except Exception as e:
+                print("Parsing error in RMSF file. Conversion to float failed : %s" % e, file=sys.stderr)
+                exit(1)
     else:
         rmsf_per_nucleotide = defaultdict(lambda: 1.00)
 
