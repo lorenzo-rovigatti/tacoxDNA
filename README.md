@@ -108,7 +108,7 @@ drop the `3` and `5` suffixes from the names of residues that are placed at the 
 * `-o\--one-file-per-strand`
 print one PDB file for each strand
 * `--rmsf-file`
-write rmsf data per residue from https://github.com/sulcgroup/oxdna_analysis_tools/compute_deviations.py to bfactor field
+write rmsf data per residue from "https://github.com/sulcgroup/oxdna_analysis_tools/ command: oat compute_deviations" to bfactor field
 
 ### Output
 * A [PDB](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html) file containing the positions of all atoms composing the strand(s) contained in the oxDNA configuration file
