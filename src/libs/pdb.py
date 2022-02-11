@@ -173,6 +173,13 @@ class Nucleotide(object):
         com = self.get_com()
         for a in self.atoms:
             a.pos += new_com - com - COM_SHIFT * self.a1
+            
+    def set_sugar(self, new_base_back_com):
+        sugar_com = self.get_com(self.sugar_atoms)
+        for a in self.atoms:
+            a.pos += new_base_back_com - sugar_com
+
+        self.compute_as()
 
     def set_base(self, new_base_com):
         atoms = [v for k, v in self.named_atoms.items() if k in self.ring_names]
