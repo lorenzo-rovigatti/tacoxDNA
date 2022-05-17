@@ -21,7 +21,7 @@ BASES = ["A", "T", "G", "C", "U"]
 
 class Nucleotide(object):
     RNA_warning_printed = False
-    
+
     def __init__(self, name, idx):
         object.__init__(self)
         self.name = name.strip()
@@ -31,7 +31,7 @@ class Nucleotide(object):
             if self.name == "U" and not Nucleotide.RNA_warning_printed:
                 print("WARNING: unsupported uracil detected: use at your own risk", file=sys.stderr)
                 Nucleotide.RNA_warning_printed = True
-                
+
             self.base = self.name
         else:
             self.base = name[1:]
@@ -47,19 +47,19 @@ class Nucleotide(object):
         return self.base_atoms + self.phosphate_atoms + self.sugar_atoms
 
     def add_atom(self, a):
-        if 'P' in a.name or a.name == "HO5'": 
+        if 'P' in a.name or a.name == "HO5'":
             self.phosphate_atoms.append(a)
-        elif "'" in a.name: 
+        elif "'" in a.name:
             self.sugar_atoms.append(a)
-        else: 
+        else:
             self.base_atoms.append(a)
-        
+
         self.named_atoms[a.name] = a
-        if self.chain_id == None: 
+        if self.chain_id == None:
             self.chain_id = a.chain_id
 
     def get_com(self, atoms=None):
-        if atoms == None: 
+        if atoms == None:
             atoms = self.atoms
         com = np.array([0., 0., 0.])
         for a in atoms:
@@ -72,7 +72,7 @@ class Nucleotide(object):
         # the O4' oxygen is always (at least for non pathological configurations, as far as I know) oriented 3' -> 5' with respect to the base's centre of mass
         parallel_to = self.named_atoms["O4'"].pos - base_com
         self.a3 = np.array([0., 0., 0.])
-        
+
         for perm in itertools.permutations(self.ring_names, 3):
             p = self.named_atoms[perm[0]]
             q = self.named_atoms[perm[1]]
@@ -84,7 +84,7 @@ class Nucleotide(object):
             if abs(np.dot(v1, v2)) > 0.01 or 1:
                 a3 = np.cross(v1, v2)
                 a3 /= sqrt(np.dot(a3, a3))
-                if np.dot(a3, parallel_to) < 0.: 
+                if np.dot(a3, parallel_to) < 0.:
                     a3 = -a3
                 self.a3 += a3
 
@@ -110,17 +110,17 @@ class Nucleotide(object):
         self.compute_a3()
         self.a2 = np.cross(self.a3, self.a1)
         self.check = abs(np.dot(self.a1, self.a3))
-        
+
     def correct_for_large_boxes(self, box):
         for atom in self.atoms:
             atom.shift(-np.rint(atom.pos / box ) * box)
 
-    def to_pdb(self, chain_identifier, print_H, residue_serial, residue_suffix, residue_type):
+    def to_pdb(self, chain_identifier, print_H, residue_serial, residue_suffix, residue_type, bfactor):
         res = []
         for a in self.atoms:
             if not print_H and 'H' in a.name:
                 continue
-            if residue_type == "5": 
+            if residue_type == "5":
                 if 'P' in a.name:
                     if a.name == 'P':
                         phosphorus = a
@@ -130,28 +130,28 @@ class Nucleotide(object):
             elif residue_type == "3":
                 if a.name == "O3'":
                     O3prime = a
-            res.append(a.to_pdb(chain_identifier, residue_serial, residue_suffix))
-            
+            res.append(a.to_pdb(chain_identifier, residue_serial, residue_suffix, bfactor))
+
         # if the residue is a 3' or 5' end, it requires one more hydrogen linked to the O3' or O5', respectively
         if residue_type == "5":
             new_hydrogen = copy.deepcopy(phosphorus)
             new_hydrogen.name = "HO5'"
-            
+
             # we put the new hydrogen at a distance 1 Angstrom from the O5' oxygen along the direction that, in a regular nucleotide, connects O5' and P
             dist_P_O = phosphorus.pos - O5prime.pos
             dist_P_O *= 1. / np.sqrt(np.dot(dist_P_O, dist_P_O))
             new_hydrogen.pos = O5prime.pos + dist_P_O
-            res.append(new_hydrogen.to_pdb(chain_identifier, residue_serial, residue_suffix))
+            res.append(new_hydrogen.to_pdb(chain_identifier, residue_serial, residue_suffix, bfactor))
         elif residue_type == "3":
             new_hydrogen = copy.deepcopy(O3prime)
             new_hydrogen.name = "HO3'"
-            
-            # we put the new hydrogen at a distance 1 Angstrom from the O3' oxygen along a direction which is a linear combination of the three 
+
+            # we put the new hydrogen at a distance 1 Angstrom from the O3' oxygen along a direction which is a linear combination of the three
             # orientations that approximately reproduce the crystallographic position
             new_distance = 0.2 * self.a2 - 0.2 * self.a1 - self.a3
             new_distance *= 1. / np.sqrt(np.dot(new_distance, new_distance))
             new_hydrogen.pos = O3prime.pos + new_distance
-            res.append(new_hydrogen.to_pdb(chain_identifier, residue_serial, residue_suffix))
+            res.append(new_hydrogen.to_pdb(chain_identifier, residue_serial, residue_suffix, bfactor))
 
         return "\n".join(res)
 
@@ -173,6 +173,13 @@ class Nucleotide(object):
         com = self.get_com()
         for a in self.atoms:
             a.pos += new_com - com - COM_SHIFT * self.a1
+            
+    def set_sugar(self, new_base_back_com):
+        sugar_com = self.get_com(self.sugar_atoms)
+        for a in self.atoms:
+            a.pos += new_base_back_com - sugar_com
+
+        self.compute_as()
 
     def set_base(self, new_base_com):
         atoms = [v for k, v in self.named_atoms.items() if k in self.ring_names]
@@ -195,22 +202,22 @@ class Atom(object):
         # some PDB files have * in place of '
         if "*" in self.name:
             self.name = self.name.replace("*", "'")
-        
+
         self.alternate = pdb_line[16]
         self.residue = pdb_line[17:20].strip()
         self.chain_id = pdb_line[21:22].strip()
         self.residue_idx = int(pdb_line[22:26])
         self.pos = np.array([float(pdb_line[30:38]), float(pdb_line[38:46]), float(pdb_line[46:54])])
-        
+
     def is_hydrogen(self):
         return "H" in self.name
 
     def shift(self, diff):
         self.pos += diff
 
-    def to_pdb(self, chain_identifier, residue_serial, residue_suffix):
+    def to_pdb(self, chain_identifier, residue_serial, residue_suffix, bfactor):
         residue = self.residue + residue_suffix
-        res = "{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}          {:>2s}{:2s}".format("ATOM", Atom.serial_atom, self.name, " ", residue, chain_identifier, residue_serial, " ", self.pos[0], self.pos[1], self.pos[2], 1.00, 0.00, " ", " ", " ")
+        res = "{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}          {:>2s}{:2s}".format("ATOM", Atom.serial_atom, self.name, " ", residue, chain_identifier, residue_serial, " ", self.pos[0], self.pos[1], self.pos[2], 1.00, bfactor, " ", " ", " ")
         Atom.serial_atom += 1
         if Atom.serial_atom > 99999:
             Atom.serial_atom = 1

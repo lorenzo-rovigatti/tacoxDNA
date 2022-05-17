@@ -37,6 +37,18 @@ CM_CENTER_DS = POS_BASE + 0.2
 FENE_R0_OXDNA = 0.7525
 FENE_EPS = 2.0
 
+POS_MM_BACK1 = -0.3400
+POS_MM_BACK2 = 0.3408
+
+# may come in handy later
+RNA = False
+RNA_POS_BACK_a1 = -0.4
+RNA_POS_BACK_a3 = 0.2
+RNA_POS_BACK_a2 = 0.0
+
+LENGTH_FACT = 8.518
+BASE_BASE = 0.3897628551303122
+
 LENGTH_FACT = 8.518
 BASE_BASE = 0.3897628551303122
 
@@ -53,12 +65,8 @@ INT_EXC_NONBONDED = 3
 
 H_CUTOFF = -0.1
 
-GROOVE_ENV_VAR = "OXDNA_GROOVE"
-if os.environ.get(GROOVE_ENV_VAR) == '1':
-    MM_GROOVING = True
-else:
-    MM_GROOVING = False
-
+NOGROOVE_ENV_VAR = "OXDNA_NOGROOVE"
+MM_GROOVING = os.environ.get(NOGROOVE_ENV_VAR) == '1'
 
 # static class
 class Logger(object):
@@ -170,7 +178,12 @@ class Nucleotide():
         Returns the position of the backbone centroid
         Note that cm_pos is the centrod of the backbone and base.
         """
-        return self.cm_pos + self._a1 * POS_BACK
+        if MM_GROOVING:
+            return self.cm_pos + self._a1 * POS_MM_BACK1 + self._a2 * POS_MM_BACK2
+        elif RNA:
+            return self.cm_pos + self._a1 * RNA_POS_BACK_a1 + self._a2 * RNA_POS_BACK_a2 + self._a3 * RNA_POS_BACK_a3
+        else:
+            return self.cm_pos + self._a1 * POS_BACK
 
     pos_back = property(get_pos_back)
 
