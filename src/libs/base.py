@@ -9,6 +9,7 @@ import sys
 import numpy as np
 import os
 
+
 def partition(s, d):
     if d in s:
         sp = s.split(d, 1)
@@ -17,11 +18,11 @@ def partition(s, d):
         return s, "", ""
 
 
-number_to_base = {0 : 'A', 1 : 'G', 2 : 'C', 3 : 'T'}
+number_to_base = {0: 'A', 1: 'G', 2: 'C', 3: 'T'}
 
-base_to_number = {'A' : 0, 'a' : 0, 'G' : 1, 'g' : 1,
-                  'C' : 2, 'c' : 2, 'T' : 3, 't' : 3,
-                  'U' : 3, 'u' : 3, 'D' : 4}
+base_to_number = {'A': 0, 'a': 0, 'G': 1, 'g': 1,
+                  'C': 2, 'c': 2, 'T': 3, 't': 3,
+                  'U': 3, 'u': 3, 'D': 4}
 
 try:
     FLT_EPSILON = np.finfo(np.float).eps
@@ -122,12 +123,13 @@ class Nucleotide():
     """
     index = 0
 
-    def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1,pair=None, cluster=None,color=None):
+    def __init__(self, cm_pos, a1, a3, base, btype=None, v=np.array([0., 0., 0.]), L=np.array([0., 0., 0.]), n3=-1, pair=None, cluster=None, color=None):
         self.index = Nucleotide.index
         Nucleotide.index += 1
         self.cm_pos = np.array(cm_pos)
         self._a1 = np.array(a1)
         self._a3 = np.array(a3)
+        self._original_base = base
         # base should be an integer
         if isinstance(base, int) or isinstance(base, np.integer):
             pass
@@ -170,16 +172,16 @@ class Nucleotide():
         """
         return self.cm_pos + self._a1 * POS_BACK
 
-    pos_back = property (get_pos_back)
+    pos_back = property(get_pos_back)
 
-    def get_pos_back_rel (self):
+    def get_pos_back_rel(self):
         """
         Returns the position of the backbone centroid relative to the centre of mass
         i.e. it will be a vector pointing from the c.o.m. to the backbone
         """
         return self.get_pos_back() - self.cm_pos
 
-    def get_a2 (self):
+    def get_a2(self):
         return np.cross (self._a3, self._a1)
 
     _a2 = property (get_a2)
@@ -204,7 +206,7 @@ class Nucleotide():
         self._a1 = np.dot(R, self._a1)
         self._a3 = np.dot(R, self._a3)
 
-    def distance (self, other, PBC=True, box=None):
+    def distance(self, other, PBC=True, box=None):
         if PBC and box is None:
             if not (isinstance (box, np.ndarray) and len(box) == 3):
                 Logger.die ("distance between nucleotides: if PBC is True, box must be a numpy array of length 3");
@@ -212,6 +214,9 @@ class Nucleotide():
         if PBC:
             dr -= box * np.rint (dr / box)
         return dr
+    
+    def is_uracil(self):
+        return isinstance(self._original_base, str) and self._original_base.lower() == "u"
 
     def get_base(self):
         """
@@ -234,6 +239,9 @@ class Nucleotide():
         >>> Nucleotide(v1, v2, v3, -97).get_base()
         '-97'
         """
+        if self.is_uracil():
+            return "U"
+        
         if type(self._base) is not int:
             try:
                 number_to_base[self._base]
@@ -311,7 +319,7 @@ class Strand():
         for n in self._nucleotides: 
             n.rotate(R, origin)
 
-    def append (self, other):
+    def append(self, other):
         if not isinstance (other, Strand):
             raise ValueError
 
@@ -442,12 +450,12 @@ class Strand():
     def is_circular(self):
         return self._circular
 
-    def cut_in_two(self, copy=True): # cuts a strand into two strands in the middle
+    def cut_in_two(self, copy=True):  # cuts a strand into two strands in the middle
         fragment_one = Strand()
         fragment_two = Strand()
         counter = 0
         for n in self._nucleotides:
-            if counter < (len(self._nucleotides)/2):
+            if counter < (len(self._nucleotides) / 2):
                 fragment_one.add_nucleotide(n.copy() if copy else n)
             else:
                 fragment_two.add_nucleotide(n.copy() if copy else n)
@@ -576,7 +584,7 @@ class System(object):
         return ret
 
     def get_visibility(self, arg=None):
-        actions = {'vis' : True, 'inv' : False}
+        actions = {'vis': True, 'inv': False}
         visibility_list = [True, ] * self._N_strands
 
         if isinstance (arg, str):
@@ -781,20 +789,20 @@ class System(object):
                     if i == 0:
                         n5 = s._nucleotides[-1].index
                     else:
-                        n5 = s._nucleotides[i-1].index
-                    if i == len(s._nucleotides)-1:
+                        n5 = s._nucleotides[i - 1].index
+                    if i == len(s._nucleotides) - 1:
                         n3 = s._nucleotides[0].index
                     else:
-                        n3 = s._nucleotides[i+1].index
+                        n3 = s._nucleotides[i + 1].index
                 else:
                     if i == 0:
                         n5 = -1
                     else:
-                        n5 = s._nucleotides[i-1].index
-                    if i == len(s._nucleotides)-1:
+                        n5 = s._nucleotides[i - 1].index
+                    if i == len(s._nucleotides) - 1:
                         n3 = -1
                     else:
-                        n3 = s._nucleotides[i+1].index
+                        n3 = s._nucleotides[i + 1].index
                 nucleotide = {
                     'id': n.index,
                     'type': n.get_base(),
@@ -818,7 +826,6 @@ class System(object):
 
         with open(name, "w") as f:
             f.write(json.dumps(out))
-
 
     N = property(get_N_Nucleotides)
     N_strands = property (get_N_strands)
