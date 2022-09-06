@@ -23,6 +23,7 @@ The sections that follow introduce the tools and their usage.
 * [Tiamat-to-oxDNA converter](#tiamat-to-oxdna-converter)
 * [vHelix-to-oxDNA converter](#vhelix-to-oxdna-converter)
 * [rpoly-to-oxDNA converter](#rpoly-to-oxdna-converter)
+* [scadnano-to-oxDNA converter](#scadnano-to-oxdna-converter)
 
 ---
 
@@ -244,6 +245,17 @@ print a `.oxview` file that can be opened and edited in [oxView](https://sulcgro
 ### Output
 * An oxDNA topology file (named by suffixing the rpoly file with ".top")
 * An oxDNA configuration file (named by suffixing the rpoly file with ".oxdna")
+
+## scadnano-to-oxDNA converter
+
+The `scadnano_oxDNA.py` script converts [scadnano](https://github.com/UC-Davis-molecular-computing/scadnano) designs to oxDNA configurations.
+
+### Mandatory arguments
+* The input scadnano design file
+
+### Output
+* An oxDNA topology file (named by suffixing the scadnano file with ".top")
+* An oxDNA configuration file (named by suffixing the scadnano file with ".oxdna")
 
 ---
 
