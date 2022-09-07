@@ -49,8 +49,7 @@ class Base:
         cm = self.cm_pos
         a1 = self.a1
         a3 = self.a3
-        # s = '%6f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f 0. 0. 0. 0. 0. 0.' % (cm[0],cm[1],cm[2],a1[0],a1[1],a1[2],a3[0],a3[1],a3[2])
-        s = '%f %f %f %f %f %f %f %f %f 0. 0. 0. 0. 0. 0.' % (
+        s = '%f %f %f %f %f %f %f %f %f 0.0 0.0 0.0 0.0 0.0 0.0' % (
             cm[0], cm[1], cm[2], a1[0], a1[1], a1[2], a3[0], a3[1], a3[2])
 
         return s
@@ -199,11 +198,10 @@ def write_conf(bases, fname, box):
     for i, b in list(bases.items()):
         ox_bases[b.oxid] = b
 
-    # print 'mame', len(bases.keys()), len(ox_bases.keys())
-
     for i in range(max(ox_bases.keys()) + 1):
         handle.write(ox_bases[i].pos_str() + '\n')
 
+    handle.close()
 
 def write_force(bases, pairs, fname):
     handle = open(fname, 'w')
