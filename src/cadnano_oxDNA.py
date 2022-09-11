@@ -1057,7 +1057,7 @@ if __name__ == '__main__':
         exit(1)
 
     if print_virt2nuc:
-        with open("virt2nuc", "w") as fout:
+        with open("virt2nuc", "wb") as fout:
             pickle.dump((vh_vb2nuc_rev, vhelix_pattern), fout)
             print("## Wrote nucleotides' index conversion data to virt2nuc", file=sys.stderr)
 
