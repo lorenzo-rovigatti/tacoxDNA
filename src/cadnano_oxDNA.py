@@ -659,7 +659,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 3:
         print_usage()
         
-    shortArgs = 'q:b:e:p:o'
+    shortArgs = 'q:b:e:po'
     longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc', 'print-oxview']
     
     side = False
