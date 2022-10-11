@@ -87,7 +87,9 @@ def get_5primes(bases):
 
 def get_circular_strands(bases, already_included, start_id, loc):
     cs = [b for b in bases if not b['id'] in already_included]
-    bases_by_id = {base['id'] : base for base in bases}
+    bases_by_id = {}
+    for base in bases:
+        bases_by_id[base['id']] = base
     idx = start_id
     strands = []
     local_id = loc
@@ -120,7 +122,9 @@ def locate_base_on_strands(strands, global_id):
 # creates a list of all strands in the respective tiamat file 
 def split_bases_to_strands(bases):
     # lookup bases by id 
-    bases_by_id = {base['id'] : base for base in bases}
+    bases_by_id = {}
+    for base in bases:
+        bases_by_id[base['id']] = base
     strands = []
     local_id = 0 
     # for #5'
