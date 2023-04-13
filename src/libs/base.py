@@ -139,7 +139,7 @@ class Nucleotide():
         self._a3 = np.array(a3)
         self._original_base = base
         # base should be an integer
-        if isinstance(base, int) or isinstance(base, np.integer):
+        if isinstance(base, int) or isinstance(base, np.int_):
             pass
         else:
             try:
@@ -518,7 +518,7 @@ class System(object):
         self._N_strands = 0
         self._strands = []
         self._nucleotide_to_strand = []
-        self._N_cells = np.array(np.floor (self._box / 3.), np.int)
+        self._N_cells = np.array(np.floor (self._box / 3.), np.int_)
         for kk in [0, 1, 2]:
             if self._N_cells[kk] > 100:
                 self._N_cells[kk] = 100
@@ -651,7 +651,7 @@ class System(object):
         return
 
     def do_cells (self):
-        self._N_cells = np.array(np.floor (self._box / 3.), np.int)
+        self._N_cells = np.array(np.floor (self._box / 3.), np.int_)
         for kk in [0, 1, 2]:
             if self._N_cells[kk] > 100:
                 self._N_cells[kk] = 100
@@ -660,7 +660,7 @@ class System(object):
             n.next = -1
         self._head = [False, ] * int(self._N_cells[0] * self._N_cells[1] * self._N_cells[2])
         for n in self._nucleotides:
-            cs = np.array((np.floor((n.cm_pos / self._box - np.rint(n.cm_pos / self._box) + 0.5) * (1. - FLT_EPSILON) * self._box / self._cellsides)), np.int)
+            cs = np.array((np.floor((n.cm_pos / self._box - np.rint(n.cm_pos / self._box) + 0.5) * (1. - FLT_EPSILON) * self._box / self._cellsides)), np.int_)
             cella = cs[0] + self._N_cells[0] * cs[1] + self._N_cells[0] * self._N_cells[1] * cs[2]
             n.next = self._head[cella]
             self._head[cella] = n
@@ -676,7 +676,7 @@ class System(object):
         # configurations; interactions are computed with h_bonds.py
         # most of the time anyways
         for n in s._nucleotides:
-            cs = np.array((np.floor((n.cm_pos/self._box - np.rint(n.cm_pos / self._box ) + 0.5) * (1. - FLT_EPSILON) * self._box / self._cellsides)), np.int)
+            cs = np.array((np.floor((n.cm_pos/self._box - np.rint(n.cm_pos / self._box ) + 0.5) * (1. - FLT_EPSILON) * self._box / self._cellsides)), np.int_)
             cella = cs[0] + self._N_cells[0] * cs[1] + self._N_cells[0] * self._N_cells[1] * cs[2]
             n.next = self._head[cella]
             self._head[cella] = n

@@ -109,7 +109,7 @@ class Lammps_parser(object):
                     
                     
         N = len(bonds)
-        strands = np.arange(0, N, 1, dtype=np.int)
+        strands = np.arange(0, N, 1, dtype=np.int_)
         
         for i in range(N):
             flip_neighs(bonds, strands, i)
