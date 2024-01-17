@@ -648,14 +648,13 @@ def parse_cadnano(path):
     return cadsys
 
 
-if __name__ == '__main__':
-    
-    def print_usage():
-        print("USAGE:", file=sys.stderr)
-        print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
-        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
-        exit(1)
-        
+def print_usage():
+    print("USAGE:", file=sys.stderr)
+    print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
+    print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
+    exit(1)
+
+def read_commandLine_input(*args):
     if len(sys.argv) < 3:
         print_usage()
         
@@ -668,6 +667,8 @@ if __name__ == '__main__':
     print_oxview = False
     source_file = sys.argv[1]
     
+    np_seed = None
+
     origami_sq = False
     origami_he = False
     if sys.argv[2] == "sq":
@@ -688,7 +689,8 @@ if __name__ == '__main__':
                 side = float(k[1])
                 base.Logger.log("The system will be put in a box of side %s (in oxDNA simulation units)" % str(side), base.Logger.INFO)
             elif k[0] == '-e' or k[0] == "--seed": 
-                np.random.seed(int(k[1]))
+                np_seed = int(k[1])
+                np.random.seed(np_seed)
             elif k[0] == '-p' or k[0] == "--print-virt2nuc":
                 print_virt2nuc = True
             elif k[0] == '-o' or k[0] == "--print-oxview":
@@ -698,6 +700,9 @@ if __name__ == '__main__':
     except Exception:
         print_usage()
 
+    return source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview
+
+def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=False, side=False, np_seed=None, print_virt2nuc=False, print_oxview=False):
     vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
     vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
 
@@ -1130,4 +1135,9 @@ if __name__ == '__main__':
     
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
-    
+
+def main():
+    source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = read_commandLine_input()
+    convert(source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview)
+
+main()
