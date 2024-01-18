@@ -5,9 +5,9 @@ import numpy as np
 import numpy.linalg as la
 import sys
 import os
-from libs import topology as top
-from libs import base
-from libs import utils
+from .libs import topology as top
+from .libs import base
+from .libs import utils
 
 	
 class Options(object):

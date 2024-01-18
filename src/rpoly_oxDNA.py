@@ -3,10 +3,10 @@
 import sys
 import re
 import os
-from libs.pyquaternion import Quaternion
+from .libs.pyquaternion import Quaternion
 import numpy as np
-from libs import cadnano_utils as cu
-from libs import base
+from .libs import cadnano_utils as cu
+from .libs import base
 
 
 class Options(object):

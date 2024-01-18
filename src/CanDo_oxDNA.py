@@ -4,7 +4,7 @@
 import sys
 import numpy as np
 
-from libs.readers import LorenzoReader
+from .libs.readers import LorenzoReader
 
 BASE_SHIFT = 1.13
 COM_SHIFT = 0.54

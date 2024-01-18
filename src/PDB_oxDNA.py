@@ -5,8 +5,8 @@ import os
 import itertools
 import numpy as np
 
-from libs.pdb import Atom, Nucleotide, FROM_ANGSTROM_TO_OXDNA
-from libs import base
+from .libs.pdb import Atom, Nucleotide, FROM_ANGSTROM_TO_OXDNA
+from .libs import base
 
 def print_usage():
     print("USAGE:", file=sys.stderr)

@@ -2,9 +2,9 @@
 
 import numpy as np
 import sys, os
-from libs import base
-from libs import reader_lammps_init 
-from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
+from .libs import base
+from .libs import reader_lammps_init 
+from .libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
 
 def quat_to_exyz(myquat):

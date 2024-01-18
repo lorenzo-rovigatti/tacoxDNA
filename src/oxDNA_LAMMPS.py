@@ -2,8 +2,8 @@
 
 import numpy as np
 import sys
-from libs.readers import LorenzoReader
-from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
+from .libs.readers import LorenzoReader
+from .libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
 def exyz_to_quat(mya1, mya3):
     mya2 = np.cross(mya3, mya1)

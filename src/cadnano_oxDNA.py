@@ -2,9 +2,9 @@
 
 import sys
 import numpy as np
-from libs import base
-from libs import utils
-from libs import cadnano_utils as cu
+from .libs import base
+from .libs import utils
+from .libs import cadnano_utils as cu
 import re
 import os
 import pickle
@@ -1140,4 +1140,6 @@ def main():
     source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = read_commandLine_input()
     convert(source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview)
 
-main()
+
+if __name__ == '__main__':
+    main()

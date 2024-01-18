@@ -7,10 +7,10 @@ import copy
 from math import sqrt, sin
 from collections import defaultdict
 
-from libs.pdb import Atom, Nucleotide, FROM_OXDNA_TO_ANGSTROM
-from libs import base
-from libs import utils
-from libs.readers import LorenzoReader
+from .libs.pdb import Atom, Nucleotide, FROM_OXDNA_TO_ANGSTROM
+from .libs import base
+from .libs import utils
+from .libs.readers import LorenzoReader
 
 DD12_PDB_PATH = "dd12_na.pdb"
 
