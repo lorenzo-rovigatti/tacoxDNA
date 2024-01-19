@@ -13,7 +13,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python3 ../../src/Tiamat_oxDNA.py --molecule=DNA --tiamat-version=2 input.dnajson
+python3 ../../src/tacoxDNA/Tiamat_oxDNA.py --molecule=DNA --tiamat-version=2 input.dnajson
 ($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

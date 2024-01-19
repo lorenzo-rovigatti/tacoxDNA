@@ -13,7 +13,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python3 ../../src/rpoly_oxDNA.py -e 123456 input.rpoly
+python3 ../../src/tacoxDNA/rpoly_oxDNA.py -e 123456 input.rpoly
 ($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

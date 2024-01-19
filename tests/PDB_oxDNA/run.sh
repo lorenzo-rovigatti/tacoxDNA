@@ -13,7 +13,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python3 ../../src/PDB_oxDNA.py input.pdb 53
+python3 ../../src/tacoxDNA/PDB_oxDNA.py input.pdb 53
 ($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

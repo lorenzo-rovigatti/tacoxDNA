@@ -13,7 +13,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python3 ../../src/cadnano_oxDNA.py init.json sq --seed 123456
+python3 ../../src/tacoxDNA/cadnano_oxDNA.py init.json sq --seed 123456
 ($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null) && (diff $CORRECT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

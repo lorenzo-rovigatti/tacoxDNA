@@ -10,7 +10,7 @@ then
 fi
 
 rm $OUTPUT 2> /dev/null
-python3 ../../src/oxDNA_PDB.py ds.top ds.dat 53
+python3 ../../src/tacoxDNA/oxDNA_PDB.py ds.top ds.dat 53
 diff_lines=$(diff $CORRECT_OUTPUT $OUTPUT)
 
 if [ $? -ne 0 ]

@@ -13,7 +13,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python3 ../../src/XYZ_oxDNA.py centerline.dat -p 0.05 -q sequence.dat --dsDNA --closed
+python3 ../../src/tacoxDNA/XYZ_oxDNA.py centerline.dat -p 0.05 -q sequence.dat --dsDNA --closed
 ($CONF_DIFF_BIN $CORRECT_OUTPUT_CONF $OUTPUT_CONF > /dev/null) && (diff $CORRECT_OUTPUT_TOP $OUTPUT_TOP > /dev/null)
 
 if [ $? -ne 0 ]

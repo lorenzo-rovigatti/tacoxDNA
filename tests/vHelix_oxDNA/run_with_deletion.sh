@@ -14,7 +14,7 @@ then
 fi
 
 rm $OUTPUT_CONF $OUTPUT_TOP 2> /dev/null
-python3 ../../src/vHelix_oxDNA.py -e 12345 $INPUT
+python3 ../../src/tacoxDNA/vHelix_oxDNA.py -e 12345 $INPUT
 # we don't check the topology in this case
 ($CONF_DIFF_BIN $CORRECT_OUTPUT $OUTPUT_CONF > /dev/null)
 
