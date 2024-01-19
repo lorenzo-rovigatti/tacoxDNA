@@ -1066,7 +1066,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
             pickle.dump((vh_vb2nuc_rev, vhelix_pattern), fout)
             print("## Wrote nucleotides' index conversion data to virt2nuc", file=sys.stderr)
 
-    basename = os.path.basename(sys.argv[1])
+    basename = os.path.basename(source_file)
     topology_file = basename + ".top"
     configuration_file = basename + ".oxdna"
 
