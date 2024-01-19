@@ -4,3 +4,4 @@ __pycache__/
 *$py.class
 .DS_Store
 log.dat
+build/
