@@ -1,0 +1,8 @@
+include README.md
+include CHANGELOG
+include LICENSE
+include setup.cfg
+include pyproject.toml
+include MANIFEST.in
+include logo.png
+include requirements.txt
