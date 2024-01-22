@@ -702,7 +702,7 @@ def read_commandLine_input(*args):
 
     return source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview
 
-def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=False, side=False, np_seed=None, print_virt2nuc=False, print_oxview=False):
+def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=False, side=False, np_seed=None, print_virt2nuc=False, print_oxview=False, out_path=''):
     vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
     vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
 
@@ -1131,14 +1131,14 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
         # Print the oxview output
         rev_sys.print_oxview_output(basename+'.oxview')
 
-    rev_sys.print_lorenzo_output(configuration_file, topology_file)
+    rev_sys.print_lorenzo_output(out_path+configuration_file, out_path+topology_file)
     
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
 
 def main():
     source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = read_commandLine_input()
-    convert(source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview)
+    convert(source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview, out_path)
 
 
 if __name__ == '__main__':
