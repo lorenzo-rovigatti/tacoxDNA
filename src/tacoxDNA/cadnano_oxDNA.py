@@ -306,7 +306,7 @@ def build_nodes(vh):
     return nodes
 
 
-def generate_vhelices_origami_sq(vhelix_direction, vhelix_perp, h, sequence_file, single_strand_system, vhelix_counter):
+def generate_vhelices_origami_sq(vhelix_direction, vhelix_perp, h):
     g = cu.StrandGenerator()
     # generate helix angles
     helix_angles = np.zeros(h.len - 1, dtype=float)
@@ -383,7 +383,7 @@ def generate_vhelices_origami_sq(vhelix_direction, vhelix_perp, h, sequence_file
     return (strands[0], strands[1]), helix_angles, pos, rot, direction, perp
 
 
-def generate_vhelices_origami_he(vhelix_direction, vhelix_perp, h, sequence_file, single_strand_system, vhelix_counter):
+def generate_vhelices_origami_he(vhelix_direction, vhelix_perp, h):
     g = cu.StrandGenerator()
     # generate helix angles
     helix_angles = np.zeros(h.len - 1, dtype=float)
@@ -619,11 +619,12 @@ class square(object):
 def parse_cadnano(path):
     import json
     
-    cadsys = vstrands()
     
     try:
         with open(path) as json_data:
             cadnano = json.load(json_data)
+
+            cadsys = vstrands()
             for vstrand in cadnano["vstrands"]:
                 vh = vhelix()
                 for key, val in list(vstrand.items()):
@@ -648,13 +649,49 @@ def parse_cadnano(path):
     return cadsys
 
 
+def parse_jsonobject(jsonobject):
+    
+    try: 
+        cadsys = vstrands()    
+        for vstrand in jsonobject["vstrands"]:
+            vh = vhelix()
+            for key, val in list(vstrand.items()):
+                if key == "skip":
+                    vh.skip = [abs(int(x)) for x in val]
+                else:
+                    setattr(vh, key, val)
+            vh.stap = [square(*i) for i in vh.stap]
+            vh.scaf = [square(*i) for i in vh.scaf]
+            vh.skiploop_bases = len(vh.skip) + sum(vh.loop) - sum(vh.skip)
+            cadsys.add_vhelix(vh)
+    except ValueError:
+        print("Invalid json '" + jsonobject + "', aborting", file=sys.stderr)
+        sys.exit(1)
+    except:
+        print("Caught an error while converting '" + jsonobject + "', aborting", file=sys.stderr)
+        sys.exit(1)
+        
+    return cadsys
+
+
 def print_usage():
     print("USAGE:", file=sys.stderr)
     print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
     print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
     exit(1)
 
-def read_commandLine_input(*args):
+def randomSequenceGenerator (cadsys):
+    base.Logger.log("No sequence file given, using random sequence", base.Logger.INFO)
+    sequences = []
+    for vhelix in (cadsys.vhelices):
+        seq = []
+        for _ in range(vhelix.skiploop_bases):
+            seq.append(np.random.randint(0, 4))
+        sequences.append(seq)
+    
+    return sequences
+
+def readingCli(*args):
     if len(sys.argv) < 3:
         print_usage()
         
@@ -702,18 +739,13 @@ def read_commandLine_input(*args):
 
     return source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview
 
-def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=False, side=False, np_seed=None, print_virt2nuc=False, print_oxview=False, out_path=''):
-    vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
-    vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
-
+def parsingCli(source_file, sequence_filename):
     cadsys = parse_cadnano(source_file)
     base.Logger.log("Using json file %s" % source_file, base.Logger.INFO)
 
     # define sequences by vhelix
     sequence_file = 0
-    single_strand_system = False
     sequences = []
-    block_seq = True
     if sequence_filename:
         sequence_file = open(sequence_filename, "r")
         base.Logger.log("Using sequence file '%s'" % sequence_filename, base.Logger.INFO)
@@ -733,18 +765,28 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         sys.exit()
             sequences.append(seq)
     else:
-        base.Logger.log("No sequence file given, using random sequence", base.Logger.INFO)
-        for ii in range(len(cadsys.vhelices)):
-            seq = []
-            for _ in range(cadsys.vhelices[ii].skiploop_bases):
-                seq.append(np.random.randint(0, 4))
-            sequences.append(seq)
+        sequences = randomSequenceGenerator(cadsys)
 
-    # check whether we're dealing with a 1 strand system (i.e. NOT double helix) across many vhelices and defined with 1 .sqs line
-    if len(sequences) == 1 and len(cadsys.vhelices) > 1:
+    return cadsys, sequences
+
+def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False, out_path=''):
+    print(input_sequences)
+    
+    vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
+    vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
+
+    sequences = randomSequenceGenerator(cadsys) if input_sequences is None else input_sequences
+    
+    for seq in sequences:
+        print(len(seq),seq)
+
+    is_1strand_in_multiple_vhelixes_special_case = len(sequences) == 1 and len(cadsys.vhelices) > 1
+    # 1strand_in_multiple_vhelixes_special_case: 1 strand system (i.e. NOT double helix) across many vhelices and defined with 1 .sqs line
+    if is_1strand_in_multiple_vhelixes_special_case:
         base.Logger.log("One line detected in the sequence file. Since the cadnano file contains more than 1 virtual helix, the sequence found will be used as we were dealing with a single-strand system", base.Logger.INFO)
         single_strand_system = True
-        block_seq = False
+    else:
+        single_strand_system = False
 
     vhelix_counter = 0
     if not side:
@@ -770,9 +812,9 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
     for h in cadsys.vhelices:
         h.cad_index = vhelix_counter
         if origami_sq:
-            strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_sq(vhelix_direction_initial, vhelix_perp_initial, h, sequence_file, single_strand_system, vhelix_counter)
+            strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_sq(vhelix_direction_initial, vhelix_perp_initial, h)
         elif origami_he:
-            strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_he(vhelix_direction_initial, vhelix_perp_initial, h, sequence_file, single_strand_system, vhelix_counter)
+            strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_he(vhelix_direction=vhelix_direction_initial, vhelix_perp=vhelix_perp_initial, h=h)
 
         nodes = build_nodes(h)
         
@@ -787,7 +829,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     begin_helix = i
                     if h.num % 2 == 1:
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 2)
                 else:
                     base.Logger.log("unexpected square array", base.Logger.WARNING)
@@ -797,7 +839,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     end_helix = i
                     if h.num % 2 == 0:
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 2)
                 elif s.V_1 == h.num and abs(s.b_1 - i) == 1:
                     pass
@@ -806,7 +848,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     end_helix = i
                     if h.num % 2 == 0 :
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 2)
 
                     if h.num % 2 == 1:
@@ -830,7 +872,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     begin_helix = i
                     if h.num % 2 == 1:
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 0, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 2)
 
                     for j in range(len(partner_list_scaf)):
@@ -864,7 +906,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     begin_helix = i
                     if h.num % 2 == 0:
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 3)
                 else:
                     base.Logger.log("unexpected square array", base.Logger.WARNING)
@@ -874,7 +916,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     end_helix = i
                     if h.num % 2 == 1:
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 3)
 
                 elif s.V_1 == h.num and abs(s.b_1 - i) == 1:
@@ -884,7 +926,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     end_helix = i
                     if h.num % 2 == 1:
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 3)
 
                     if h.num % 2 == 0:
@@ -908,7 +950,7 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                         strand_number += 1
                     begin_helix = i
                     if h.num % 2 == 0:
-                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, block_seq, sequences)
+                        slice_sys = add_slice(slice_sys, h, begin_helix, end_helix, nodes, strands, pos, vhelix_direction, vhelix_perp, rot, helix_angles, 1, not single_strand_system, sequences)
                         vh_vb2nuc = add_slice_nupack(h, strand_number, begin_helix, end_helix, vh_vb2nuc, 3)
 
                     for j in range(len(partner_list_stap)):
@@ -1002,13 +1044,12 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
                 vh_vb2nuc_final.add_strand(join[k], vh_vb2nuc, continue_join=True)
             vh_vb2nuc_final.add_strand(join[k + 1], vh_vb2nuc, continue_join=False)
                 
-            if single_strand_system == 1:
+            if single_strand_system:
                 final_sys._strands[0].set_sequence(sequences[0])
     
-    if sequence_file and single_strand_system:
-        if len(final_sys._strands) > 1:
-            base.Logger.log("more than one strand detected - sequence file will not be read", base.Logger.WARNING)
-            final_sys._strands[0].set_sequence(np.random.randint(0, 4, len(final_sys._strands[0]._nucleotides)))  # this line does not work
+    if input_sequences is not None and single_strand_system and len(final_sys._strands) > 1:
+        base.Logger.log("more than one strand detected - sequence file will not be read", base.Logger.WARNING)
+        final_sys._strands[0].set_sequence(np.random.randint(0, 4, len(final_sys._strands[0]._nucleotides)))  # this line does not work
 
     # Fix to reverse the direction of every strand so that the 3' to 5' direction is the same
     # as in Cadnano. In cadnano the strands point in the 5' to 3' direction, whereas in oxDNA
@@ -1137,8 +1178,10 @@ def convert(source_file, origami_he=False, origami_sq=False, sequence_filename=F
     print("## DONE", file=sys.stderr)
 
 def main():
-    source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = read_commandLine_input()
-    convert(source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview, out_path)
+    out_path = ''
+    source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = readingCli()
+    cadsys, sequences = parsingCli(source_file, sequence_filename)
+    convert(source_file, cadsys, origami_he, origami_sq, sequences, side, np_seed, print_virt2nuc, print_oxview, out_path)
 
 
 if __name__ == '__main__':
