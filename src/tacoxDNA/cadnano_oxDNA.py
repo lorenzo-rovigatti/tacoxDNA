@@ -769,16 +769,11 @@ def parsingCli(source_file, sequence_filename):
 
     return cadsys, sequences
 
-def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False):
-    print(input_sequences)
-    
+def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False):    
     vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
     vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
 
     sequences = randomSequenceGenerator(cadsys) if input_sequences is None else input_sequences
-
-    for seq in sequences:
-        print(len(seq),seq)
 
     is_1strand_in_multiple_vhelixes_special_case = len(sequences) == 1 and len(cadsys.vhelices) > 1
     # 1strand_in_multiple_vhelixes_special_case: 1 strand system (i.e. NOT double helix) across many vhelices and defined with 1 .sqs line
