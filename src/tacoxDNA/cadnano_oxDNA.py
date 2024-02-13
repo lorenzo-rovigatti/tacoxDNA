@@ -769,14 +769,14 @@ def parsingCli(source_file, sequence_filename):
 
     return cadsys, sequences
 
-def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False, out_path=''):
+def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False):
     print(input_sequences)
     
     vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
     vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
 
     sequences = randomSequenceGenerator(cadsys) if input_sequences is None else input_sequences
-    
+
     for seq in sequences:
         print(len(seq),seq)
 
@@ -1107,7 +1107,7 @@ def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_seque
             pickle.dump((vh_vb2nuc_rev, vhelix_pattern), fout)
             print("## Wrote nucleotides' index conversion data to virt2nuc", file=sys.stderr)
 
-    basename = os.path.basename(source_file)
+    basename = os.path.abspath(source_file)
     topology_file = basename + ".top"
     configuration_file = basename + ".oxdna"
 
@@ -1172,16 +1172,15 @@ def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_seque
         # Print the oxview output
         rev_sys.print_oxview_output(basename+'.oxview')
 
-    rev_sys.print_lorenzo_output(out_path+configuration_file, out_path+topology_file)
+    rev_sys.print_lorenzo_output(configuration_file, topology_file)
     
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
 
 def main():
-    out_path = ''
     source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = readingCli()
     cadsys, sequences = parsingCli(source_file, sequence_filename)
-    convert(source_file, cadsys, origami_he, origami_sq, sequences, side, np_seed, print_virt2nuc, print_oxview, out_path)
+    convert(source_file, cadsys, origami_he, origami_sq, sequences, side, np_seed, print_virt2nuc, print_oxview)
 
 
 if __name__ == '__main__':
