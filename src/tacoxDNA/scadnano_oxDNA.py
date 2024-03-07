@@ -4,7 +4,7 @@ import scadnano as sc
 import argparse
 import os
     
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description="scadnano -> oxDNA converter")
     parser.add_argument("scadnano_file", help="The scadnano input design")
     
@@ -23,4 +23,8 @@ if __name__ == '__main__':
         
     with open(configuration_file, "w") as f:
         f.write(configuration)
+
+
+if __name__ == '__main__':
+    main()
         

@@ -1,0 +1,12 @@
+[console_scripts]
+CanDo_oxDNA = tacoxDNA.CanDo_oxDNA:main
+LAMMPS_oxDNA = tacoxDNA.LAMMPS_oxDNA:main
+PDB_oxDNA = tacoxDNA.PDB_oxDNA:main
+Tiamat_oxDNA = tacoxDNA.Tiamat_oxDNA:main
+XYZ_oxDNA = tacoxDNA.XYZ_oxDNA:main
+cadnano_oxDNA = tacoxDNA.cadnano_oxDNA:main
+oxDNA_LAMMPS = tacoxDNA.oxDNA_LAMMPS:main
+oxDNA_PDB = tacoxDNA.oxDNA_PDB:main
+rpoly_oxDNA = tacoxDNA.rpoly_oxDNA:main
+scadnano_oxDNA = tacoxDNA.scadnano_oxDNA:main
+vHelix_oxDNA = tacoxDNA.vHelix_oxDNA:main

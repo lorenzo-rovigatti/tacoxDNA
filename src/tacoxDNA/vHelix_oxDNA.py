@@ -516,7 +516,7 @@ def print_usage():
     exit(1)
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) < 2:
         print_usage()
 
@@ -528,3 +528,7 @@ if __name__ == '__main__':
         np.random.seed(opts['seed'])
     
     export_oxDNA(source_file, box_size)
+
+
+if __name__ == '__main__':
+    main()

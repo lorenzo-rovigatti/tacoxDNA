@@ -21,6 +21,7 @@ src/tacoxDNA/vHelix_oxDNA.py
 src/tacoxDNA.egg-info/PKG-INFO
 src/tacoxDNA.egg-info/SOURCES.txt
 src/tacoxDNA.egg-info/dependency_links.txt
+src/tacoxDNA.egg-info/entry_points.txt
 src/tacoxDNA.egg-info/not-zip-safe
 src/tacoxDNA.egg-info/requires.txt
 src/tacoxDNA.egg-info/top_level.txt

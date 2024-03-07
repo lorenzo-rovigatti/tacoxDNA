@@ -47,7 +47,8 @@ def parse_options():
         
     return opts
 
-if __name__ == '__main__':
+
+def main():
     if len(sys.argv) < 3:
         print_usage()
         
@@ -149,3 +150,6 @@ if __name__ == '__main__':
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
     
+
+if __name__ == '__main__':
+    main()

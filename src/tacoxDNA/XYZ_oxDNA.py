@@ -69,7 +69,8 @@ BASE_BASE = 0.3897628551303122
 # distance between the helix centre and the nucleotides' centre of mass
 CM_CENTER_DS = 0.6
 
-if __name__ == '__main__':
+
+def main():
 	opts = parse_options()
 	opts.check()
 	
@@ -243,3 +244,7 @@ if __name__ == '__main__':
 	
 	print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
 	print("## DONE", file=sys.stderr)
+
+
+if __name__ == '__main__':
+	main()

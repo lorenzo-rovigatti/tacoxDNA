@@ -155,7 +155,7 @@ def parse_options():
 	return opts
 
 
-if __name__ == '__main__':
+def main():
 	if len(sys.argv) < 2:
 		print_usage()
 	
@@ -163,3 +163,7 @@ if __name__ == '__main__':
 	if opts.seed is not None:
 		np.random.seed(opts.seed)
 	rpoly_to_oxDNA(opts)
+
+
+if __name__ == '__main__':
+	main()

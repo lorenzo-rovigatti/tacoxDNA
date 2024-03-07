@@ -47,8 +47,7 @@ def exyz_to_quat(mya1, mya3):
 
     return np.array([myquat[0], myquat[1], myquat[2], myquat[3]])
 
-
-if __name__ == '__main__':
+def main():
     if len(sys.argv) < 3:
         print("Usage is %s topology configuration" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
@@ -141,4 +140,8 @@ if __name__ == '__main__':
 
     print("## Wrote data to '%s'" % out_name, file=sys.stderr)
     print("## DONE", file=sys.stderr)
+
+
+if __name__ == '__main__':
+    main()
     

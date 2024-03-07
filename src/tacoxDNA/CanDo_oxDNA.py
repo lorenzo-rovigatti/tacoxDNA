@@ -391,9 +391,7 @@ def parse_options():
         
     return opts
 
-
-
-if __name__ == '__main__':
+def main():
     opts = parse_options()
     
     s = load_and_convert(opts)
@@ -408,3 +406,7 @@ if __name__ == '__main__':
 
     print("## Wrote data to '%s' / '%s'" % (opts['cando_file'] + '.oxdna', opts['cando_file'] + '.top'), file=sys.stderr)
     print("## DONE", file=sys.stderr)
+
+if __name__ == '__main__':
+    main()
+

@@ -34,8 +34,7 @@ def quat_to_exyz(myquat):
 
     return mya1, mya3
 
-
-if __name__ == '__main__':
+def main():
     if len(sys.argv) < 2:
         print("USAGE:", file=sys.stderr)
         print("\t%s lammps_data_file [lammps_trajectory_file]" % sys.argv[0], file=sys.stderr)
@@ -169,3 +168,7 @@ if __name__ == '__main__':
 
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
+
+
+if __name__ == '__main__':
+    main()

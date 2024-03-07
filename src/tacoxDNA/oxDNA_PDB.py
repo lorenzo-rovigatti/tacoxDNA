@@ -87,7 +87,8 @@ def align(full_base, ox_base):
         R = utils.get_rotation_matrix(axis, theta)
         full_base.rotate(R)
 
-if __name__ == '__main__':
+
+def main():
     opts = parse_options()
 
     with open(os.path.join(os.path.dirname(__file__), DD12_PDB_PATH)) as f:
@@ -218,3 +219,7 @@ if __name__ == '__main__':
         print("## Wrote data to '%s'" % out_name, file=sys.stderr)
 
     print("## DONE", file=sys.stderr)
+
+
+if __name__ == '__main__':
+    main()
