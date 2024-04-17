@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
-import sys
-import numpy as np
-from .libs import base
-from .libs import utils
-from .libs import cadnano_utils as cu
-import re
 import os
 import pickle
+import re
+import sys
+
+import numpy as np
+
+from .libs import base
+from .libs import cadnano_utils as cu
+from .libs import utils
 
 DEBUG = 0
 DIST_HEXAGONAL = 2.55  # distance between centres of virtual helices (hexagonal array)
@@ -706,12 +708,10 @@ def readingCli(*args):
     
     np_seed = None
 
-    origami_sq = False
-    origami_he = False
     if sys.argv[2] == "sq":
-        origami_sq = True
+        lattice_type = "sq"
     elif sys.argv[2] == "he":
-        origami_he = True
+        lattice_type = "he"
     else:
         print("Lattice_type should be either 'sq' or 'he'", file=sys.stderr)
         exit(1)
@@ -737,7 +737,7 @@ def readingCli(*args):
     except Exception:
         print_usage()
 
-    return source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview
+    return source_file, lattice_type, sequence_filename, side, np_seed, print_virt2nuc, print_oxview
 
 def parsingCli(source_file, sequence_filename):
     cadsys = parse_cadnano(source_file)
@@ -769,7 +769,7 @@ def parsingCli(source_file, sequence_filename):
 
     return cadsys, sequences
 
-def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False):    
+def cadnano_oxdna(output_file, cadsys, lattice_type, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False):    
     vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
     vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
 
@@ -789,9 +789,9 @@ def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_seque
         base.Logger.log("Using default box size, a factor %s larger than the size of the cadnano system" % str(BOX_FACTOR), base.Logger.INFO)
     vhelix_direction_initial = np.array([0., 0., 1.])
     vhelix_perp_initial = np.array([1., 0., 0.])
-    if origami_sq:
+    if lattice_type == "sq":
         vhelix_perp_initial = vhelix_rotation_origami_sq(vhelix_direction_initial, vhelix_perp_initial)
-    elif origami_he:
+    elif lattice_type == "he":
         vhelix_perp_initial = vhelix_rotation_origami_he(vhelix_direction_initial, vhelix_perp_initial)
 
     slice_sys = base.System([side, side, side])
@@ -806,10 +806,13 @@ def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_seque
     end_helix = -1
     for h in cadsys.vhelices:
         h.cad_index = vhelix_counter
-        if origami_sq:
+        if lattice_type == "sq":
             strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_sq(vhelix_direction_initial, vhelix_perp_initial, h)
-        elif origami_he:
+        elif lattice_type == "he":
             strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_he(vhelix_direction=vhelix_direction_initial, vhelix_perp=vhelix_perp_initial, h=h)
+        else:
+            print("Unknown lattice type!\n")
+            exit(1)
 
         nodes = build_nodes(h)
         
@@ -1102,9 +1105,8 @@ def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_seque
             pickle.dump((vh_vb2nuc_rev, vhelix_pattern), fout)
             print("## Wrote nucleotides' index conversion data to virt2nuc", file=sys.stderr)
 
-    basename = os.path.abspath(source_file)
-    topology_file = basename + ".top"
-    configuration_file = basename + ".oxdna"
+    topology_file = output_file + ".top"
+    configuration_file = output_file + ".oxdna"
 
     if print_oxview:
         # Find colors
@@ -1165,7 +1167,7 @@ def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_seque
                     break
 
         # Print the oxview output
-        rev_sys.print_oxview_output(basename+'.oxview')
+        rev_sys.print_oxview_output(output_file+'.oxview')
 
     rev_sys.print_lorenzo_output(configuration_file, topology_file)
     
@@ -1173,9 +1175,10 @@ def convert(source_file, cadsys, origami_he=False, origami_sq=False, input_seque
     print("## DONE", file=sys.stderr)
 
 def main():
-    source_file, origami_he, origami_sq, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = readingCli()
+    source_file, lattice_type, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = readingCli()
+    output_file = os.path.abspath(source_file)
     cadsys, sequences = parsingCli(source_file, sequence_filename)
-    convert(source_file, cadsys, origami_he, origami_sq, sequences, side, np_seed, print_virt2nuc, print_oxview)
+    cadnano_oxdna(output_file, cadsys, lattice_type, sequences, side, np_seed, print_virt2nuc, print_oxview)
 
 
 if __name__ == '__main__':
