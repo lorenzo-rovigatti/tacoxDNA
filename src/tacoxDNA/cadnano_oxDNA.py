@@ -682,7 +682,7 @@ def print_usage():
     print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
     exit(1)
 
-def randomSequenceGenerator (cadsys):
+def randomSequenceGenerator(cadsys):
     base.Logger.log("No sequence file given, using random sequence", base.Logger.INFO)
     sequences = []
     for vhelix in (cadsys.vhelices):
@@ -1176,8 +1176,8 @@ def cadnano_oxdna(output_file, cadsys, lattice_type, input_sequences=None, side=
 
 def main():
     source_file, lattice_type, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = readingCli()
-    output_file = os.path.abspath(source_file)
     cadsys, sequences = parsingCli(source_file, sequence_filename)
+    output_file = os.path.abspath(output_file)
     cadnano_oxdna(output_file, cadsys, lattice_type, sequences, side, np_seed, print_virt2nuc, print_oxview)
 
 
