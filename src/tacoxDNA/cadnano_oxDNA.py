@@ -698,10 +698,11 @@ def readingCli(*args):
         print_usage()
         
     shortArgs = 'q:b:e:po'
-    longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc', 'print-oxview']
+    longArgs = ['sequence=', 'box=', 'seed=', 'print_lattice_id_map', 'print-virt2nuc', 'print-oxview']
     
     side = False
     sequence_filename = False
+    print_lattice_id_map = False
     print_virt2nuc = False
     print_oxview = False
     source_file = sys.argv[1]
@@ -728,6 +729,8 @@ def readingCli(*args):
             elif k[0] == '-e' or k[0] == "--seed": 
                 np_seed = int(k[1])
                 np.random.seed(np_seed)
+            elif k[0] == '-m' or k[0] == "--print_lattice_id_map":
+                print_lattice_id_map == True
             elif k[0] == '-p' or k[0] == "--print-virt2nuc":
                 print_virt2nuc = True
             elif k[0] == '-o' or k[0] == "--print-oxview":
@@ -769,7 +772,7 @@ def parsingCli(source_file, sequence_filename):
 
     return cadsys, sequences
 
-def cadnano_oxdna(output_file, cadsys, lattice_type, input_sequences=None, side=False, print_virt2nuc=False, print_oxview=False):    
+def cadnano_oxdna(output_file, cadsys, lattice_type, input_sequences=None, side=False, print_lattice_id_map=False, print_virt2nuc=False, print_oxview=False):    
     vh_vb2nuc = cu.vhelix_vbase_to_nucleotide()
     vh_vb2nuc_final = cu.vhelix_vbase_to_nucleotide()
 
@@ -1079,7 +1082,7 @@ def cadnano_oxdna(output_file, cadsys, lattice_type, input_sequences=None, side=
         for nucii in nuciis:
             nuc = len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii]
             rev_nuciis.append(nuc)
-            id_to_pos[nuc] = (vh, vb)
+            id_to_pos[nuc] = (vh, vb, True)
         vh_vb2nuc_rev.add_scaf(vh, vb, strandii, rev_nuciis)
     for vh, vb in list(vh_vb2nuc_final._stap.keys()):
         strandii, nuciis = vh_vb2nuc_final._stap[(vh, vb)]
@@ -1087,9 +1090,34 @@ def cadnano_oxdna(output_file, cadsys, lattice_type, input_sequences=None, side=
         for nucii in nuciis:
             nuc = len(rev_sys._strands[strandii]._nucleotides) - 1 - (nucii - nnucs_to_here[strandii]) + nnucs_to_here[strandii]
             rev_nuciis.append(nuc)
-            id_to_pos[nuc] = (vh, vb)
+            id_to_pos[nuc] = (vh, vb, False)
 
         vh_vb2nuc_rev.add_stap(vh, vb, strandii, rev_nuciis)
+
+
+    if print_lattice_id_map:
+        def search_key(dict, val):
+            key_lst = []
+            for key in dict:
+                if dict[key] == val:
+                    key_lst.append(key)
+            return key_lst
+        
+        pos_to_id = {}
+        for pos in id_to_pos.values():
+            if pos not in pos_to_id.keys():
+                pos_to_id[pos] = search_key(id_to_pos, pos)
+
+        with open(output_file+"_cadnano2oxDNA_map.pickle", "wb") as map_dic:
+            pickle.dump(pos_to_id, map_dic, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open(output_file+"_bond_pairs.txt", "w") as pair_file:
+            for k in pos_to_id.keys():
+                if k[2] == True:
+                    if (k[0], k[1], False) in pos_to_id.keys():
+                        for i in range(len(pos_to_id[k])):
+                            pair_file.write("{} {}\n".format(pos_to_id[k][i], pos_to_id[(k[0],k[1],False)][i]))
+    
 
     # dump the spatial arrangement of the vhelices to a file
     vhelix_pattern = {}
@@ -1175,10 +1203,10 @@ def cadnano_oxdna(output_file, cadsys, lattice_type, input_sequences=None, side=
     print("## DONE", file=sys.stderr)
 
 def main():
-    source_file, lattice_type, sequence_filename, side, np_seed, print_virt2nuc, print_oxview = readingCli()
+    source_file, lattice_type, sequence_filename, side, np_seed, print_lattice_id_map, print_virt2nuc, print_oxview = readingCli()
     cadsys, sequences = parsingCli(source_file, sequence_filename)
     output_file = os.path.abspath(output_file)
-    cadnano_oxdna(output_file, cadsys, lattice_type, sequences, side, np_seed, print_virt2nuc, print_oxview)
+    cadnano_oxdna(output_file, cadsys, lattice_type, sequences, side, np_seed, print_lattice_id_map, print_virt2nuc, print_oxview)
 
 
 if __name__ == '__main__':
