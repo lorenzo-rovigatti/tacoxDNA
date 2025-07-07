@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import sys, os
+import sys, os, inspect
 from libs import base
 from libs import reader_lammps_init 
 from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
@@ -115,19 +115,32 @@ if __name__ == '__main__':
                 if line.startswith('ITEM: ATOMS'):
                     aux = line.split()
             
-                    # find column number in trajectory file
+                    # find column number in trajectory file (the -2 and -1 handle the "ITEM:" and "ATOMS" keywords)
+                    
+                    line_ref1 = inspect.currentframe().f_lineno
+                    try:
+                        keyx = aux.index('x') - 2  # x
+                        keyz = aux.index('z') - 1  # z (exclusive)
             
-                    keyx = aux.index('x') - 2  # x
-                    keyz = aux.index('z') - 1  # z (exclusive)
-            
-                    keyvx = aux.index('vx') - 2  # vx
-                    keyvz = aux.index('vz') - 1  # vz (exclusive)
-            
-                    keylx = aux.index('angmomx') - 2  # angular momentum x
-                    keylz = aux.index('angmomz') - 1  # angular momentum z (exclusive)
-            
-                    keyq0 = aux.index('c_quat[1]') - 2  # quat0
-                    keyq3 = aux.index('c_quat[4]') - 1  # quat3 (exclusive)
+                        keyvx = aux.index('vx') - 2  # vx
+                        keyvz = aux.index('vz') - 1  # vz (exclusive)
+                    
+                        keylx = aux.index('angmomx') - 2 if 'angmomx' in aux else \
+                                aux.index('AngularMomentumX') - 2  # angular momentum x
+                        keylz = aux.index('angmomz') - 1 if 'angmomz' in aux else \
+                                aux.index('AngularMomentumZ') - 1  # angular momentum z (exclusive)
+                
+                        keyq0 = aux.index('c_quat[1]') - 2 if 'c_quat[1]' in aux else \
+                                aux.index('quatw') - 2 if 'quatw' in aux else \
+                                aux.index('c_quat1') - 2  # quat0
+                        keyq3 = aux.index('c_quat[4]') - 1 if 'c_quat[4]' in aux else \
+                                aux.index('quatk') - 1 if 'quatk' in aux else \
+                                aux.index('c_quat4') - 1  # quat3 (exclusive)
+                    except ValueError as e:
+                        line_ref2 = inspect.currentframe().f_lineno
+                        print(f"ValueError: {e}.\n  Required columns not found in the LAMMPS dump/trajectory file.",\
+                              f"\n    See Lines {line_ref1} to {line_ref2} in LAMMPS_oxDNA.py for accepted syntax and values.", file=sys.stderr)
+                        sys.exit(1)
             
                     N = natoms
             
@@ -140,7 +153,10 @@ if __name__ == '__main__':
             
                     for n in range(N):
                         line = lmptrj.readline()
-                        index = int(line.split()[0]) - 1
+                        try:
+                            index = int(line.split()[0]) - 1
+                        except ValueError:
+                            raise Exception(f"Likely cause is that 'ITEMS: ATOMS' in dump file does not start with 'ITEM: ATOMS id'.")
                         
                         xyz[index,:] = np.float32(line.split()[keyx:keyz])
                         vel[index,:] = np.float32(line.split()[keyvx:keyvz])
