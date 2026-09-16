@@ -1,5 +1,5 @@
 [project]
-name = "tacoxdna"
+name = "tacoxDNA"
 version = "1.1.0"
 description = "A collection of tools for DNA modelling"
 readme = "README.md"

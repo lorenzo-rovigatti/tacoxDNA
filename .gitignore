@@ -4,3 +4,5 @@ __pycache__/
 *$py.class
 .DS_Store
 log.dat
+.venv/
+!.pyproject.toml
