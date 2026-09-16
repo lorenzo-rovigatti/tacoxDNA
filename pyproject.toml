@@ -1,124 +1,42 @@
-[build-system]
-build-backend = "setuptools.build_meta"
-requires = ["setuptools >= 77.0.3"]
-
 [project]
-dependencies = [
-    "scadnano",
-    "numpy"
-]
-name = "tacoxDNA"
+name = "tacoxdna"
+version = "1.1.0"
+description = "A collection of tools for DNA modelling"
 readme = "README.md"
+authors = [
+    { name = "lorenzo-rovigatti", email = "lorenzo.rovigatti@gmail.com" },
+    { name = "ohenrich"},
+    { name = "Akodiat"},
+    { name = "bensonbits"},
+    { name = "antonio-suma"},
+    { name = "dom-the-physicist"},
+    { name = "sdouglas"},
+    { name = "lrussel676"},
+    { name = "RodenLuo"},
+    { name = "elija-feigl"},
+    { name = "mckwxp"},
+    { name = "mattaq31"},
+    { name = "macsandel", email = "mac.sandel@radiancetech.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.5.3",
+    "scadnano>=0.21.1",
+]
 
 [project.scripts]
-cadnano_oxDNA = "tacoxDNA.cadnano_oxDNA"
-CanDo_oxDNA = "tacoxDNA.CanDo_oxDNA"
-LAMMPS_oxDNA = "tacoxDNA.LAMMPS_oxDNA"
-oxDNA_LAMMPS = "tacoxDNA.oxDNA_LAMMPS"
-oxDNA_PDB = "tacoxDNA.oxDNA_PDB"
-PDB_oxDNA = "tacoxDNA.PDB_oxDNA"
-rpoly_oxDNA = "tacoxDNA.rpoly_oxDNA"
-scadnano_oxDNA = "tacoxDNA.scadnano_oxDNA"
-Tiamat_oxDNA =  "tacoxDNA.Tiamat_oxDNA"
-vHelix_oxDNA = "tacoxDNA.vHelix_oxDNA"
-XYZ_oxDNA =  "tacoxDNA.XYZ_oxDNA"
+cadnano_oxDNA = "tacoxdna.cadnano_oxDNA"
+CanDo_oxDNA = "tacoxDNA.CanDo_oxDNA:main"
+LAMMPS_oxDNA = "tacoxDNA.LAMMPS_oxDNA:main"
+oxDNA_LAMMPS = "tacoxDNA.oxDNA_LAMMPS:main"
+oxDNA_PDB = "tacoxDNA.oxDNA_PDB:main"
+PDB_oxDNA = "tacoxDNA.PDB_oxDNA:main"
+rpoly_oxDNA = "tacoxDNA.rpoly_oxDNA:main"
+scadnano_oxDNA = "tacoxDNA.scadnano_oxDNA:main"
+Tiamat_oxDNA = "tacoxDNA.Tiamat_oxDNA:main"
+vHelix_oxDNA = "tacoxDNA.vHelix_oxDNA:main"
+XYZ_oxDNA = "tacoxDNA.XYZ_oxDNA:main"
 
-[dependency-groups]
-# With uv, dev group dependencies are automatically excluded from wheel file dependency metadata
-dev = [
-    "docformatter>=1.7.7",
-    "isort>=6.0.1",
-    "mypy>=1.17.1",
-    "oslex>=0.1.3",
-    "pre-commit>=4.2.0",
-    "pytest-cov>=6.2.1",
-    "pytest-dependency>=0.6.0",
-    "pytest-order>=1.3.0",
-    "pytest>=8.4.1",
-    "ruff>=0.12.7",
-    "tensorboard>=2.20.0",
-    "toml>=0.10.2",
-    "types-requests>=2.32.4.20250611",
-    "yapf>=0.43.0",
-]
-
-# Turn on strict type checking by default
-# strict is global and cannot be overridden, so instead split it up into
-# its individually overridable constituent flags
-[tool.mypy]
-# Important, do not skip untyped functions
-check_untyped_defs = true
-# May be tricky
-disallow_any_generics = true
-# Enforces type hints
-disallow_incomplete_defs = true
-# May be tricky
-disallow_subclassing_any = true
-# Enforces type hints
-disallow_untyped_calls = true
-# May be tricky
-disallow_untyped_decorators = true
-# Enforces type hints
-disallow_untyped_defs = true
-# Should be easy (--strict_concatenate is deprecated)
-extra_checks = true
-# Should be easy
-no_implicit_reexport = true
-python_version = "3.11"
-# Should be easy
-strict_equality = true
-# Cannot override
-warn_redundant_casts = true
-# May be tricky
-warn_return_any = true
-# Cannot override
-warn_unused_configs = true
-# Should be easy; catch redundant type: ignore
-warn_unused_ignores = true
-
-[[tool.mypy.overrides]]
-check_untyped_defs = false
-disallow_any_generics = false
-disallow_incomplete_defs = false
-disallow_subclassing_any = false
-disallow_untyped_calls = false
-disallow_untyped_decorators = false
-disallow_untyped_defs = false
-extra_checks = false
-module = "radpy_clearml.*.tests.*"
-no_implicit_reexport = false
-strict_equality = false
-warn_return_any = false
-warn_unused_ignores = false
-
-[tool.numpydoc_validation]
-# All checks are performed except those listed explicitly
-checks = [
-    "ES01",  # don't require extended summaries
-    "EX01",  # don't require examples section
-    "GL08",  # don't require objects to have docstrings
-    "PR01",  # don't require parameters section
-    "PR09",  # don't require parameter descriptions to end with a period
-    "RT01",  # don't require returns section
-    "RT05",  # don't require return description to end with a period
-    "SA01",  # don't require see also section
-    "SA02",  # don't require period at end of see also section
-    "SA04",  # don't require see also section to have description
-    "SS05",  # don't require an infinitive verb at start of description
-    "all",  # report on all checks, except the above
-]
-
-[tool.pytest.ini_options]
-addopts = ["--durations-min=1.0", "--durations=0", "--order-dependencies", "-rsx"]
-
-[tool.tomlsort]
-all = true
-sort_first = ["build-system", "project"]
-spaces_before_inline_comment = 2
-spaces_indent_inline_array = 4
-trailing_comma_inline_array = true
-
-[tool.uv]
-native-tls = true
-
-
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"
