@@ -1,3 +1,3 @@
 """
-Scripts to convert files.
+A collection of tools to help `oxDNA` users.
 """
