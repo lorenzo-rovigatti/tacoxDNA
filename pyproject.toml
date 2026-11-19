@@ -5,18 +5,6 @@ description = "A collection of tools for DNA modelling"
 readme = "README.md"
 authors = [
     { name = "lorenzo-rovigatti", email = "lorenzo.rovigatti@gmail.com" },
-    { name = "ohenrich"},
-    { name = "Akodiat"},
-    { name = "bensonbits"},
-    { name = "antonio-suma"},
-    { name = "dom-the-physicist"},
-    { name = "sdouglas"},
-    { name = "lrussel676"},
-    { name = "RodenLuo"},
-    { name = "elija-feigl"},
-    { name = "mckwxp"},
-    { name = "mattaq31"},
-    { name = "macsandel", email = "mac.sandel@radiancetech.com" }
 ]
 requires-python = ">=3.12"
 dependencies = [
