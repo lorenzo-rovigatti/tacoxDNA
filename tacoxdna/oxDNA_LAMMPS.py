@@ -2,8 +2,8 @@
 
 import numpy as np
 import sys
-from libs.readers import LorenzoReader
-from libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
+from tacoxdna.libs.readers import LorenzoReader
+from tacoxdna.libs.constants import mass_in_lammps, inertia_in_lammps, number_oxdna_to_lammps
 
 def exyz_to_quat(mya1, mya3):
     mya2 = np.cross(mya3, mya1)
@@ -48,7 +48,7 @@ def exyz_to_quat(mya1, mya3):
     return np.array([myquat[0], myquat[1], myquat[2], myquat[3]])
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) < 3:
         print("Usage is %s topology configuration" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
@@ -59,10 +59,10 @@ if __name__ == '__main__':
     except Exception as e:
         print("Parser error: %s" % e, file=sys.stderr)
         exit(1)
-    
+
     s.map_nucleotides_to_strands()
     box = s._box
-   
+
     # get total number of bonds
     N_bonds = 0
     for strand in s._strands:
@@ -141,4 +141,6 @@ if __name__ == '__main__':
 
     print("## Wrote data to '%s'" % out_name, file=sys.stderr)
     print("## DONE", file=sys.stderr)
-    
+
+if __name__ == '__main__':
+    main()

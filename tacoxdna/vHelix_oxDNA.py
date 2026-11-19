@@ -2,8 +2,7 @@
 import numpy as np
 import sys, os, math, re
 from collections import OrderedDict
-import libs.utils as utils
-
+import tacoxdna.libs.utils as utils
 
 def GetMatrix(gamma, beta, alpha):
     gamma = math.radians(gamma)
@@ -51,8 +50,8 @@ def export_oxDNA(ma_file, box_size):
     helix_name = ""
     base_parent = ""
     base_name = ""
-    
-    # this array converts between the vHelix and oxDNA base name system 
+
+    # this array converts between the vHelix and oxDNA base name system
     base_array = [0, 3, 2, 1]
 
     vHelixFile = open(ma_file, "r").readlines()
@@ -123,7 +122,7 @@ def export_oxDNA(ma_file, box_size):
             break
 
     keys = first_base_parents.keys()
-    
+
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -140,7 +139,7 @@ def export_oxDNA(ma_file, box_size):
             base_parents[key.split("|")[2].strip("'").rstrip("'")] = first_base_parents[key]
             base_names.append(key.split("|")[2].strip("'").rstrip("'"))
     keys = first_base_trans.keys()
-    
+
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -155,7 +154,7 @@ def export_oxDNA(ma_file, box_size):
         else:
             base_trans[key.split("|")[2].strip("'").rstrip("'")] = first_base_trans[key]
     keys = first_base_types.keys()
-    
+
     x = []
     for line in keys:
         if line.split("|")[2].strip("'").rstrip("'") in x:
@@ -178,7 +177,7 @@ def export_oxDNA(ma_file, box_size):
             new_abc.append(i[:-1])
         if re.search('connectAttr.+\.bw', i):
             new_bcd.append(i)
-            
+
     for line in new_abc:
         data = line.split(" ")
         base1 = data[1].strip('"').rstrip('.lb"')
@@ -257,30 +256,30 @@ def export_oxDNA(ma_file, box_size):
             except:
                 print("failing translation for %s" % name_line)
                 sys.exit()
-                
+
             own_base_type = base_types[name_line]
             own_parent = base_parents[name_line]
             own_parent_translation = helix_trans[own_parent]
             own_parent_rotation = helix_rot[own_parent]
-         
-            if partner_base is not None:       
+
+            if partner_base is not None:
                 try:
                     partner_index = int(base_names.index(partner_base))
                 except:
                     print(partner_base)
                     sys.exit()
-                
+
                 try:
                     partner_translation = base_trans[partner_base]
                 except:
                     print(partner_index)
                     sys.exit()
-                    
+
                 partner_base_type = base_types[partner_base]
                 partner_parent = base_parents[partner_base]
                 partner_parent_translation = helix_trans[partner_parent]
                 partner_parent_rotation = helix_rot[partner_parent]
-    
+
                 link_versor = (partner_translation - own_translation) / np.linalg.norm(partner_translation - own_translation)
             else:
                 link_versor = utils.get_random_vector()
@@ -300,7 +299,7 @@ def export_oxDNA(ma_file, box_size):
                 base_CoMs[partner_base] = backw_CoM_element
             else:
                 back_rot_mat = GetMatrix(0, 0, 0)
-                
+
             rotated_backw_pos = np.dot(back_rot_mat, new_backw_pos)
             base_CoMs[name_line] = forw_CoM_element
 
@@ -443,7 +442,7 @@ def export_oxDNA(ma_file, box_size):
                 print(index)
         for base, low, up in zip(base_letters, lower_neighbour_list, upper_neighbour_list):
             topology.append("%s %s %s %s" % (strand_number, base, low, up))
-            
+
     basename = os.path.basename(ma_file)
     top_file = basename + ".top"
     conf_file = basename + ".oxdna"
@@ -498,9 +497,9 @@ def parse_options():
                 except ValueError:
                     print("The argument of '%s' should be a number (got '%s' instead)" % (k[0], k[1]), file=sys.stderr)
                     exit(1)
-            if k[0] == '-e' or k[0] == "--seed": 
+            if k[0] == '-e' or k[0] == "--seed":
                 opts['seed'] = int(k[1])
-                    
+
         opts['vHelix_file'] = positional_args[0]
 
     except Exception:
@@ -516,15 +515,19 @@ def print_usage():
     exit(1)
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) < 2:
         print_usage()
 
     opts = parse_options()
-    
+
     source_file = opts['vHelix_file']
     box_size = opts['box']
     if opts['seed'] is not None:
         np.random.seed(opts['seed'])
-    
+
     export_oxDNA(source_file, box_size)
+
+
+if __name__ == '__main__':
+    main()

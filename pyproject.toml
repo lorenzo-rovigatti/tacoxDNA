@@ -1,0 +1,33 @@
+[project]
+name = "tacoxDNA"
+version = "1.1.0"
+description = "A collection of tools for DNA modelling"
+readme = "README.md"
+authors = [
+    { name = "lorenzo-rovigatti", email = "lorenzo.rovigatti@gmail.com" },
+]
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.5.3",
+    "scadnano>=0.21.1",
+]
+
+[project.scripts]
+cadnano_oxDNA = "tacoxdna.cadnano_oxDNA:main"
+CanDo_oxDNA = "tacoxdna.CanDo_oxDNA:main"
+LAMMPS_oxDNA = "tacoxdna.LAMMPS_oxDNA:main"
+oxDNA_LAMMPS = "tacoxdna.oxDNA_LAMMPS:main"
+oxDNA_PDB = "tacoxdna.oxDNA_PDB:main"
+PDB_oxDNA = "tacoxdna.PDB_oxDNA:main"
+rpoly_oxDNA = "tacoxdna.rpoly_oxDNA:main"
+scadnano_oxDNA = "tacoxdna.scadnano_oxDNA:main"
+Tiamat_oxDNA = "tacoxdna.Tiamat_oxDNA:main"
+vHelix_oxDNA = "tacoxdna.vHelix_oxDNA:main"
+XYZ_oxDNA = "tacoxdna.XYZ_oxDNA:main"
+
+[tool.uv.build-backend]
+module-root = "."
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"

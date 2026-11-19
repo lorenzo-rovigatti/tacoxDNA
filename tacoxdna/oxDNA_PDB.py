@@ -7,10 +7,10 @@ import copy
 from math import sqrt, sin
 from collections import defaultdict
 
-from libs.pdb import Atom, Nucleotide, FROM_OXDNA_TO_ANGSTROM
-from libs import base
-from libs import utils
-from libs.readers import LorenzoReader
+from tacoxdna.libs.pdb import Atom, Nucleotide, FROM_OXDNA_TO_ANGSTROM
+from tacoxdna.libs import base
+from tacoxdna.libs import utils
+from tacoxdna.libs.readers import LorenzoReader
 
 DD12_PDB_PATH = "dd12_na.pdb"
 
@@ -87,7 +87,7 @@ def align(full_base, ox_base):
         R = utils.get_rotation_matrix(axis, theta)
         full_base.rotate(R)
 
-if __name__ == '__main__':
+def main():
     opts = parse_options()
 
     with open(os.path.join(os.path.dirname(__file__), DD12_PDB_PATH)) as f:
@@ -218,3 +218,7 @@ if __name__ == '__main__':
         print("## Wrote data to '%s'" % out_name, file=sys.stderr)
 
     print("## DONE", file=sys.stderr)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,3 +1,6 @@
+v 1.1.1 (15th November 2026)
+	- Allow UV and pip installation
+
 v 1.1 (19th February 2021)
 	- Port the code to Python 3
 	- Normalise the usage and output of all the different tools

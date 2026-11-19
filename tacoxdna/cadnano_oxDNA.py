@@ -2,9 +2,9 @@
 
 import sys
 import numpy as np
-from libs import base
-from libs import utils
-from libs import cadnano_utils as cu
+from tacoxdna.libs import base
+from tacoxdna.libs import utils
+from tacoxdna.libs import cadnano_utils as cu
 import re
 import os
 import pickle
@@ -125,7 +125,7 @@ def insert_loop_skip(strands, start_pos, direction, perp, rot, helix_angles, vhe
             for _ in range(j):
                 helix_angles_new = np.insert(helix_angles_new, begin_gs - deleted + inserted, new_angle[i])
                 inserted_this_iteration += 1
-                
+
     g = cu.StrandGenerator()
     new_strands = g.generate_or_sq(len(helix_angles_new) + 1, start_pos=start_pos, direction=direction, perp=perp, double=True, rot=rot, angle=helix_angles_new, length_change=length_change, region_begin=new_nodes.begin, region_end=new_nodes.end)
     if use_seq:
@@ -153,18 +153,18 @@ def add_slice(current_system, vhelix, begin, end, nodes, strands, pos, direction
     # add a slice of the virtual helix to the slice system, taking into account skips and loops
     length_change_begin = 0
     length_change_end = 0
-    
+
     if (vhelix.num % 2 + strand_type) % 2 == 0:  # strand and even num or staple and odd num
         for i in vhelix.skip[:begin]:
             length_change_begin -= int(i)
         for i in vhelix.skip[:end + 1]:
             length_change_end -= int(i)
-            
+
         for i in vhelix.loop[:begin]:
             length_change_begin += int(i)
         for i in vhelix.loop[:end + 1]:
             length_change_end += int(i)
-    
+
         begin_slice = begin + length_change_begin
         end_slice = end + 1 + length_change_end
 
@@ -173,7 +173,7 @@ def add_slice(current_system, vhelix, begin, end, nodes, strands, pos, direction
             length_change_end -= int(i)
         for i in vhelix.skip[begin + 1:]:
             length_change_begin -= int(i)
-            
+
         for i in vhelix.loop[end:]:
             length_change_end += int(i)
         for i in vhelix.loop[begin + 1:]:
@@ -194,17 +194,17 @@ def add_slice_nupack(vhelix, strand_number, begin_helix, end_helix, index_lookup
     if (vhelix.num % 2 + strand_type) % 2 == 0 :  # strand and even num or staple and odd num
         for i in vhelix.skip[begin_helix:end_helix + 1]:
             length_change -= int(i)
-            
+
         for i in vhelix.loop[begin_helix:end_helix + 1]:
             length_change += int(i)
-    
+
     else:
         for i in vhelix.skip[end_helix:begin_helix + 1]:
             length_change -= int(i)
-            
+
         for i in vhelix.loop[end_helix:begin_helix + 1]:
             length_change += int(i)
-            
+
     if (strand_type + vhelix.num % 2) % 2 == 0:
         iter_length = end_helix - begin_helix + 1 + length_change
     else:
@@ -302,7 +302,7 @@ def build_nodes(vh):
                 elif vh.stap[i].type(vh, i) == 'end':
                     nodes.add_begin(i)
                     nodes.add_end(i - 1 * direction)
-                    
+
     return nodes
 
 
@@ -362,7 +362,7 @@ def generate_vhelices_origami_sq(vhelix_direction, vhelix_perp, h, sequence_file
     for i in range(len(helix_angles)):
         if i % 32 == 31:
             helix_angles[i] = 1080 * np.pi / 180 - total_sum
-            
+
     # make the virtual helices
     if h.num % 2 == 0:
         pos = np.array([h.col * DIST_SQUARE, h.row * DIST_SQUARE, 0])
@@ -409,7 +409,7 @@ def generate_vhelices_origami_he(vhelix_direction, vhelix_perp, h, sequence_file
         elif modi in (19, 20):
             helix_angles[i] = 28.476 * np.pi / 180
         else:
-            helix_angles[i] = 720. / 21 * (np.pi / 180.) 
+            helix_angles[i] = 720. / 21 * (np.pi / 180.)
 
     # make sure it's periodic
     total_sum = 0
@@ -463,9 +463,9 @@ class vstrands (object):
         dr = DIST_SQUARE * (max(rows) - min(rows) + 2)
         dc = DIST_SQUARE * (max(cols) - min(cols) + 2)
         dl = 0.34 * (max(lens) + 2)
-        
+
         return 2 * max([dr, dc, dl]) * BOX_FACTOR
-    
+
     def __str__(self):
         a = '{\n"vstrands":[\n'
         if len(self.vhelices) > 0:
@@ -505,7 +505,7 @@ class vhelix (object):
         else:
             base.Logger.log("Cannot add square that is not scaf or stap. Dying now", base.Logger.CRITICAL)
             sys.exit(1)
-    
+
     def __str__(self):
         a = '{\n'
 
@@ -522,14 +522,14 @@ class vhelix (object):
                 a = a + str(e) + ','
             a = a[0:len(a) - 1]  # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"loop":['
         if len(self.loop) > 0:
             for e in self.loop:
                 a = a + str(e) + ','
             a = a[0:len(a) - 1]  # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"stap_colors":['
         if len (self.stap_colors) > 0:
             for e in self.stap_colors:
@@ -540,21 +540,21 @@ class vhelix (object):
         a = a + '"row":' + str(self.row) + ',\n'
         a = a + '"col":' + str(self.col) + ',\n'
         a = a + '"num":' + str(self.num) + ',\n'
-        
+
         a = a + '"scafLoop":['
         if len(self.scafLoop) > 0:
             for i in self.scafLoop:
                 a = a + str(i) + ','
             a = a[0:len(a) - 1]  # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"stap":['
         if len(self.stap) > 0:
             for i in self.stap:
                 a = a + str(i) + ','
             a = a[0:len(a) - 1]  # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"scaf":['
         if len(self.scaf) > 0:
             for i in self.scaf:
@@ -615,12 +615,12 @@ class square(object):
         # shouldn't get to here
         base.Logger.log('unexpected square array', base.Logger.WARNING)
 
-        
+
 def parse_cadnano(path):
     import json
-    
+
     cadsys = vstrands()
-    
+
     try:
         with open(path) as json_data:
             cadnano = json.load(json_data)
@@ -644,30 +644,28 @@ def parse_cadnano(path):
     except:
         print("Caught an error while parsing '" + path + "', aborting", file=sys.stderr)
         sys.exit(1)
-        
+
     return cadsys
 
-
-if __name__ == '__main__':
-    
+def main():
     def print_usage():
-        print("USAGE:", file=sys.stderr)
-        print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
-        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
-        exit(1)
-        
+            print("USAGE:", file=sys.stderr)
+            print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
+            print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
+            exit(1)
+
     if len(sys.argv) < 3:
         print_usage()
-        
+
     shortArgs = 'q:b:e:po'
     longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc', 'print-oxview']
-    
+
     side = False
     sequence_filename = False
     print_virt2nuc = False
     print_oxview = False
     source_file = sys.argv[1]
-    
+
     origami_sq = False
     origami_he = False
     if sys.argv[2] == "sq":
@@ -677,24 +675,24 @@ if __name__ == '__main__':
     else:
         print("Lattice_type should be either 'sq' or 'he'", file=sys.stderr)
         exit(1)
-    
+
     try:
         import getopt
         args, files = getopt.gnu_getopt(sys.argv[3:], shortArgs, longArgs)
         for k in args:
-            if k[0] == '-q' or k[0] == "--sequence": 
+            if k[0] == '-q' or k[0] == "--sequence":
                 sequence_filename = k[1]
-            elif k[0] == '-b' or k[0] == "--box": 
+            elif k[0] == '-b' or k[0] == "--box":
                 side = float(k[1])
                 base.Logger.log("The system will be put in a box of side %s (in oxDNA simulation units)" % str(side), base.Logger.INFO)
-            elif k[0] == '-e' or k[0] == "--seed": 
+            elif k[0] == '-e' or k[0] == "--seed":
                 np.random.seed(int(k[1]))
             elif k[0] == '-p' or k[0] == "--print-virt2nuc":
                 print_virt2nuc = True
             elif k[0] == '-o' or k[0] == "--print-oxview":
                 print_oxview = True
-            
-            
+
+
     except Exception:
         print_usage()
 
@@ -770,7 +768,7 @@ if __name__ == '__main__':
             strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_he(vhelix_direction_initial, vhelix_perp_initial, h, sequence_file, single_strand_system, vhelix_counter)
 
         nodes = build_nodes(h)
-        
+
         # read the scaffold squares and add strands to slice_sys
         i = 0
         for s in h.scaf:
@@ -841,9 +839,9 @@ if __name__ == '__main__':
                         partner_list_scaf.append([s.V_0, s.b_0])
                     found_partner = False
                 else:
-                    base.Logger.log("unexpected square array", base.Logger.WARNING)                
+                    base.Logger.log("unexpected square array", base.Logger.WARNING)
             i += 1
-            
+
         if slice_sys.N_strands == 0:
             base.Logger.log("No scaffold strand found in virtual helix n. %d: staples-only virtual helices are not supported" % h.num, base.Logger.WARNING)
             continue
@@ -919,7 +917,7 @@ if __name__ == '__main__':
                         partner_list_stap.append([s.V_0, s.b_0])
                     found_partner = False
                 else:
-                    base.Logger.log("unexpected square array", base.Logger.WARNING)                
+                    base.Logger.log("unexpected square array", base.Logger.WARNING)
             i += 1
         vhelix_counter += 1
 
@@ -982,7 +980,7 @@ if __name__ == '__main__':
             else:
                 for k in range(1, len(join)):
                     joined_strand = joined_strand.append(slice_sys._strands[join[k]])
-                
+
             final_sys.add_strand(joined_strand, check_overlap=False)
 
             # This is a bug fix. Ben 12/2/14
@@ -996,10 +994,10 @@ if __name__ == '__main__':
             for k in joining_range:
                 vh_vb2nuc_final.add_strand(join[k], vh_vb2nuc, continue_join=True)
             vh_vb2nuc_final.add_strand(join[k + 1], vh_vb2nuc, continue_join=False)
-                
+
             if single_strand_system == 1:
                 final_sys._strands[0].set_sequence(sequences[0])
-    
+
     if sequence_file and single_strand_system:
         if len(final_sys._strands) > 1:
             base.Logger.log("more than one strand detected - sequence file will not be read", base.Logger.WARNING)
@@ -1145,7 +1143,7 @@ if __name__ == '__main__':
     vhelix_pattern = {}
     for i in range(len(cadsys.vhelices)):
         vhelix_pattern[cadsys.vhelices[i].num] = (cadsys.vhelices[i].row,cadsys.vhelices[i].col)
-        
+
     if rev_sys.N == 0:
         base.Logger.log("The generated configuration is empty: this might be due to this conversion module not supporting virtual helices containing no scaffold strands.", base.Logger.CRITICAL)
         exit(1)
@@ -1221,7 +1219,10 @@ if __name__ == '__main__':
         rev_sys.print_oxview_output(basename+'.oxview')
 
     rev_sys.print_lorenzo_output(configuration_file, topology_file)
-    
+
     print("## Wrote data to '%s' / '%s'" % (configuration_file, topology_file), file=sys.stderr)
     print("## DONE", file=sys.stderr)
-    
+
+if __name__ == '__main__':
+    main()
+
