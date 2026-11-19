@@ -4,7 +4,7 @@
 import sys
 import numpy as np
 
-from libs.readers import LorenzoReader
+from tacoxdna.libs.readers import LorenzoReader
 
 BASE_SHIFT = 1.13
 COM_SHIFT = 0.54
@@ -85,7 +85,7 @@ class Strand:
                 else:
                     new_assigned = b.cm_pos
                     N = len(unassigned)
-                    v = (np.array(new_assigned) - 
+                    v = (np.array(new_assigned) -
                          np.array(last_assigned)) / float(N)
                     spos = np.array(last_assigned)
                     for ub in unassigned:
@@ -120,11 +120,11 @@ class Strand:
 
                     # v = (np.array(new_assigned) -
                     #     np.array(last_assigned))/float(N)
-                    spos = np.array(last_assigned) 
+                    spos = np.array(last_assigned)
                     for ub in unassigned:
                         # print 'Assigning to ',ub.oxid, last_assigned + v
                         ub.cm_pos = spos
-                        spos = spos + 0.8 * v 
+                        spos = spos + 0.8 * v
                     unassigned = []
             else:
                 unassigned.append(b)
@@ -147,7 +147,7 @@ def reconstruct_strands(three_ends, bases):
             added.append(s_next)
             s_next = b.get_5prime()
         strands.append(s)
-    
+
     if(len(bases) != len(added)):  # maybe circular strands?
         s = None
         for b_id, b in list(bases.items()):
@@ -163,7 +163,7 @@ def reconstruct_strands(three_ends, bases):
                     s.add_base_at_5_prime(nb)
                     added.append(b_next)
                     b_next = nb.get_5prime()
-                    
+
                     if len(added) > len(list(bases.keys())):
                         raise Exception("error while processing circular strand")
                 strands.append(s)
@@ -209,7 +209,7 @@ def write_force(bases, pairs, fname):
     for p in list(pairs.values()):
         a = bases[p[0]].oxid
         b = bases[p[1]].oxid
-        forces = forces + get_mutual_force(a, b)   
+        forces = forces + get_mutual_force(a, b)
     handle.write(forces)
     handle.close()
 
@@ -346,7 +346,7 @@ def load_and_convert(opts, invert_preference=False):
         force_file = cando_file + '.forces.txt'
         print("## Printing forces to the '%s' file" % force_file, file=sys.stderr)
         write_force(bases, pair_ids, force_file)
-        
+
     return strands
 
 
@@ -361,7 +361,7 @@ def print_usage():
 def parse_options():
     shortArgs = 'b:f'
     longArgs = ['box=', 'print-force-file']
-    
+
     # for some reason, files originally made in T1 have a different .json form than T2
     # it would be possible to rewrite all the parameters to fix it, but tossing a factor
     # of 1.2 for DNA and 1.6 for RNA on base_vector seems to be good enough
@@ -369,7 +369,7 @@ def parse_options():
         "box" : 100.,
         "print_force_file" : False
     }
-    
+
     try:
         import getopt
         args, positional_args = getopt.gnu_getopt(sys.argv[1:], shortArgs, longArgs)
@@ -383,28 +383,30 @@ def parse_options():
                     exit(1)
             elif k[0] == '-f' or k[0] == '--print-force-file':
                 opts['print_force_file'] = True
-            
+
         opts['cando_file'] = positional_args[0]
-        
+
     except Exception:
         print_usage()
-        
+
     return opts
 
-
-
-if __name__ == '__main__':
+def main():
     opts = parse_options()
-    
+
     s = load_and_convert(opts)
     r = LorenzoReader(opts['cando_file'] + '.top', opts['cando_file'] + '.oxdna')
     mys = r.get_system()
     refdir = mys._strands[0]._nucleotides[1].get_pos_base() - mys._strands[0]._nucleotides[0].get_pos_base()
     refdir /= np.sqrt(np.dot(refdir, refdir))
-    ref_angle = np.dot(mys._strands[0]._nucleotides[0]._a3, refdir) 
+    ref_angle = np.dot(mys._strands[0]._nucleotides[0]._a3, refdir)
     if ref_angle < 0 and abs(ref_angle) > 0.8:  # likely selected the wrong orientation for preferred nucleotide!
         Strand.base_counter = 0
         s = load_and_convert(opts, invert_preference=True)
 
     print("## Wrote data to '%s' / '%s'" % (opts['cando_file'] + '.oxdna', opts['cando_file'] + '.top'), file=sys.stderr)
     print("## DONE", file=sys.stderr)
+
+
+if __name__ == '__main__':
+    main()
