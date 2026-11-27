@@ -20,6 +20,38 @@ HEADERS = set([
 ])
 
 
+def unwrap_along_bonds(xyz, bonds, box):
+    '''
+    Make each strand spatially contiguous by minimum-imaging every nucleotide with respect to the
+    previous one along the bond chain. oxDNA does not apply PBCs to bonded (FENE) neighbours, so
+    wrapped LAMMPS coordinates must be unwrapped before being written out.
+    '''
+    box = np.asarray(box, dtype=float)
+    N = len(xyz)
+    visited = np.zeros(N, dtype=bool)
+
+    def walk(start):
+        visited[start] = True
+        i = start
+        while True:
+            j = bonds[i][1]
+            if j == -1 or visited[j]:
+                break
+            xyz[j] -= box * np.rint((xyz[j] - xyz[i]) / box)
+            visited[j] = True
+            i = j
+
+    # start from the strand ends, then take care of whatever is left (i.e. circular strands)
+    for start in range(N):
+        if not visited[start] and bonds[start][0] == -1:
+            walk(start)
+    for start in range(N):
+        if not visited[start]:
+            walk(start)
+
+    return xyz
+
+
 class Lammps_parser(object):	
 
     def __init__(self, filename):
@@ -39,6 +71,7 @@ class Lammps_parser(object):
 
         self.parse_Atoms_header(sects['Atoms'])
         self.parse_bonds(sects['Bonds'])
+        unwrap_along_bonds(self.xyz, self.bonds, (self.Lx, self.Ly, self.Lz))
         self.parse_ellipsoids(sects['Ellipsoids'])
 
         self.parse_velocities(sects['Velocities'])

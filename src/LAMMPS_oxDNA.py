@@ -119,8 +119,10 @@ if __name__ == '__main__':
                     
                     line_ref1 = inspect.currentframe().f_lineno
                     try:
-                        keyx = aux.index('x') - 2  # x
-                        keyz = aux.index('z') - 1  # z (exclusive)
+                        keyx = aux.index('x') - 2 if 'x' in aux else \
+                               aux.index('xu') - 2  # x (or unwrapped x)
+                        keyz = aux.index('z') - 1 if 'z' in aux else \
+                               aux.index('zu') - 1  # z (exclusive)
             
                         keyvx = aux.index('vx') - 2  # vx
                         keyvz = aux.index('vz') - 1  # vz (exclusive)
@@ -162,6 +164,8 @@ if __name__ == '__main__':
                         vel[index,:] = np.float32(line.split()[keyvx:keyvz])
                         quat[index,:] = np.float32(line.split()[keyq0:keyq3])
                         angmom[index,:] = np.float32(line.split()[keylx:keylz]) 
+
+                    reader_lammps_init.unwrap_along_bonds(xyz, conf.bonds, (Lx, Ly, Lz))
             
                     # write oxDNA data to file
             
