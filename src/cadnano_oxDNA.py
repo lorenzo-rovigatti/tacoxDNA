@@ -616,6 +616,110 @@ class square(object):
         base.Logger.log('unexpected square array', base.Logger.WARNING)
 
         
+def parse_cadnano_seq_file(filename):
+    """Parse a cadnano sequence export (CSV or Excel) into a list of (vh_num, vb_index, sequence_str) tuples."""
+    pos_pattern = re.compile(r'^(\d+)\[(\d+)\]$')
+    raw_rows = []
+    ext = os.path.splitext(filename)[1].lower()
+
+    if ext in ('.xlsx', '.xls'):
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(filename, read_only=True, data_only=True)
+            ws = wb.active
+            for i, row in enumerate(ws.iter_rows(values_only=True)):
+                if i == 0:
+                    continue  # skip header row
+                if row[0] is None:
+                    continue
+                raw_rows.append((str(row[0]).strip(), str(row[2] or '').strip()))
+        except ImportError:
+            base.Logger.log("openpyxl is not installed; cannot read Excel file '%s'. Install it with: pip install openpyxl" % filename, base.Logger.CRITICAL)
+            sys.exit(1)
+    else:
+        import csv
+        try:
+            with open(filename, newline='') as f:
+                reader = csv.reader(f)
+                for i, row in enumerate(reader):
+                    if i == 0:
+                        continue  # skip header row
+                    if len(row) >= 3 and row[0].strip():
+                        raw_rows.append((row[0].strip(), row[2].strip()))
+        except IOError:
+            base.Logger.log("Could not open sequence file '%s'" % filename, base.Logger.CRITICAL)
+            sys.exit(1)
+
+    result = []
+    for start_str, seq_str in raw_rows:
+        m = pos_pattern.match(start_str)
+        if m:
+            result.append((int(m.group(1)), int(m.group(2)), seq_str))
+    return result
+
+
+def assign_cadnano_staple_sequences(staple_seqs, vh_by_num, vh_vb2nuc_rev, rev_sys, nnucs_to_here):
+    """Apply staple sequences from a cadnano CSV/Excel export to the nucleotides in rev_sys."""
+    total_assigned = 0
+    for start_vh, start_vb, seq_str in staple_seqs:
+        seq_str = seq_str.replace(' ', '').upper()
+        if not seq_str or start_vh not in vh_by_num:
+            continue
+
+        # Trace cadnano stap connectivity from the 5' start position
+        route = []
+        current = (start_vh, start_vb)
+        visited = set()
+        while current and current not in visited:
+            visited.add(current)
+            vh_num, vb = current
+            if vh_num not in vh_by_num:
+                break
+            vh_obj = vh_by_num[vh_num]
+            if vb >= len(vh_obj.stap):
+                break
+            route.append((vh_num, vb))
+            sq = vh_obj.stap[vb]
+            if sq.V_1 == -1:
+                break
+            current = (sq.V_1, sq.b_1)
+
+        # Assign bases to nucleotides along the traced route
+        seq_idx = 0
+        for vh_num, vb in route:
+            if seq_idx >= len(seq_str):
+                break
+            vh_obj = vh_by_num[vh_num]
+            # Skip deleted positions (skip=1 means no physical nucleotide)
+            if vb < len(vh_obj.skip) and vh_obj.skip[vb] != 0:
+                continue
+            if (vh_num, vb) not in vh_vb2nuc_rev._stap:
+                seq_idx += 1
+                continue
+            strand_idx, nuc_abs_indices = vh_vb2nuc_rev._stap[(vh_num, vb)]
+            for nuc_abs_idx in nuc_abs_indices:
+                if seq_idx >= len(seq_str):
+                    break
+                base_char = seq_str[seq_idx]
+                seq_idx += 1
+                if base_char == '?':
+                    continue
+                base_val = base.base_to_number.get(base_char, -1)
+                if base_val == -1:
+                    continue
+                local_idx = nuc_abs_idx - nnucs_to_here[strand_idx]
+                if 0 <= local_idx < len(rev_sys._strands[strand_idx]._nucleotides):
+                    rev_sys._strands[strand_idx]._nucleotides[local_idx]._base = base_val
+                    total_assigned += 1
+
+        if seq_idx < len(seq_str):
+            base.Logger.log(
+                "Staple at %d[%d]: only %d of %d sequence bases were assigned" % (start_vh, start_vb, seq_idx, len(seq_str)),
+                base.Logger.WARNING)
+
+    base.Logger.log("Assigned cadnano staple sequences: %d bases placed" % total_assigned, base.Logger.INFO)
+
+
 def parse_cadnano(path):
     import json
     
@@ -653,17 +757,20 @@ if __name__ == '__main__':
     def print_usage():
         print("USAGE:", file=sys.stderr)
         print("\t%s cadnano_file lattice_type" % sys.argv[0], file=sys.stderr)
-        print("\t[-q\--sequence FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
+        print("\t[-q\--sequence FILE] [-s\--cadnano-seq FILE] [-b\--box VALUE] [-e\--seed VALUE] [-p\--print-virt2nuc] [-o\--print-oxview]", file=sys.stderr)
+        print("\t-q/--sequence FILE   : per-helix scaffold sequence file (one line per virtual helix)", file=sys.stderr)
+        print("\t-s/--cadnano-seq FILE: cadnano staple sequence export (CSV or Excel from cadnano)", file=sys.stderr)
         exit(1)
         
     if len(sys.argv) < 3:
         print_usage()
         
-    shortArgs = 'q:b:e:po'
-    longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc', 'print-oxview']
-    
+    shortArgs = 'q:b:e:pos:'
+    longArgs = ['sequence=', 'box=', 'seed=', 'print-virt2nuc', 'print-oxview', 'cadnano-seq=']
+
     side = False
     sequence_filename = False
+    cadnano_seq_filename = False
     print_virt2nuc = False
     print_oxview = False
     source_file = sys.argv[1]
@@ -693,6 +800,9 @@ if __name__ == '__main__':
                 print_virt2nuc = True
             elif k[0] == '-o' or k[0] == "--print-oxview":
                 print_oxview = True
+            elif k[0] == '-s' or k[0] == "--cadnano-seq":
+                cadnano_seq_filename = k[1]
+                base.Logger.log("Using cadnano sequence file '%s'" % cadnano_seq_filename, base.Logger.INFO)
             
             
     except Exception:
@@ -1047,6 +1157,9 @@ if __name__ == '__main__':
 
         vh_vb2nuc_rev.add_stap(vh, vb, strandii, rev_nuciis)
 
+    # Build a vh_num -> vhelix lookup used by both scaffold and staple sequence assignment
+    vh_by_num = {vh.num: vh for vh in cadsys.vhelices}
+
     # --- Fix: route-aware scaffold sequence assignment ---
     # When a single-line sequence file is provided (-q with full scaffold
     # sequence), assign bases by tracing the cadnano scaffold route rather
@@ -1056,8 +1169,6 @@ if __name__ == '__main__':
         scaffold_seq = sequences[0]  # full scaffold sequence as list of ints
 
         # Trace scaffold route through cadnano connectivity
-        # Build (vh_num -> vhelix) lookup
-        vh_by_num = {vh.num: vh for vh in cadsys.vhelices}
 
         # Find scaffold 5' end: position where V_0 == -1 (no predecessor)
         five_prime_pos = None
@@ -1140,6 +1251,12 @@ if __name__ == '__main__':
             base.Logger.log("Assigned scaffold sequence via cadnano route (%d bases)" % seq_idx, base.Logger.INFO)
         else:
             base.Logger.log("Could not find scaffold 5' end in cadnano file; scaffold sequence not assigned", base.Logger.WARNING)
+
+    # Apply staple sequences from cadnano CSV/Excel export (-s/--cadnano-seq)
+    if cadnano_seq_filename:
+        staple_seqs = parse_cadnano_seq_file(cadnano_seq_filename)
+        base.Logger.log("Read %d staple entries from '%s'" % (len(staple_seqs), cadnano_seq_filename), base.Logger.INFO)
+        assign_cadnano_staple_sequences(staple_seqs, vh_by_num, vh_vb2nuc_rev, rev_sys, nnucs_to_here)
 
     # dump the spatial arrangement of the vhelices to a file
     vhelix_pattern = {}
